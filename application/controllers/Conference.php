@@ -167,31 +167,35 @@ class Conference extends CF_Controller
      */
     public function index()
     {
-        switch ($this->_method) {
-            case 'paper-submit':
-                {
-                    $this->_paper_submit();
-                    break;
-                }
-            case 'management':
-                {
-                    $this->_management();
-                    break;
-                }
-            case 'member':
-                {
-                    $this->_member();
-                    break;
-                }
-            case 'paper-review':
-                {
-                    $this->_paper_review();
-                    break;
-                }
-            default:
-                {
-                    $this->_default();
-                }
+        try {
+            switch ($this->_method) {
+                case 'paper-submit':
+                    {
+                        $this->_paper_submit();
+                        break;
+                    }
+                case 'management':
+                    {
+                        $this->_management();
+                        break;
+                    }
+                case 'member':
+                    {
+                        $this->_member();
+                        break;
+                    }
+                case 'paper-review':
+                    {
+                        $this->_paper_review();
+                        break;
+                    }
+                default:
+                    {
+                        $this->_default();
+                    }
+            }
+        } catch (Exception $e) {
+            show_error($e->getMessage(), $e->getCode());
         }
     }
 
@@ -707,21 +711,17 @@ class Conference extends CF_Controller
         $category_id = $this->input->get('cid');
         $category_id = $category_id == '' ? 0 : intval($category_id);
         //进入业务逻辑
-        try {
-            $data = $this->sConference->homepage($this->_conference_id, $category_id);
-            $this->_render(
-                'conference/show',
-                $this->_conference_data['conference_name'],
-                array(
-                    'conference' => $this->_conference_data,
-                    'category_list' => $data->category_list,
-                    'active_category_id' => $category_id,
-                    'active_category_document_id' => $data->document->id,
-                    'active_document_content' => $data->document->html,
-                )
-            );
-        } catch (Exception $e) {
-            show_error($e->getMessage(), $e->getCode());
-        }
+        $data = $this->sConference->homepage($this->_conference_id, $category_id);
+        $this->_render(
+            'conference/show',
+            $this->_conference_data['conference_name'],
+            array(
+                'conference' => $this->_conference_data,
+                'category_list' => $data->category_list,
+                'active_category_id' => $category_id,
+                'active_category_document_id' => $data->document_id,
+                'active_document_content' => $data->document_html,
+            )
+        );
     }
 }

@@ -145,25 +145,22 @@ $autoload['model'] = array(
     'db_models/mUser',
     //微服务
     'micro_services/sAttachment',
-    'micro_services/sConference'
+    'micro_services/sConference',
+    'micro_services/sAccount'
 );
 
 require APPPATH . 'classes/MyConfBase.class.php';
-//自动加载myConf的类
-//
-spl_autoload_register(function ($class_name) {
-    $file_to_load = APPPATH . 'classes/ret/' . $class_name . '.class.php';
-    if (!file_exists($file_to_load)) {
-        return FALSE;
-    }
-    include $file_to_load;
-});
 
+//自动加载myConf的类
 spl_autoload_register(function ($class_name) {
-    $file_to_load = APPPATH . 'classes/obj/' . $class_name . '.class.php';
-    if (!file_exists($file_to_load)) {
-        throw new Exception("Class $class_name not found", 500);
+    $modules = array('ret', 'exception', 'obj');
+    foreach ($modules as $module) {
+        $file_to_load = APPPATH . 'classes/' . $module . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class_name) . '.php';
+        if (file_exists($file_to_load)) {
+            include $file_to_load;
+            return TRUE;
+        }
     }
-    include $file_to_load;
+    return FALSE;
 });
 

@@ -17,7 +17,7 @@ class sConference extends CF_Service
      * @param $conference_id
      * @param $category_id
      * @return sConferenceHomepageRet
-     * @throws Exception
+     * @throws FinalDisplayedException
      */
     public function homepage($conference_id, $category_id)
     {
@@ -25,19 +25,12 @@ class sConference extends CF_Service
             $category_id = $this->mCategory->get_first_category_id($conference_id);
         } else {
             if (!$this->mCategory->has_category($category_id)) {
-                throw new Exception('This category does not exists or has been deleted.', 404);
+                throw new FinalDisplayedException('This category does not exists or has been deleted.', 404);
             }
         }
         $categories = $this->mCategory->get_all_categories($conference_id, TRUE);
         $category_document = $this->mDocument->get_first_document_from_category($category_id);
-        return new sConferenceHomepageRet(
-            $categories,
-            new ConferenceDocument(
-                $category_document['document_id'],
-                $category_document['document_title'],
-                $category_document['document_html']
-            )
-        );
+        return new sConferenceHomepageRet($categories, $category_document);
     }
 
     public function overview_submit()

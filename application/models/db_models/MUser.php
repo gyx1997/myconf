@@ -12,6 +12,7 @@ class mUser extends CF_Model
     {
         parent::__construct();
         $this->_table_name = 'users';
+        $this->_pk = 'user_id';
     }
 
     /**

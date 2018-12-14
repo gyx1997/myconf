@@ -13,6 +13,7 @@ class CF_Model extends CI_Model
 {
     protected $_table_name = '';
     protected $_table_prefix = 'myconf';
+    protected $_pk = '';
 
     public function __construct()
     {
@@ -133,6 +134,21 @@ class CF_Model extends CI_Model
         $qr = $this->db->query($query_str, $parameters);
         $result = $qr->row_array();
         return empty($result) ? array() : $result;
+    }
+
+    /**
+     * @param int $pk_val
+     * @return array
+     * @throws DbNotFoundException
+     */
+    public function get(int $pk_val): array
+    {
+        $this->db->where($this->_pk, $pk_val);
+        $query_result = $this->db->get($this->_table(), 1);
+        if (empty($query_result->row_array())) {
+            throw new DbNotFoundException(sprintf('No record found in table %s with primary key %s valued %d', $this->_table(), $this->_pk, $pk_val), 1001);
+        }
+        return $query_result->row_array();
     }
 }
 

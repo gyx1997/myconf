@@ -24,51 +24,32 @@ class account extends CF_Controller
         switch ($this->_do) {
             case 'submit':
                 {
-                    $captcha = $this->session->tempdata('captcha');
-                    if (empty($captcha) || $captcha !== $this->input->post('login_captcha')) {
-                        $this->_exit_with_json(array('status' => 'CAPTCHA_ERR'));
+                    //检查验证码和登录状态
+                    $this->_check_captcha($this->input->post('login_captcha')) || $this->_exit_with_json(array('status' => 'CAPTCHA_ERR'));
+                    $this->_has_login() && $this->_exit_with_json(array('status' => 'ALREADY_LOGIN'));
+                    //使用登录逻辑
+                    $status = 'SUCCESS';
+                    $redirect = '';
+                    try {
+                        $current_user = $this->sAccount->login($this->input->post('login_entry'), $this->input->post('login_password'));
+                        $this->_set_login($current_user);
+                        $redirect = $this->_url_redirect;
+                    } catch (\sAccount\AccountPasswordErrorException $e) {
+                        $status = 'PASSWORD_ERROR';
+                    } catch (\sAccount\LoginEntryNotExistsException $e) {
+                        $status = 'USERNAME_ERROR';
                     }
-
-                    if ($this->_has_login()) {
-                        $this->_exit_with_json(array('status' => 'ALREADY_LOGIN'));
-                    }
-
-                    //同时支持用户名和邮箱登录
-                    $entry = $this->input->post('login_entry');
-                    $user = array();
-                    if ($this->mUser->exists_username($entry)) {
-                        $user = $this->mUser->get_user_by_username($entry);
-                    } else if ($this->mUser->exists_email($entry)) {
-                        $user = $this->mUser->get_user_by_email($entry);
-                    } else {
-                        $this->_exit_with_json(array('status' => 'USERNAME_ERROR'));
-                        return;
-                    }
-
-                    $password_got = $this->input->post('login_password');
-                    if ($user['user_password'] == md5($password_got . $user['password_salt'])) {
-                        $this->_set_login($user);
-                        $this->_exit_with_json(
-                            array(
-                                'status' => 'SUCCESS',
-                                'redirect' => $this->_url_redirect
-                            )
-                        );
-                    } else {
-                        $this->_exit_with_json(array('status' => 'PASSWORD_ERROR', 'pwd' => md5($password_got . $user['password_salt'])));
-                    }
+                    $this->_exit_with_json(array('status' => $status, 'redirect' => $redirect));
                     break;
                 }
             default:
                 {
-                    if (!$this->_has_login()) {
-                        $this->_render(
+                    $this->_has_login() || $this->_render(
                             'account/login',
                             'Login',
                             array('redirect' => base64_encode($this->_url_redirect)
                             )
                         );
-                    }
                     break;
                 }
         }
@@ -88,41 +69,26 @@ class account extends CF_Controller
         switch ($this->_do) {
             case 'submit':
                 {
-                    $captcha = $this->session->tempdata('captcha');
-                    if (empty($captcha) || $captcha !== $this->input->post('register_captcha')) {
-                        $this->_exit_with_json(array('status' => 'CAPTCHA_ERR'));
-                        return;
-                    }
-                    if ($this->mUser->exists_username($this->input->post('register_username'))) {
-                        $this->_exit_with_json(array('status' => 'USERNAME_EXISTS'));
-                        return;
-                    }
-                    if ($this->mUser->exists_email($this->input->post('register_email'))) {
-                        $this->_exit_with_json(array('status' => 'EMAIL_EXISTS'));
-                        return;
-                    }
-                    $salt = md5(substr(
+                    //检查验证码和登录状态
+                    $this->_check_captcha($this->input->post('register_captcha')) || $this->_exit_with_json(array('status' => 'CAPTCHA_ERR'));
+                    $this->_has_login() && $this->_exit_with_json(array('status' => 'ALREADY_LOGIN'));
+                    //使用注册逻辑
+                    $status = 'SUCCESS';
+                    try {
+                        $user = $this->sAccount->register(
+                            $this->input->post('register_email'),
                             $this->input->post('register_username'),
-                            0,
-                            5
-                        ) .
-                        uniqid() .
-                        strval(time())
-                    );
-
-                    $this->mUser->add_user(
-                        $this->input->post('register_username'),
-                        md5($this->input->post('register_password') . $salt),
-                        $this->input->post('register_email'),
-                        $salt
-                    );
-
-                    $user = $this->mUser->get_user_by_username($this->input->post('register_username'));
-                    $this->_set_login($user);
-
-                    $this->_exit_with_json(array('status' => 'SUCCESS'));
-
-
+                            $this->input->post('register_password')
+                        );
+                        $this->_set_login($user);
+                    } catch (\sAccount\EmailAlreadyExistsException $e) {
+                        $status = 'EMAIL_EXISTS';
+                    } catch (\sAccount\UsernameAlreadyExistsException $e) {
+                        $status = 'USERNAME_EXISTS';
+                    } catch (\Exception $e) {
+                        $status = 'INTERNAL_SERVER_ERROR';
+                    }
+                    $this->_exit_with_json(array('status' => $status));
                     //$this->load->library('email');
                     //$this->email->from('csqrwc@126.com', 'CSQRWC Register');
                     //$this->email->to($this->input->post('email_text'));
@@ -168,26 +134,10 @@ class account extends CF_Controller
                     }
                 case 'avatar':
                     {
-                        //检查文件夹是否存在
-                        $base_path = AVATAR_DIR . strval($this->_user_id % 100);
-                        if (!is_dir($base_path)) {
-                            @mkdir($base_path);
-                        }
-                        //上传文件
-                        $image_param['upload_path'] = TMP_PATH;
-                        $image_param['allowed_types'] = 'jpeg|jpg|png';
-                        $image_param['max_size'] = '1048576';
-                        $this->load->library('upload', $image_param);
-                        if ($this->upload->do_upload('avatar_image')) {
-                            $image_data = $this->upload->data();
-                            $new_image_name = $this->_user_id . $image_data['file_ext'];
-                            rename($image_data['full_path'], $base_path . '/' . $new_image_name);
-                            @unlink($image_data['full_path']);
-                            //更新数据库
-                            $this->mUser->update_extra(
-                                $this->_user_id,
-                                array('avatar' => '/' . strval($this->_user_id % 100) . '/' . $new_image_name)
-                            );
+                        try {
+                            $this->sAccount->change_avatar($this->_user_id, 'avatar_image');
+                        } catch (\Exception $e) {
+
                         }
                         break;
                     }

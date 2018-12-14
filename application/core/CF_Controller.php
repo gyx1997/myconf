@@ -256,13 +256,24 @@ class CF_Controller extends CI_Controller
     }
 
     /**
-     * 使用JSON返回。
+     * 返回JSON
      * @param array $parameters
      */
-    protected function _exit_with_json($parameters = array())
+    protected function _exit_with_json($parameters = array()): void
     {
         header('Content-Type:application/json;charset=utf-8');
         exit(json_encode($parameters));
+    }
+
+    /**
+     * 检查验证码
+     * @param string $captcha_input
+     * @return bool
+     */
+    protected function _check_captcha(string $captcha_input): bool
+    {
+        $captcha = $this->session->tempdata('captcha');
+        return !empty($captcha) && $captcha === $captcha_input;
     }
 }
 

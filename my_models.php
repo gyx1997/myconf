@@ -23,6 +23,7 @@
  * 下面是微服务模型
  * @property sConference $sConference
  * @property sAttachment $sAttachment
+ * @property sAccount $sAccount
  * 下面是辅助类库
  * @property Attach $attach
  */
