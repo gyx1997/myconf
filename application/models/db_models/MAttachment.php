@@ -6,8 +6,17 @@
  * Time: 16:33
  */
 
+/**
+ * Class mAttachment
+ */
 class mAttachment extends CF_Model
 {
+    public $tag_types = array('document' => 'document', 'paper' => 'paper', 'conf' => 'conf');
+    public const tag_type_conference = 'conf';
+    public const tag_type_document = 'document';
+    public const tag_type_paper = 'paper';
+    public const tag_type_non_restrict = '';
+
     public function __construct()
     {
         parent::__construct();
@@ -86,17 +95,24 @@ class mAttachment extends CF_Model
     }
 
     /**
-     * @param bool $image
+     * @param string $tag_type
+     * @param int $tag_id
+     * @param bool $image_only
      * @param int $start
      * @param int $limit
-     * @return mixed
+     * @return array
      */
-    public function get_file_list($image = FALSE, $start = 0, $limit = 10)
+    public function get_file_list(string $tag_type = '', int $tag_id = 0, bool $image_only = FALSE, int $start = 0, int $limit = 10): array
     {
         $this->db->select('*');
-        $this->db->where('attachment_tag_type', 'document');
-        $image == TRUE && $this->db->where('attachment_is_image', TRUE);
-        $this->db->limit($limit, $start);
+        if ($tag_type !== '' && isset($this->tag_types[$tag_type])) {
+            $this->db->where('attachment_tag_type', $this->tag_types[$tag_type]);
+            if ($tag_id !== 0) {
+                $this->db->where('attachment_tag_id', $tag_id);
+            }
+        }
+        $image_only === TRUE && $this->db->where('attachment_is_image', 1);
+        $this->db->limit($limit, strval($start));
         $this->db->order_by('attachment_id', 'DESC');
         $query_result = $this->db->get($this->_table());
         return $query_result->result_array();

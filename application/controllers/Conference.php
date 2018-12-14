@@ -167,7 +167,6 @@ class Conference extends CF_Controller
      */
     public function index()
     {
-        try {
             switch ($this->_method) {
                 case 'paper-submit':
                     {
@@ -194,9 +193,6 @@ class Conference extends CF_Controller
                         $this->_default();
                     }
             }
-        } catch (Exception $e) {
-            show_error($e->getMessage(), $e->getCode());
-        }
     }
 
     /**

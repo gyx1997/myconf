@@ -77,7 +77,7 @@ $db['default'] = array(
     'dsn' => '',
     'hostname' => '127.0.0.1',
     'username' => 'root',
-    'password' => (ENVIRONMENT == 'production' || IN_LAB == TRUE ? 'jsnudb123456' : 'gyx19970611a*!'),
+    'password' => 'gyx19970611a*!',//(ENVIRONMENT == 'production' || IN_LAB == TRUE ? 'jsnudb123456' : 'gyx19970611a*!'),
     'database' => 'conference',
     'dbdriver' => 'mysqli',
     'dbprefix' => '',

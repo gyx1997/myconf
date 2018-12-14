@@ -18,7 +18,8 @@ class Attach
     {
         $result = array('error' => '', 'status' => '');
         $file = $_FILES[$file_field_name];
-        if (!$file || $file['error'] != 0) {
+        //var_dump($_FILES);
+        if (!isset($file) || $file['error'] != 0) {
             throw new \lAttach\AttachParseException('ERROR_FILE_NOT_FOUND');
         } else {
             if (!file_exists($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
@@ -102,19 +103,14 @@ class Attach
      * @param string $attach_relative_path
      * @param string $file_name_original
      * @param int $file_size
-     * @param bool $redirect_source_file
      * @param int $download_speed
      * @throws \lAttach\AttachReadException
      */
-    public function download_attach(string $attach_relative_path, string $file_name_original, int $file_size, bool $redirect_source_file = FALSE, int $download_speed = 80000): void
+    public function download_attach(string $attach_relative_path, string $file_name_original, int $file_size, int $download_speed = 80000): void
     {
         $file_absolute_path = FCPATH . $attach_relative_path;
         if (!file_exists($file_absolute_path)) {
-            show_404();
-        }
-        if ($redirect_source_file) {
-            header('location:' . $attach_relative_path, true, 301);
-            return;
+            throw new \lAttach\AttachReadException();
         }
         set_time_limit(900);
         ob_clean();

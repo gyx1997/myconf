@@ -55,13 +55,14 @@ class sAccount extends CF_Service
             throw new \sAccount\UsernameAlreadyExistsException();
         }
         $salt = $this->_generate_password_salt();
+        $this->mUser->begin_transaction();
         $user_id = $this->mUser->add_user($username, md5($password . $salt), $email, $salt);
-        //添加文章学者信息
-        $this->mScholar->add_scholar_info($email, '', '', '', '', '', '');
+        $this->mScholar->add_scholar_info($email, '', '', '', '', '', '');                      //添加文章学者信息，需要自行完善
+        $this->mUser->end_transaction();
         try {
             return $this->mUser->get($user_id);
-        } catch (Exception $e) {
-            throw new Exception('Internal Server Error.', 500);
+        } catch (\DbNotFoundException $e) {
+            throw new Exception('mysqli_insert_id() called in method `register` got incorrect return value, which caused the next SELECT operation return empty set.');
         }
     }
 

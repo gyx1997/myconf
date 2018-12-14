@@ -16,7 +16,7 @@ class sConference extends CF_Service
     /**
      * @param $conference_id
      * @param $category_id
-     * @return sConferenceHomepageRet
+     * @return sConference\sConferenceHomepageRet
      * @throws FinalDisplayedException
      */
     public function homepage($conference_id, $category_id)
@@ -30,15 +30,15 @@ class sConference extends CF_Service
         }
         $categories = $this->mCategory->get_all_categories($conference_id, TRUE);
         $category_document = $this->mDocument->get_first_document_from_category($category_id);
-        return new sConferenceHomepageRet($categories, $category_document);
+        return new sConference\sConferenceHomepageRet($categories, $category_document);
     }
 
-    public function overview_submit()
+    public function management_overview_submit()
     {
 
     }
 
-    public function overview_display()
+    public function management_overview_display()
     {
 
     }

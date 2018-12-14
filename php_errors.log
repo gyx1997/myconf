@@ -1,1 +1,5 @@
 [13-Dec-2018 14:55:37 UTC] PHP Fatal error:  Class 'CF_Service' not found in F:\csqrwc\application\models\services\SAttachment.php on line 8
+[14-Dec-2018 12:29:56 UTC] PHP Fatal error:  Uncaught Exception in F:\csqrwc_git\index.php:57
+Stack trace:
+#0 {main}
+  thrown in F:\csqrwc_git\index.php on line 57

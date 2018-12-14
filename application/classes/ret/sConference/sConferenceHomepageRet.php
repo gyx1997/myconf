@@ -6,6 +6,7 @@
  * Time: 0:03
  */
 
+namespace sConference;
 /**
  * Class sConferenceHomepageRet
  * @property array $category_list

@@ -21,11 +21,13 @@ class attachment extends CF_Controller
     public function put()
     {
         try {
-            $attach_data = $this->sAttachment->ueditor_upload('file', $this->input->post('document_id'));
+            $attach_data = $this->sAttachment->ueditor_upload('upfile', $this->input->post('document_id'));
             $this->_exit_with_json(
                 array(
                     'state' => 'SUCCESS',
-                    'url' => '/attachment/get/' . $this->_action . '/?aid=' . $attach_data->attachment_id,
+                    //对于图片直接进行下载，不需要中转进行文件重命名。
+                    //也可以充分利用后期的CDN
+                    'url' => $this->_action === 'file' ? '/attachment/get/' . $this->_action . '/?aid=' . $attach_data->attachment_id : $attach_data->stored_full_name,
                     'title' => $attach_data->original_file_name,
                     'original' => $attach_data->original_file_name,
                     'type' => $attach_data->file_extension,
@@ -34,9 +36,6 @@ class attachment extends CF_Controller
             );
         } catch (\sAttachment\UEditorUploadException $e) {
             $this->_exit_with_json(array('state' => $e->getJsonStatus()));
-        } catch (\Exception $e) {
-            //未捕获的系统异常
-            show_error('Internal Server Error.');
         }
         return;
     }
@@ -56,40 +55,15 @@ class attachment extends CF_Controller
         }
     }
 
+    /**
+     * 获取文件列表
+     */
     public function get_list()
     {
-        $limit = $this->input->get('size');
-        $start = $this->input->get('start');
-        $files = $this->mAttachment->get_file_list(
-            ($this->_action == 'image'),
-            $start,
-            $limit
-        );
-        if (empty($files)) {
-            $this->result = array(
-                'state' => 'no match file',
-                'list' => array(),
-                'start' => $start,
-                'total' => 0
-            );
-        } else {
-            $file_list = array();
-            foreach ($files as $file) {
-                $file_list [] = array(
-                    'url' => $file['attachment_file_name'],
-                    'mtime' => $file['attachment_upload_time'],
-                    'original' => $file['attachment_original_name'],
-                );
-            }
-            $this->result = array(
-                'state' => 'SUCCESS',
-                'list' => $file_list,
-                'start' => $start,
-                'total' => count($file_list)
-            );
-        }
-        $this->return_json();
-        return;
+        $limit = intval($this->input->get('size'));
+        $start = intval($this->input->get('start'));
+        $ret = $this->sAttachment->ueditor_get_list($limit, $start, $this->_action === 'image');
+        $this->_exit_with_json(array('state' => $ret->status, 'list' => $ret->file_list, 'start' => $start, 'total' => $ret->total));
     }
 
     /**
@@ -102,16 +76,9 @@ class attachment extends CF_Controller
             $type = ($this->_action === 'image' ? 'image' : 'file');
             $this->sAttachment->download_attachment($attachment_id, $type);
         } catch (\sAttachment\AttachmentIdNotFoundException $e) {
-            show_404('The attachment you requested was not found.');
+            show_error('404 Not Found. The attachment you requested was not found, or it has been deleted.', 404);
+        } catch (\lAttach\AttachReadException $e) {
+            show_error('404 Not Found. The attachment you requested was not found, or it has been deleted.', 404);
         }
     }
-
-    private function get_file_short_name($file_full_name)
-    {
-        return substr(
-            $file_full_name,
-            strrpos($file_full_name, '/') + 1
-        );
-    }
-
 }

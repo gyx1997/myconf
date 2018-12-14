@@ -372,7 +372,11 @@ if (!function_exists('show_error')) {
         }
 
         $_error =& load_class('Exceptions', 'core');
-        echo $_error->show_error($heading, $message, 'error_general', $status_code);
+        if ($status_code == 500) {
+            echo $_error->show_error($heading, $message, 'error_500', $status_code);
+        } else {
+            echo $_error->show_error($heading, $message, 'error_general', $status_code);
+        }
         exit($exit_status);
     }
 }
@@ -592,11 +596,13 @@ if (!function_exists('_exception_handler')) {
     {
         $_error =& load_class('Exceptions', 'core');
         $_error->log_exception('error', 'Exception: ' . $exception->getMessage(), $exception->getFile(), $exception->getLine());
-
         is_cli() OR set_status_header(500);
         // Should we display the error?
         if (str_ireplace(array('off', 'none', 'no', 'false', 'null'), '', ini_get('display_errors'))) {
+            echo "(生产环境会自动拦截下面的tractBack，放心使用Exception)<br>";
             $_error->show_exception($exception);
+        } else {
+            show_error("500 Internal Server Error.", 500);
         }
 
         exit(1); // EXIT_ERROR

@@ -76,8 +76,6 @@ class account extends CF_Controller
                     } catch (\sAccount\AccountNotExistsException $e) {
                         $status = 'EMAIL_NOT_EXISTS';
                         $this->session->unset_tempdata('pwd-reset-hash');
-                    } catch (\Exception $e) {
-                        show_error('Internal Server Error.');
                     }
                     $this->_render('account/reset_pwd_verify', 'Reset Password', array('status' => $status, 'email' => $target_email));
                     break;
@@ -110,7 +108,7 @@ class account extends CF_Controller
     }
 
     /**
-     * 注册页面
+     * @throws Exception mysqli_insert_id()出错，认为可以忽略。如果偶然出现会被最外层的_exception_handler抓住。
      */
     public function register()
     {
@@ -123,6 +121,7 @@ class account extends CF_Controller
                     //使用注册逻辑
                     $status = 'SUCCESS';
                     try {
+                        //定义上会出Exception，实际上应该不会。
                         $user = $this->sAccount->register(
                             $this->input->post('register_email'),
                             $this->input->post('register_username'),
@@ -133,8 +132,6 @@ class account extends CF_Controller
                         $status = 'EMAIL_EXISTS';
                     } catch (\sAccount\UsernameAlreadyExistsException $e) {
                         $status = 'USERNAME_EXISTS';
-                    } catch (\Exception $e) {
-                        $status = 'INTERNAL_SERVER_ERROR';
                     }
                     $this->_exit_with_json(array('status' => $status));
                     break;
