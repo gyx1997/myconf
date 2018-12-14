@@ -9,7 +9,7 @@
 namespace sAccount;
 
 
-class AvatarNotSelectedException extends \Exception
+class AvatarNotSelectedException extends \ExceptionBase
 {
 
 }

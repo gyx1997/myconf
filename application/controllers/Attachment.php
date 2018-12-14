@@ -15,37 +15,45 @@ class attachment extends CF_Controller
         parent::__construct();
     }
 
+    /**
+     * 上传文件
+     */
     public function put()
     {
-        $attach_info = $this->attach->parse_attach('upfile');
-        $attachment_id = $this->mAttachment->add_attachment_from_document(
-            $attach_info['full_name'],
-            $attach_info['size'],
-            $attach_info['original_name'],
-            intval($this->input->post('document_id')),
-            $attach_info['is_image'],
-            0,
-            1
-        );
-        $this->result = array(
-            'state' => $attach_info['status'] === 'SUCCESS' ? 'SUCCESS' : $attach_info['error'],
-            'url' => '/attachment/get/' . $this->_action . '/?aid=' . $attachment_id,
-            'title' => $attach_info['short_name'],
-            'original' => $attach_info['original_name'],
-            'type' => $attach_info['extension'],
-            'size' => $attach_info['size']
-        );
-        $this->return_json();
+        try {
+            $attach_data = $this->sAttachment->ueditor_upload('file', $this->input->post('document_id'));
+            $this->_exit_with_json(
+                array(
+                    'state' => 'SUCCESS',
+                    'url' => '/attachment/get/' . $this->_action . '/?aid=' . $attach_data->attachment_id,
+                    'title' => $attach_data->original_file_name,
+                    'original' => $attach_data->original_file_name,
+                    'type' => $attach_data->file_extension,
+                    'size' => $attach_data->file_size,
+                )
+            );
+        } catch (\sAttachment\UEditorUploadException $e) {
+            $this->_exit_with_json(array('state' => $e->getJsonStatus()));
+        } catch (\Exception $e) {
+            //未捕获的系统异常
+            show_error('Internal Server Error.');
+        }
         return;
     }
 
-    private function return_json()
+    /**
+     * 返回UE带有callback的Json
+     * @param array $data
+     */
+    protected function _exit_with_json(array $data = array()): void
     {
-        header("Content-Type: text/html; charset=utf-8");
         $callback = $this->input->get('callback');
-        echo isset($callback) ?
-            htmlspecialchars($callback) . '(' . json_encode($this->result) . ')' :
-            json_encode($this->result);
+        if (isset($callback)) {
+            header("Content-Type: text/html; charset=utf-8");
+            exit(htmlspecialchars($callback) . '(' . json_encode($data) . ')');
+        } else {
+            parent::_exit_with_json($data);
+        }
     }
 
     public function get_list()
@@ -84,29 +92,17 @@ class attachment extends CF_Controller
         return;
     }
 
+    /**
+     * 下载文件
+     */
     public function get()
     {
-        //从数据库中查找附件信息
-        $attachment_id = intval($this->input->get('aid'));
-        $attach_info = $this->mAttachment->get_attachment($attachment_id);
-        if (empty($attach_info)) {
-            show_404();
-        }
-        switch ($this->_action) {
-            case 'file':
-                {
-                    $this->mAttachment->increase_download_times($attachment_id);
-                }
-            case 'image':
-                {
-                    $this->attach->download_attach(
-                        $attach_info['attachment_file_name'],
-                        $attach_info['attachment_original_name'],
-                        $attach_info['attachment_file_size'],
-                        $this->_action === 'image'
-                    );
-                    break;
-                }
+        try {
+            $attachment_id = intval($this->input->get('aid'));
+            $type = ($this->_action === 'image' ? 'image' : 'file');
+            $this->sAttachment->download_attachment($attachment_id, $type);
+        } catch (\sAttachment\AttachmentIdNotFoundException $e) {
+            show_404('The attachment you requested was not found.');
         }
     }
 

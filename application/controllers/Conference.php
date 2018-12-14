@@ -211,8 +211,8 @@ class Conference extends CF_Controller
                         //处理作者
                         $authors = json_decode($this->input->post('authors'), TRUE);
                         foreach ($authors as $author) {
-                            if ($this->mScholarInfo->scholar_exists($author['email']) === FALSE) {
-                                $this->mScholarInfo->add_scholar_info(
+                            if ($this->mScholar->scholar_exists($author['email']) === FALSE) {
+                                $this->mScholar->add_scholar_info(
                                     $author['email'],
                                     $author['first_name'],
                                     $author['last_name'],
@@ -256,7 +256,7 @@ class Conference extends CF_Controller
                 }
             case 'author':
                 {
-                    $data = $this->mScholarInfo->get_scholar_info(base64_decode($this->input->get('email')));
+                    $data = $this->mScholar->get_scholar_info(base64_decode($this->input->get('email')));
                     if ($this->_do == 'get') {
                         $this->_exit_with_json(
                             array(

@@ -28,8 +28,11 @@ class misc extends CF_Controller
         for ($i = 0; $i < CAPTCHA_NUMCHARS; $i++) {
             $pass_phrase .= $str[rand(0, 25)];
         }
+        //写入Session
         $this->session->set_tempdata('captcha', $pass_phrase, 300);
-        /* 生成验证码图像 */
+        session_write_close();
+        //关闭Session防止阻塞
+        //下面使用gd库生成验证码的图像
         define("CAPTCHA_WIDTH", 200);    //验证码宽度
         define("CAPTCHA_HEIGHT", 80);    //验证码高度
         $img = imagecreatetruecolor(CAPTCHA_WIDTH, CAPTCHA_HEIGHT);

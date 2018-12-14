@@ -40,7 +40,12 @@ class mAttachment extends CF_Model
         return $this->db->insert_id();
     }
 
-    public function get_attachment($attachment_id)
+    /**
+     * @param int $attachment_id
+     * @return array
+     * @throws DbNotFoundException
+     */
+    public function get_attachment(int $attachment_id)
     {
         return $this->_fetch_first(array('attachment_id' => $attachment_id));
     }

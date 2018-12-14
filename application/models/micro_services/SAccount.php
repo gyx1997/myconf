@@ -23,8 +23,6 @@ class sAccount extends CF_Service
      */
     public function login(string $entry, string $password): array
     {
-        $user = array();
-        $status = 'SUCCESS';
         if ($this->mUser->exists_username($entry)) {
             $user = $this->mUser->get_user_by_username($entry);
         } else if ($this->mUser->exists_email($entry)) {
@@ -56,21 +54,10 @@ class sAccount extends CF_Service
         if ($this->mUser->exists_username($username)) {
             throw new \sAccount\UsernameAlreadyExistsException();
         }
-        $salt = md5(
-            substr(
-                $this->input->post('register_username'),
-                0,
-                5
-            ) .
-            uniqid() .
-            strval(time())
-        );
-        $user_id = $this->mUser->add_user(
-            $username,
-            md5($password . $salt),
-            $email,
-            $salt
-        );
+        $salt = $this->_generate_password_salt();
+        $user_id = $this->mUser->add_user($username, md5($password . $salt), $email, $salt);
+        //添加文章学者信息
+        $this->mScholar->add_scholar_info($email, '', '', '', '', '', '');
         try {
             return $this->mUser->get($user_id);
         } catch (Exception $e) {
@@ -79,12 +66,61 @@ class sAccount extends CF_Service
     }
 
     /**
+     * 发送验证邮件
+     * @param string $email
+     * @param string $hash_key
+     * @throws \sAccount\AccountNotExistsException
+     */
+    public function send_verify_email(string $email, string $hash_key): void
+    {
+        if (!$this->mUser->exists_email($email)) {
+            throw new \sAccount\AccountNotExistsException();
+        }
+        $this->load->library('email');
+        $this->email->from('csqrwc@126.com', 'myConf Password Reset');
+        $this->email->to($email);
+        $this->email->subject('Password Reset');
+        $this->email->message(
+            '
+            <h1>Email Verification From myConf.cn</h1>
+            <p>Copy the text below to enter in the form popped from myConf.cn .</p>
+            <p style="font-family: Consolas; font-size: 14px; background-color: #D0D0D0">' . $hash_key . '</p>
+            <p>You should finish to submit the form in 30 minutes since you have submit this request.</p>
+            <p>If you have not registered an account at myConf.cn, Please ignore this email.</p>
+            '
+        );
+        $this->email->send();
+    }
+
+    /**
+     * 更改密码逻辑
+     * @param string $email
+     * @param string $hash_original
+     * @param string $hash_to_verify
+     * @param string $new_password
+     * @throws \sAccount\AccountNotExistsException
+     * @throws \sAccount\EmailVerifyFailedException
+     */
+    public function reset_password(string $email, string $hash_original, string $hash_to_verify, string $new_password): void
+    {
+        if (!$this->mUser->exists_email($email)) {
+            throw new \sAccount\AccountNotExistsException();
+        }
+        if ($hash_original !== $hash_to_verify) {
+            throw new \sAccount\EmailVerifyFailedException();
+        }
+        $salt = $this->_generate_password_salt();
+        $this->mUser->update_user_password_by_email($email, md5($new_password . $salt), $salt);
+        return;
+    }
+
+    /**
      * 修改头像逻辑
      * @param int $user_id
-     * @param array $avatar_field
+     * @param string $avatar_field
      * @throws \sAccount\AvatarNotSelectedException
      */
-    public function change_avatar(int $user_id, array $avatar_field): void
+    public function change_avatar(int $user_id, string $avatar_field): void
     {
         //检查文件夹是否存在
         $base_path = AVATAR_DIR . strval($user_id % 100);
@@ -112,8 +148,72 @@ class sAccount extends CF_Service
         return;
     }
 
-    public function user_full_info(int $user_id)
+    /**
+     * 获取用户的完全信息
+     * @param int $user_id
+     * @return \sAccount\sAccountUserFullInfoRet
+     * @throws \sAccount\AccountNotExistsException
+     */
+    public function user_full_info(int $user_id): \sAccount\sAccountUserFullInfoRet
     {
+        //先在user表中查找账户信息
+        try {
+            $base_data = $this->mUser->get_user_by_user_id($user_id);
+        } catch (DbNotFoundException $e) {
+            throw new \sAccount\AccountNotExistsException();
+        }
+        //再查找对应的scholar信息，如果不存在，返回对象此处对应为空数组
+        try {
+            $scholar_data = $this->mScholar->get_scholar_info($base_data['user_email']);
+            $ret = new \sAccount\sAccountUserFullInfoRet(
+                $user_id,
+                $base_data['user_name'],
+                $base_data['user_email'],
+                $base_data['user_phone'],
+                $base_data['avatar'],
+                $base_data['organization'],
+                $scholar_data
+            );
+        } catch (DbNotFoundException $e) {
+            $ret = new \sAccount\sAccountUserFullInfoRet(
+                $user_id,
+                $base_data['user_name'],
+                $base_data['user_email'],
+                $base_data['user_phone'],
+                $base_data['avatar'],
+                $base_data['organization']
+            );
+        }
+        return $ret;
+    }
 
+    /**
+     * 更新账户的Scholar信息
+     * @param string $email
+     * @param string $first_name
+     * @param string $last_name
+     * @param string $institution
+     * @param string $department
+     * @param string $address
+     * @param string $prefix
+     * @param string $chn_full_name
+     * @throws \sAccount\ScholarNotExistsException
+     */
+    public function update_scholar_info(string $email, string $first_name, string $last_name, string $institution, string $department, string $address, string $prefix = '', string $chn_full_name = ''): void
+    {
+        if (!$this->mScholar->scholar_exists($email)) {
+            throw new \sAccount\ScholarNotExistsException();
+        }
+        $this->mScholar->update_scholar($email, $first_name, $last_name, $institution, $department, $address, $prefix, $chn_full_name);
+        return;
+    }
+
+    /**
+     * 生成密码用的盐
+     * @return string
+     */
+    private function _generate_password_salt(): string
+    {
+        return md5(uniqid() . strval(time()));
     }
 }

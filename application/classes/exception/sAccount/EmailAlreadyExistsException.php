@@ -7,7 +7,7 @@
  */
 
 namespace sAccount {
-    class EmailAlreadyExistsException extends \Exception
+    class EmailAlreadyExistsException extends \ExceptionBase
     {
 
     }

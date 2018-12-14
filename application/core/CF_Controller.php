@@ -259,7 +259,7 @@ class CF_Controller extends CI_Controller
      * 返回JSON
      * @param array $parameters
      */
-    protected function _exit_with_json($parameters = array()): void
+    protected function _exit_with_json(array $parameters = array()): void
     {
         header('Content-Type:application/json;charset=utf-8');
         exit(json_encode($parameters));

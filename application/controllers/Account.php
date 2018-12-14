@@ -57,8 +57,56 @@ class account extends CF_Controller
 
     public function logout()
     {
-        $this->_set_logout();
+        $this->session->sess_destroy();
         header('location:' . $this->_url_redirect);
+    }
+
+    public function reset_password()
+    {
+        switch ($this->_do) {
+            case 'verifyKey':
+                {
+                    $status = 'SUCCESS';
+                    $target_email = base64_decode($this->input->get('email'));
+                    //生成验证Key
+                    $hash_key = md5(uniqid());
+                    $this->session->set_tempdata('pwd-reset-hash', $hash_key, 1800);
+                    try {
+                        $this->sAccount->send_verify_email($target_email, $hash_key);
+                    } catch (\sAccount\AccountNotExistsException $e) {
+                        $status = 'EMAIL_NOT_EXISTS';
+                        $this->session->unset_tempdata('pwd-reset-hash');
+                    } catch (\Exception $e) {
+                        show_error('Internal Server Error.');
+                    }
+                    $this->_render('account/reset_pwd_verify', 'Reset Password', array('status' => $status, 'email' => $target_email));
+                    break;
+                }
+            case 'submitNewPwd':
+                {
+                    //检查验证码
+                    $this->_check_captcha($this->input->post('reset_pwd_captcha')) || $this->_exit_with_json(array('status' => 'CAPTCHA_ERR'));
+                    //读取输入
+                    $status = 'SUCCESS';
+                    $hash_key = $this->session->tempdata('pwd-reset-hash');
+                    $hash_key_got = trim($this->input->post('verification_key'));
+                    $new_password = $this->input->post('user_password');
+                    $email = $this->input->post('user_email');
+                    try {
+                        $this->sAccount->reset_password($email, $hash_key, $hash_key_got, $new_password);
+                    } catch (\sAccount\EmailVerifyFailedException $e) {
+                        $status = 'EMAIL_VERIFY_FAILED';
+                    } catch (\sAccount\AccountNotExistsException $e) {
+                        $status = 'EMAIL_ERROR';
+                    }
+                    $this->_exit_with_json(array('status' => $status));
+                    break;
+                }
+            default:
+                {
+                    show_404();
+                }
+        }
     }
 
     /**
@@ -89,16 +137,11 @@ class account extends CF_Controller
                         $status = 'INTERNAL_SERVER_ERROR';
                     }
                     $this->_exit_with_json(array('status' => $status));
-                    //$this->load->library('email');
-                    //$this->email->from('csqrwc@126.com', 'CSQRWC Register');
-                    //$this->email->to($this->input->post('email_text'));
-                    //$this->email->subject('Email Test');
-                    //$this->email->message('Testing the email class.');
-                    //$this->email->send();
                     break;
                 }
             case 'activate':
                 {
+                    //TODO 增加注册邮箱激活
                     break;
                 }
             default:
@@ -107,11 +150,7 @@ class account extends CF_Controller
                         header('location:/account/');
                         return;
                     }
-                    $this->_render(
-                        'account/register',
-                        'Register',
-                        array()
-                    );
+                    $this->_render('account/register', 'Register', array());
                     break;
                 }
         }
@@ -141,11 +180,33 @@ class account extends CF_Controller
                         }
                         break;
                     }
+                case 'scholar':
+                    {
+                        $email = $this->input->post('scholarEmail');
+                        $first_name = $this->input->post('scholarFirstName');
+                        $last_name = $this->input->post('scholarLastName');
+                        $institution = $this->input->post('scholarInstitution');
+                        $department = $this->input->post('scholarDepartment');
+                        $address = $this->input->post('scholarAddress');
+                        try {
+                            $this->sAccount->update_scholar_info($email, $first_name, $last_name, $institution, $department, $address);
+                        } catch (\Exception $e) {
+                            show_error('Internal Server Error', 500);
+                        }
+                    }
             }
             header('location:/account/my-settings/');
             return;
         } else {
-            $this->_render('account/settings', 'My Account', array());
+            try {
+                $user_data = $this->sAccount->user_full_info($this->_user_id);
+            } catch (Exception $e) {
+
+            }
+            $this->_render('account/settings', 'My Account', array(
+                    'scholar_info' => isset($user_data) ? $user_data->assigned_scholar_info : array()
+                )
+            );
         }
     }
 

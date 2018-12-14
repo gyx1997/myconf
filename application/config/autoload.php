@@ -141,7 +141,7 @@ $autoload['model'] = array(
     'db_models/mConfMember',
     'db_models/mDocument',
     'db_models/mPaper',
-    'db_models/mScholarInfo',
+    'db_models/mScholar',
     'db_models/mUser',
     //微服务
     'micro_services/sAttachment',
@@ -150,7 +150,7 @@ $autoload['model'] = array(
 );
 
 require APPPATH . 'classes/MyConfBase.class.php';
-
+require APPPATH . 'classes/exception/ExceptionBase.php';
 //自动加载myConf的类
 spl_autoload_register(function ($class_name) {
     $modules = array('ret', 'exception', 'obj');

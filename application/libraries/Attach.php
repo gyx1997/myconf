@@ -10,23 +10,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Attach
 {
     /**
-     * @param $file_field_name
+     * @param string $file_field_name
      * @return array
+     * @throws \lAttach\AttachParseException
      */
-    public function parse_attach($file_field_name)
+    public function parse_attach(string $file_field_name): array
     {
         $result = array('error' => '', 'status' => '');
         $file = $_FILES[$file_field_name];
         if (!$file || $file['error'] != 0) {
-            $result['error'] = 'ERROR_FILE_NOT_FOUND';
+            throw new \lAttach\AttachParseException('ERROR_FILE_NOT_FOUND');
         } else {
             if (!file_exists($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
-                $result['error'] = 'ERROR_TMP_FILE_NOT_FOUND';
+                throw new \lAttach\AttachParseException('ERROR_TMP_FILE_NOT_FOUND');
             } else {
                 $stored_data = $this->_get_stored_file_data($file['name']);
                 $file_size = filesize($file['tmp_name']);
                 if ($this->_move_file_to($file['tmp_name'], $stored_data['directory'], $stored_data['short_name']) === FALSE) {
-                    $result['error'] = 'ERROR_WRITE_CONTENT';
+                    throw new \lAttach\AttachParseException('ERROR_WRITE_CONTENT');
                 } else {
                     $is_image = ($stored_data['extension'] == '.jpg' || $stored_data['extension'] == '.jpeg'
                         || $stored_data['extension'] == '.png' || $stored_data['extension'] == '.gif') ? TRUE : FALSE;
@@ -39,9 +40,6 @@ class Attach
                     $result = array_merge($result, $stored_data);
                 }
             }
-        }
-        if ($result['error'] === '') {
-            $result['status'] = 'SUCCESS';
         }
         return $result;
     }
@@ -100,11 +98,15 @@ class Attach
     }
 
     /**
-     * @param $attach_relative_path
-     * @param $file_name_original
-     * @param $file_size
+     * 下载文件
+     * @param string $attach_relative_path
+     * @param string $file_name_original
+     * @param int $file_size
+     * @param bool $redirect_source_file
+     * @param int $download_speed
+     * @throws \lAttach\AttachReadException
      */
-    public function download_attach($attach_relative_path, $file_name_original, $file_size, $redirect_source_file = FALSE, $download_speed = 80000)
+    public function download_attach(string $attach_relative_path, string $file_name_original, int $file_size, bool $redirect_source_file = FALSE, int $download_speed = 80000): void
     {
         $file_absolute_path = FCPATH . $attach_relative_path;
         if (!file_exists($file_absolute_path)) {
@@ -122,7 +124,7 @@ class Attach
         header("Accept-length:" . $file_size);
         $fp = @fopen($file_absolute_path, 'r');
         if ($fp === FALSE) {
-            show_error('Trying to read attachment file but failed.', 500);
+            throw new \lAttach\AttachReadException('ATTACH_READ_FAILED');
         }
         $buffer = $download_speed;
         $buffer_count = 0;

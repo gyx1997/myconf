@@ -401,7 +401,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             </tr>
                             <tr>
                                 <td style="width:38%;">
-                                    <label for="editAuthorDepartment">Address&nbsp;&nbsp;<span class="badge badge-info">LESS THAN 250 Characters</span></label>
+                                    <label for="editAuthorAddress">Address&nbsp;&nbsp;<span class="badge badge-info">LESS THAN 250 Characters</span></label>
                                 </td>
                                 <td style="width:62%;">
                                     <input class="form-control" name="editAuthorAddress" id="editAuthorAddress"

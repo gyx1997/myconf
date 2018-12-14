@@ -89,30 +89,36 @@ class mUser extends CF_Model
     }
 
     /**
-     * @param $user_id
+     * @param int $user_id
      * @return array
+     * @throws DbNotFoundException
      */
-    public function get_user_by_user_id($user_id)
+    public function get_user_by_user_id(int $user_id): array
     {
         return $this->_get_single_user('user_id', $user_id);
     }
 
-    private function _get_single_user($field, $value)
+    /**
+     * @param string $field
+     * @param $value
+     * @return array
+     * @throws DbNotFoundException
+     */
+    private function _get_single_user(string $field, $value): array
     {
         $this->db->where($field, $value);
         $query = $this->db->get($this->_table());
         $result = $query->row_array();
         if (empty($result)) {
-            return array();
-        } else {
-            $result['user_role'] = explode(',', $result['user_role']);
-            $tmp = unserialize($result['user_extra']);
-            foreach ($tmp as $k => $v) {
-                $result[$k] = $v;
-            }
-            $result['user_extra'] = NULL;
-            return $result;
+            throw new DbNotFoundException();
         }
+        $result['user_role'] = explode(',', $result['user_role']);
+        $tmp = unserialize($result['user_extra']);
+        foreach ($tmp as $k => $v) {
+            $result[$k] = $v;
+        }
+        $result['user_extra'] = NULL;
+        return $result;
     }
 
     /**
@@ -169,6 +175,19 @@ class mUser extends CF_Model
     public function get_user_by_username($username)
     {
         return $this->_get_single_user('user_name', $username);
+    }
+
+    /**
+     * 更新密码
+     * @param string $user_email
+     * @param string $password
+     * @param string $salt
+     */
+    public function update_user_password_by_email(string $user_email, string $password, string $salt): void
+    {
+        $this->db->where('user_email', $user_email);
+        $this->db->update($this->_table(), array('user_password' => $password, 'password_salt' => $salt));
+        return;
     }
 
     public function get_user_by_email($email)

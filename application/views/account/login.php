@@ -51,7 +51,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="submit_button" type="button" class="btn btn-success">Submit</button>
+                    <button id="submit_button" type="button" class="btn btn-primary">Submit</button>
+                    <button id="reset_pwd_button" type="button" class="btn btn-secondary">Reset Password</button>
                 </div>
             </form>
         </div>
@@ -105,6 +106,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     captcha_image.onclick = function () {
         this.src = "/misc/captcha/?refresh=" + Math.random();
     };
+    $('#reset_pwd_button').click(function () {
+        window.location.href = "/account/reset-password/?do=verifyKey&email=" + window.btoa($('#login_entry').val());
+    });
 </script>
 
 

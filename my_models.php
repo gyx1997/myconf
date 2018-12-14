@@ -19,7 +19,7 @@
  * @property mUser $mUser
  * @property mConfMember $mConfMember
  * @property mPaper $mPaper
- * @property mScholarInfo $mScholarInfo
+ * @property mScholar $mScholar
  * 下面是微服务模型
  * @property sConference $sConference
  * @property sAttachment $sAttachment

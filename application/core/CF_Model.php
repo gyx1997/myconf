@@ -97,8 +97,9 @@ class CF_Model extends CI_Model
      * @param string $order_field
      * @param string $order_direction
      * @return array
+     * @throws DbNotFoundException
      */
-    protected function _fetch_first($where_segment_array = array(), $order_field = '', $order_direction = '')
+    protected function _fetch_first(array $where_segment_array = array(), string $order_field = '', string $order_direction = ''): array
     {
         $this->_pack_query_args(
             $where_segment_array,
@@ -109,7 +110,10 @@ class CF_Model extends CI_Model
         );
         $query_result = $this->db->get($this->_table());
         $result = $query_result->row_array();
-        return empty($result) ? array() : $result;
+        if (empty($result)) {
+            throw new DbNotFoundException();
+        }
+        return $result;
     }
 
     /**
@@ -160,5 +164,6 @@ class CF_Service extends CI_Model
     public function __construct()
     {
         parent::__construct();
+        $this->load->library('session');
     }
 }
