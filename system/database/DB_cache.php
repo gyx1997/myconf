@@ -38,9 +38,8 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Database Cache Class
- *
- * @category    Database
+ * DataTableManager Cache Class
+ * @category    DataTableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -55,11 +54,9 @@ class CI_DB_Cache
     public $CI;
 
     /**
-     * Database object
-     *
+     * DataTableManager object
      * Allows passing of DB object so that multiple database connections
      * and returned DB objects can be supported.
-     *
      * @var    object
      */
     public $db;

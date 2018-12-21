@@ -39,10 +39,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Postgre Forge Class
- *
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    Database
+ * @category    DataTableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -77,8 +76,7 @@ class CI_DB_postgre_forge extends CI_DB_forge
 
     /**
      * Class constructor
-     *
-     * @param    object &$db Database object
+     * @param    object &$db DataTableManager object
      * @return    void
      */
     public function __construct(&$db)

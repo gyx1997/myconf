@@ -38,15 +38,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Firebird/Interbase Database Adapter Class
- *
+ * Firebird/Interbase DataTableManager Adapter Class
  * Note: _DB is an extender class that the app controller
  * creates dynamically based on whether the query builder
  * class is being used or not.
- *
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    Database
+ * @category    DataTableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -54,8 +52,7 @@ class CI_DB_ibase_driver extends CI_DB
 {
 
     /**
-     * Database driver
-     *
+     * DataTableManager driver
      * @var    string
      */
     public $dbdriver = 'ibase';
@@ -352,8 +349,7 @@ class CI_DB_ibase_driver extends CI_DB
     // --------------------------------------------------------------------
 
     /**
-     * Database version number
-     *
+     * DataTableManager version number
      * @return    string
      */
     public function version()

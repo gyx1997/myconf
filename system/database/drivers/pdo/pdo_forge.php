@@ -39,10 +39,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * PDO Forge Class
- *
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    Database
+ * @category    DataTableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/database/
  */

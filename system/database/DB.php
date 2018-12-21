@@ -39,11 +39,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Initialize the database
- *
- * @category    Database
+ * @category    DataTableManager
  * @author    EllisLab Dev Team
  * @link    https://codeigniter.com/user_guide/database/
- *
  * @param    string|string[] $params
  * @param    bool $query_builder_override
  *                Determines if query builder should be used or not
@@ -92,7 +90,7 @@ function &DB($params = '', $query_builder_override = NULL)
     } elseif (is_string($params)) {
         /**
          * Parse the URL from the DSN string
-         * Database settings can be passed as discreet
+         * DataTableManager settings can be passed as discreet
          * parameters or as a data source name in the first
          * parameter. DSNs must have this prototype:
          * $dsn = 'driver://username:password@hostname/database';

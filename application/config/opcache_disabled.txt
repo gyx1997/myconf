@@ -1,1 +1,1 @@
-F:/csqrwc_git/application/cache/data
+F:/myconf/application/cache/data

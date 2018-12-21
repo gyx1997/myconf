@@ -38,15 +38,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * PDO IBM DB2 Database Adapter Class
- *
+ * PDO IBM DB2 DataTableManager Adapter Class
  * Note: _DB is an extender class that the app controller
  * creates dynamically based on whether the query builder
  * class is being used or not.
- *
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    Database
+ * @category    DataTableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */

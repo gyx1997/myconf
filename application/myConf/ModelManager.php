@@ -12,9 +12,9 @@ namespace myConf;
  * Class ModelManager 模型管理器
  * @package myConf
  * @property-read \myConf\Models\User $User
- * @property-read \myConf\Models\Scholar $Scholar
+ * @property-read \myConf\Models\Scholars $Scholar
  * @property-read \myConf\Models\Config $Config
- * @property-read \myConf\Models\Document $Document
+ * @property-read \myConf\Models\Documents $Document
  * @property-read \myConf\Models\Conference $Conference
  * @property-read \myConf\Models\Category $Category
  * @property-read \myConf\Models\ConfMember $ConfMember
@@ -79,7 +79,7 @@ class ModelManager
             return;
         }
         $this->_db->trans_rollback();
-        throw new \myConf\Exceptions\DbTransactionException('DB_TRANS_ERROR', 'Database transaction exception. Closest SQL: ' . $this->_db->last_query() . '  .', 10002);
+        throw new \myConf\Exceptions\DbTransactionException('DB_TRANS_ERROR', 'DataTableManager transaction exception. Closest SQL: ' . $this->_db->last_query() . '  .', 10002);
     }
 
     /**

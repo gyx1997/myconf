@@ -39,12 +39,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Query Builder Class
- *
  * This is the platform-independent base Query Builder implementation class.
- *
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    Database
+ * @category    DataTableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */

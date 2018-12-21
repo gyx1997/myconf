@@ -59,7 +59,7 @@ class BaseController
      */
     protected $_url_redirect = '';
     /**
-     * @var ResponseManager
+     * @var Response
      */
     private $_response_manager;
     private $_service_manager;

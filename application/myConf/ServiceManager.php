@@ -15,20 +15,14 @@ namespace myConf;
  * @property-read \myConf\Services\Account $Account
  * @property-read \myConf\Services\Config $Config
  * @property-read \myConf\Services\Conference $Conference
+ * @property-read \myConf\Services\ConferenceMember $ConferenceMember
  */
 class ServiceManager
 {
-    private $_services = array();
-    private $_loaded_count = 0;
-
     /**
-     * ServiceManager constructor.
+     * @var array 当前加载的服务
      */
-    public function __construct()
-    {
-        $CI = &get_instance();
-        $this->_db = $CI->db;
-    }
+    private $_services = array();
 
     /**
      * 返回指定的微服务实例对象（类名大小写敏感）
@@ -40,7 +34,6 @@ class ServiceManager
         if (!isset($this->_services[$service_name])) {
             $class_name = '\\myConf\\Services\\' . $service_name;
             $this->_services[$service_name] = new $class_name();
-            $this->_loaded_count++;
         }
         return $this->_services[$service_name];
     }

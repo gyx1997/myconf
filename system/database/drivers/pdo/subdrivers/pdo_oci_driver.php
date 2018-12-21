@@ -38,15 +38,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * PDO Oracle Database Adapter Class
- *
+ * PDO Oracle DataTableManager Adapter Class
  * Note: _DB is an extender class that the app controller
  * creates dynamically based on whether the query builder
  * class is being used or not.
- *
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    Database
+ * @category    DataTableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -284,8 +282,7 @@ class CI_DB_pdo_oci_driver extends CI_DB_pdo_driver
     // --------------------------------------------------------------------
 
     /**
-     * Database version number
-     *
+     * DataTableManager version number
      * @return    string
      */
     public function version()

@@ -6,7 +6,7 @@ namespace myConf;
 class Request
 {
     /**
-     * @var ResponseManager $_response 响应管理器
+     * @var Response $_response 响应管理器
      */
     private $_response;
     /**
@@ -21,7 +21,7 @@ class Request
         //返回变量
         $ret = 0;
         //加载输出响应类
-        $this->_response = new \myConf\ResponseManager();
+        $this->_response = new \myConf\Response();
         //使用实例化的CI核心类处理URL,为加载核心控制器模块做准备
         $CI = &get_instance();
         $this->_ajax = $CI->input->get('ajax') === 'true';

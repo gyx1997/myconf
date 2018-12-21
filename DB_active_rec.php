@@ -41,15 +41,12 @@
 
 /**
  * Active Record Class
- *
  * This is the platform-independent base Active Record implementation class.
- *
  * @package        CodeIgniter
  * @subpackage     Drivers
- * @category       Database
+ * @category       DataTableManager
  * @author         ExpressionEngine Dev Team
  * @link           http://codeigniter.com/user_guide/database/
- *
  * @method      int insert_id() insert_id() The insert ID number when performing database inserts.
  * @method      int affected_rows() affected_rows() The number of affected rows, when doing "write" type queries (insert, update, etc.).
  * @method      int count_all() count_all(string $table) Determine the number of rows in a particular table.

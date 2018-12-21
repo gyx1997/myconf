@@ -39,10 +39,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * MySQL Result Class
- *
  * This class extends the parent result class: CI_DB_result
- *
- * @category    Database
+ * @category    DataTableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */

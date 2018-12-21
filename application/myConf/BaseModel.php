@@ -1,51 +1,29 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: 52297
- * Date: 2018/12/15
- * Time: 14:21
- */
+
 
 namespace myConf;
-
 
 class BaseModel
 {
     /**
-     * @var \CI_Controller 基础CI框架类
+     * @var \myConf\DataCacheManager 缓存操作对象实例
      */
-    private $CI;
+    private $_cache_manager;
     /**
-     * @var \CI_DB_active_record CI数据库接口
+     * @var \myConf\DataTableManager 数据表操作对象实例
      */
-    protected $db;
-    /**
-     * @var string 数据表名
-     */
-    protected $_table_name = '';
-    /**
-     * @var string 数据表前缀
-     */
-    protected $_table_prefix = 'myconf';
-    /**
-     * @var string 主键名
-     */
-    protected $_pk = '';
-
-    protected $_cache_manager;
-
+    private $_data_table;
     /**
      * myConf_BaseModel constructor.
      */
     public function __construct()
     {
-        $this->CI = &get_instance();
-        $this->db = $this->CI->db;
         $this->_cache_manager = new DataCacheManager(get_called_class());
+        $this->_data_table = new DataTableManager();
     }
 
     /**
-     * 缓存操作器
+     * 缓存操作对象
      * @return DataCacheManager
      */
     public function cache(): \myConf\DataCacheManager
@@ -54,171 +32,10 @@ class BaseModel
     }
 
     /**
-     * 根据指定的Where条件组合判断数据表的记录是否存在
-     * @param array $where_segment_array
-     * @return bool
+     * 数据表操作对象
+     * @return \myConf\DataTableManager
      */
-    protected function _exists(array $where_segment_array): bool
-    {
-        foreach ($where_segment_array as $field => $value) {
-            $this->db->where($field, $value);
-        }
-        $this->db->select('COUNT(*)');
-        $query = $this->db->get($this->_table());
-        $result = $query->row_array();
-        return intval($result['COUNT(*)']) === 1;
-    }
-
-    /**
-     * 得到当前Model的数据表
-     * @return string
-     */
-    protected function _table(): string
-    {
-        return $this->_table_prefix . '_' . $this->_table_name;
-    }
-
-    /**
-     * 增加表前缀得到完整的表明
-     * @param string $table_name
-     * @return string
-     */
-    public function make_table(string $table_name): string
-    {
-        return $this->_table_prefix . '_' . $table_name;
-    }
-
-    /**
-     * 从数据表中获取全部数据
-     * @param array $where_segment_array
-     * @param string $order_field
-     * @param string $order_direction
-     * @param int $start
-     * @param int $limit
-     * @return array
-     */
-    protected function _fetch_all(array $where_segment_array = array(), string $order_field = '', string $order_direction = '', int $start = 0, int $limit = 0): array
-    {
-        $this->_pack_query_args(
-            $where_segment_array,
-            $order_field,
-            $order_direction,
-            $start,
-            $limit
-        );
-        $query_result = $this->db->get($this->_table());
-        if (empty($query_result->result_array())) {
-            return array();
-        }
-        return $query_result->result_array();
-    }
-
-    /**
-     * 包装查询参数
-     * @param array $where_segment_array
-     * @param string $order_field
-     * @param string $order_direction
-     * @param int $start
-     * @param int $limit
-     */
-    private function _pack_query_args(array $where_segment_array = array(), string $order_field = '', string $order_direction = '', int $start = 0, int $limit = 0): void
-    {
-        foreach ($where_segment_array as $field => $value) {
-            $this->db->where($field, $value);
-        }
-        $order_field !== '' && $order_direction !== '' && $this->db->order_by($order_field, $order_direction);
-        $limit !== 0 && $this->db->limit($limit, $start);
-        return;
-    }
-
-    /**
-     * 从数据库中取一条数据
-     * @param array $where_segment_array
-     * @param string $order_field
-     * @param string $order_direction
-     * @return array
-     */
-    protected function _fetch_first(array $where_segment_array = array(), string $order_field = '', string $order_direction = ''): array
-    {
-        $this->_pack_query_args(
-            $where_segment_array,
-            $order_field,
-            $order_direction,
-            0,
-            1
-        );
-        $query_result = $this->db->get($this->_table());
-        if (empty($query_result->row_array())) {
-            return array();
-        }
-        return $query_result->row_array();
-    }
-
-    /**
-     * 使用原始的数据库查询语句查询并取所有记录。
-     * @param string $query_str
-     * @param array $parameters
-     * @return array
-     */
-    protected function _fetch_all_raw(string $query_str, array $parameters = array()): array
-    {
-        $qr = $this->db->query($query_str, $parameters);
-        if (empty($qr->result_array())) {
-            return array();
-        }
-        return $qr->result_array();
-    }
-
-    /**
-     * @param $query_str
-     * @param array $parameters
-     * @return array
-     */
-    protected function _fetch_first_raw($query_str, $parameters = array()): array
-    {
-        $qr = $this->db->query($query_str, $parameters);
-        if (empty($qr->row_array())) {
-            return array();
-        }
-        return $qr->row_array();
-    }
-
-    /**
-     * 根据主键获取数据
-     * @param string $pk_val
-     * @return array
-     */
-    public function get(string $pk_val): array
-    {
-        $this->db->where($this->_pk, $pk_val);
-        $query_result = $this->db->get($this->_table(), 1);
-        if (empty($query_result->row_array())) {
-            return array();
-        }
-        return $query_result->row_array();
-    }
-
-    /**
-     * 判断当前主键的记录是否存在
-     * @param string $pk_val
-     * @return bool
-     */
-    public function exist(string $pk_val): bool
-    {
-        $this->db->where($this->_pk, $pk_val);
-        $this->db->select('COUNT(1)');
-        $query_result = $this->db->get($this->_table(), 1);
-        return intval($query_result->row_array()['COUNT(1)']) !== 0;
-    }
-
-    /**
-     * 执行update操作，根据主键
-     * @param string $pk_val
-     * @param array $data
-     */
-    public function set(string $pk_val, array $data = array()): void
-    {
-        $this->db->where($this->_pk, $pk_val);
-        $this->db->update($this->_table(), $data);
+    public function table() : \myConf\DataTableManager {
+        return $this->_data_table;
     }
 }

@@ -31,9 +31,10 @@ class ConfMember extends \myConf\BaseModel
     {
         //NOTE:使用连表查询，写死了表明，后面需要注意
         //NOTE:过滤角色信息，请在上一层处理，因为返回的是数组展开的字符串
+        $scholar_table = $this->make_table('scholars');
         $user_table = $this->make_table('users');
         $this_table = $this->_table();
-        $sql = "SELECT $this_table.user_id, $this_table.conference_id, $this_table.user_role, $user_table.user_name, $user_table.user_email FROM $this_table INNER JOIN $user_table ON $user_table.user_id = $this_table.user_id WHERE $user_table.user_id = $this_table.user_id AND $this_table.conference_id = " . strval($conference_id);
+        $sql = "SELECT $scholar_table.scholar_first_name as first_name, $scholar_table.scholar_last_name as last_name, $this_table.user_id, $this_table.conference_id, $this_table.user_role, $user_table.user_name, $user_table.user_email FROM $this_table INNER JOIN $user_table ON $user_table.user_id = $this_table.user_id INNER JOIN $scholar_table ON $scholar_table.scholar_email = $user_table.user_email WHERE $user_table.user_id = $this_table.user_id AND $this_table.conference_id = " . strval($conference_id) . " ORDER BY $this_table.id ASC";
         $data = $this->_fetch_all_raw($sql);
         foreach ($data as &$item) {
             $item['user_roles'] = explode(',', $item['user_role']);

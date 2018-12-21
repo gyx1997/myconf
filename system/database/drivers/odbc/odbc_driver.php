@@ -38,15 +38,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * ODBC Database Adapter Class
- *
+ * ODBC DataTableManager Adapter Class
  * Note: _DB is an extender class that the app controller
  * creates dynamically based on whether the query builder
  * class is being used or not.
- *
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    Database
+ * @category    DataTableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -54,15 +52,13 @@ class CI_DB_odbc_driver extends CI_DB_driver
 {
 
     /**
-     * Database driver
-     *
+     * DataTableManager driver
      * @var    string
      */
     public $dbdriver = 'odbc';
 
     /**
-     * Database schema
-     *
+     * DataTableManager schema
      * @var    string
      */
     public $schema = 'public';

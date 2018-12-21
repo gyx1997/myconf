@@ -38,9 +38,8 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Database Forge Class
- *
- * @category    Database
+ * DataTableManager Forge Class
+ * @category    DataTableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -66,14 +65,12 @@ abstract class CI_DB_forge
      */
     public $primary_keys = array();
     /**
-     * Database character set
-     *
+     * DataTableManager character set
      * @var    string
      */
     public $db_char_set = '';
     /**
-     * Database object
-     *
+     * DataTableManager object
      * @var    object
      */
     protected $db;
@@ -156,14 +153,13 @@ abstract class CI_DB_forge
 
     /**
      * Class constructor
-     *
-     * @param    object &$db Database object
+     * @param    object &$db DataTableManager object
      * @return    void
      */
     public function __construct(&$db)
     {
         $this->db =& $db;
-        log_message('info', 'Database Forge Class Initialized');
+        log_message('info', 'DataTableManager Forge Class Initialized');
     }
 
     // --------------------------------------------------------------------

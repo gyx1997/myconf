@@ -8,7 +8,7 @@
 
 namespace myConf;
 
-class ResponseManager
+class Response
 {
     /**
      * @var array 需要输出的变量
@@ -57,6 +57,7 @@ class ResponseManager
                 'status' => strval($code) . ' ' . HTTP_STATUS_CODE[$code],
                 'date' => date('M jS, Y', time())
             );
+            http_response_code($code);
             \myConf\Libraries\NativeTpl::render('/Common/Error', array_merge($err_data, $this->_vars));
         } catch (\Throwable $e) {
             echo 'Fatal error.';

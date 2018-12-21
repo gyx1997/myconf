@@ -39,12 +39,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * HTML Table Generating Class
- *
  * Lets you create tables manually or from database result objects, or arrays.
- *
  * @package        CodeIgniter
  * @subpackage    Libraries
- * @category    HTML Tables
+ * @category    HTML TableManager
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/libraries/table.html
  */
@@ -388,8 +386,7 @@ class CI_Table
 
     /**
      * Set table data from a database result object
-     *
-     * @param    CI_DB_result $object Database result object
+     * @param    CI_DB_result $object DataTableManager result object
      * @return    void
      */
     protected function _set_from_db_result($object)

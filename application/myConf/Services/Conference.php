@@ -341,6 +341,6 @@ class Conference extends \myConf\BaseService
      */
     private function _refresh_category_list_cache(int $conference_id): void
     {
-        $this->models()->Category->get_categories_from_conference($conference_id, TRUE, true);
+        $this->models()->Category->get_categories_from_conference($conference_id, true, true);
     }
 }

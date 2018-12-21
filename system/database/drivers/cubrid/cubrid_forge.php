@@ -39,8 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * CUBRID Forge Class
- *
- * @category    Database
+ * @category    DataTableManager
  * @author        Esen Sagynov
  * @link        https://codeigniter.com/user_guide/database/
  */

@@ -46,7 +46,7 @@ class Document extends \myConf\BaseModel
     /**
      * 根据指定的document_id获得document信息
      * @deprecated
-     * @see \myConf\Models\Document::get()
+     * @see \myConf\Models\Documents::get()
      * @param int $document_id
      * @return array
      */
@@ -58,7 +58,7 @@ class Document extends \myConf\BaseModel
     /**
      * 更新document
      * @deprecated
-     * @see \myConf\Models\Document::set()
+     * @see \myConf\Models\Documents::set()
      * @param int $document_id
      * @param string $document_title
      * @param string $document_html

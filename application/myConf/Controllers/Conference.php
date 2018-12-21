@@ -274,7 +274,7 @@ class Conference extends \myConf\BaseController
             case 'participant':
                 {
                     switch ($this->_do) {
-                        case 'get':
+                        case 'getAll':
                             {
                                 //处理输入
                                 $page = $this->input->get('page');
@@ -287,45 +287,8 @@ class Conference extends \myConf\BaseController
                                         $user_role_restrict [] = $key;
                                     }
                                 }
-                                $this->services()->ConferenceMember->get_conference_members($this->_conference_id);
-                                $count_per_page = 10;
-                                $participants_data_set = array();
-                                $count = 0;
-                                //分页显示交给前端处理
-                                $participants = $this->services()->ConfMember->get_conference_members($this->_conference_id, $page, $count_per_page);
-                                foreach ($participants as $participant) {
-                                    //过滤信息
-                                    $user_info = $this->mUser->get_user_by_user_id($participant['user_id']);
-                                    if ($user_name_restrict != '' && strpos($user_info['user_name'], $user_name_restrict) === FALSE) {
-                                        continue;
-                                    }
-                                    if ($user_email_restrict != '' && $user_info['user_email'] != $user_email_restrict) {
-                                        continue;
-                                    }
-                                    $continue = FALSE;
-                                    foreach ($user_role_restrict as $role) {
-                                        if (strpos($participant['user_role'], $role) === FALSE) {
-                                            $continue = TRUE;
-                                            break;
-                                        }
-                                    }
-                                    if ($continue == TRUE) {
-                                        continue;
-                                    }
-                                    //添加信息
-                                    $participant['user_name'] = $user_info['user_name'];
-                                    $participant['user_roles'] = explode(',', $participant['user_role']);
-                                    $participant['user_role'] = NULL;
-                                    $participants_data_set [] = $participant;
-                                    $count++;
-                                }
-                                $this->_exit_with_json(
-                                    array(
-                                        'status' => 'SUCCESS',
-                                        'data' => $participants_data_set,
-                                        'page_count' => ceil($count / $count_per_page)
-                                    )
-                                );
+                                $members = $this->services()->ConferenceMember->get_conference_members($this->_conference_id, $user_role_restrict, $user_name_restrict, $user_email_restrict);
+                                $this->add_output_variables(array('status' => 'SUCCESS', 'data' => $members, 'count' => count($members)), OUTPUT_VAR_JSON_ONLY);
                                 break;
                             }
                         case 'toggleRole':
@@ -339,26 +302,22 @@ class Conference extends \myConf\BaseController
                                         $this->mConfMember->add_role_to_member($user_id, $this->_conference_id, $role);
                                     }
                                 }
-                                $this->_exit_with_json(array('status' => 'SUCCESS'));
+                                $this->add_output_variables(array('status' => 'SUCCESS'), OUTPUT_VAR_JSON_ONLY);
+                                break;
+                            }
+                        case 'remove':
+                            {
+                                $user_id = $this->input->get('uid');
+                                $this->services()->ConferenceMember;
+                            }
+                        case '':
+                            {
+                                //显示页面
                                 break;
                             }
                         default:
                             {
-                                $page = $this->input->get('page');
-                                $page == '' ? $page = 0 : $page = intval($page) - 1;
-                                $participants = $this->mConfMember->get_conference_members($this->_conference_id, $page);
-                                foreach ($participants as &$participant) {
-                                    $user_info = $this->mUser->get_user_by_user_id($participant['user_id']);
-                                    $participant['user_name'] = $user_info['user_name'];
-                                    $participant['user_roles'] = explode(',', $participant['user_role']);
-                                }
-                                $this->_render(
-                                    'conference/management/participant',
-                                    'Participants',
-                                    array(
-                                        'participants' => $participants
-                                    )
-                                );
+                                throw new HttpStatusException(400, 'UNKNOWN_DO_PARAM', 'The request parameters are invalid.');
                             }
                     }
 

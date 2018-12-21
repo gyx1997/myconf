@@ -38,8 +38,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * CodeIgniter Session Database Driver
- *
+ * CodeIgniter Session DataTableManager Driver
  * @package    CodeIgniter
  * @subpackage    Libraries
  * @category    Sessions
