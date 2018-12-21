@@ -45,11 +45,11 @@ class account extends CF_Controller
             default:
                 {
                     $this->_has_login() || $this->_render(
-                            'account/login',
-                            'Login',
-                            array('redirect' => base64_encode($this->_url_redirect)
-                            )
-                        );
+                        'account/login',
+                        'Login',
+                        array('redirect' => base64_encode($this->_url_redirect)
+                        )
+                    );
                     break;
                 }
         }

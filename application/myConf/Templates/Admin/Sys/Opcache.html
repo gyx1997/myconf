@@ -1,0 +1,95 @@
+<?php
+    defined('BASEPATH') OR die('No direct script access allowed');
+    ?>
+<div style="padding : 20px;">
+    <div>
+        <h1>myConf Administrator Panel</h1>
+    </div>
+    <div style="padding:15px;">
+        <a href="/admin/">Home</a>
+        <a href="/admin/conf/">Conference Management</a>
+        <a href="/admin/user/">User Management</a>
+        <a href="/admin/sys/">System Management</a>
+    </div>
+    <div style="padding:15px;">
+        Operations in System Management:
+        <a href="/admin/sys/files/">Uploaded Files</a>
+        <a href="/admin/sys/template/">Template</a>
+        <a href="/admin/sys/opcache/">PHP OpCache</a>
+        <a href="/admin/sys/dcache/">Data Cache</a>
+    </div>
+    <div style="padding: 15px; border: 1px solid gray;">
+        <h3>Operations</h3>
+        <a href="/admin/sys/opcache/?do=reset" ?>Reset OpCache</a>
+    </div>
+    <br/>
+    <div style="padding: 15px; border: 1px solid gray;">
+        <h3>Status</h3>
+        <ul>
+            <?php
+            $conf = opcache_get_configuration();
+            $total_mem = intval($conf['directives']['opcache.memory_consumption']);
+            $info = opcache_get_status();
+            $used_mem = $info['memory_usage']['used_memory'];
+            $wasted_mem = $info['memory_usage']['wasted_memory'];
+            $strings = $info['interned_strings_usage']['number_of_strings'];
+            echo "<li>opCache Hit Rate: " . sprintf('%.2f', $info['opcache_statistics']['opcache_hit_rate']) . " %</li>
+            ";
+            echo "
+            <li>opCache Total Available Memory: " . sprintf('%.2f', ($total_mem / 1048576)) . " MiB</li>
+            ";
+            echo "
+            <li>opCache Used Memory: " . sprintf('%.2f', ($used_mem / 1048576)) . " MiB</li>
+            ";
+            echo "
+            <li>opCache Used Percentage: " . sprintf('%.2f', ($used_mem / $total_mem) * 100) . " %</li>
+            ";
+            echo "
+            <li>opCache Wasted Memory: " . sprintf('%.2f', ($wasted_mem / 1048576)) . " MiB</li>
+            ";
+            echo "
+            <li>opCache Internal String Cached: " . $strings . "</li>
+            ";
+            ?>
+        </ul>
+    </div>
+    <br/>
+    <div style="padding: 15px; border: 1px solid gray;">
+        <h3>Cached Files</h3>
+        <table>
+            <tr>
+                <td style="width:45%;">
+                    Filename
+                </td>
+                <td style="width:3%">
+                    Hits
+                </td>
+                <td style="width:3%">
+                    Memory
+                </td>
+                <td style="width:8%">
+                    Time
+                </td>
+            </tr>
+            <?php
+            foreach($info['scripts'] as $k=>$s) {
+            echo '
+            <tr>
+                <td>';
+                    echo($k);
+                    echo '
+                <td/>
+                <td>';
+                    echo $s['hits'] . '
+                </td>
+                <td>' . 'Mem : ' . sprintf('%.2f ', $s['memory_consumption'] / 1024) . ' KiB';
+                    echo '
+                </td>
+                <td>' . $s['last_used'] . '</td>
+            </tr>
+            ';
+            }
+            ?>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+<?php
+    defined('BASEPATH') OR die('No direct script access allowed');
+    ?>
+<div style="padding : 20px;">
+    <div>
+        <h1>myConf Administrator Panel</h1>
+    </div>
+    <div style="padding:15px;">
+        <a href="/admin/">Home</a>
+        <a href="/admin/conf/">Conference Management</a>
+        <a href="/admin/user/">User Management</a>
+        <a href="/admin/sys/">System Management</a>
+    </div>
+    <div style="padding: 15px; border: 1px solid gray;">
+        <h3>Application Information</h3>
+        <ul>
+            <li> Version: myConf 2019.1</li>
+            <li> Framework: Codeigniter <?php echo CI_VERSION; ?></li>
+            <li> Application Directory: <?php echo APPPATH; ?></li>
+        </ul>
+        <h3>PHP</h3>
+        <ul>
+            <li> PHP Version: <?php echo phpversion(); ?></li>
+            <li> Environment: <?php echo PHP_OS; ?></li>
+            <li> Server Software: <?php echo $_SERVER['SERVER_SOFTWARE']; ?></li>
+        </ul>
+    </div>
+</div>

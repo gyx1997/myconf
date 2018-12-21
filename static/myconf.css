@@ -1,3 +1,13 @@
+body, button, input, select, textarea, h1, h2, h3, h4, h5, h6 {
+    font-family: Tahoma, Verdana, Arial, "Microsoft YaHei UI", sans-serif;
+}
+
+.header-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+}
+
 .container-main {
     margin: 0 auto;
 
@@ -72,3 +82,4 @@ p.footer {
     width: 100%;
     height: 150px;
 }
+

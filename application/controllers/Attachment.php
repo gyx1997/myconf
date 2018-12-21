@@ -78,7 +78,7 @@ class attachment extends CF_Controller
         } catch (\sAttachment\AttachmentIdNotFoundException $e) {
             show_error('404 Not Found. The attachment you requested was not found, or it has been deleted.', 404);
         } catch (\lAttach\AttachReadException $e) {
-            show_error('404 Not Found. The attachment you requested was not found, or it has been deleted.', 404);
+            show_error('404 Not Found. The attachment file has been deleted from the server.', 404);
         }
     }
 }

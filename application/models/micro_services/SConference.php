@@ -16,8 +16,8 @@ class sConference extends CF_Service
     /**
      * @param $conference_id
      * @param $category_id
-     * @return sConference\sConferenceHomepageRet
-     * @throws FinalDisplayedException
+     * @return \sConference\sConferenceHomepageRet
+     * @throws \sConference\CategoryNotFoundException
      */
     public function homepage($conference_id, $category_id)
     {
@@ -25,7 +25,7 @@ class sConference extends CF_Service
             $category_id = $this->mCategory->get_first_category_id($conference_id);
         } else {
             if (!$this->mCategory->has_category($category_id)) {
-                throw new FinalDisplayedException('This category does not exists or has been deleted.', 404);
+                throw new \sConference\CategoryNotFoundException('This category does not exists or has been deleted.');
             }
         }
         $categories = $this->mCategory->get_all_categories($conference_id, TRUE);

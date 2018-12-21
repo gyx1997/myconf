@@ -1,0 +1,24 @@
+{{@eval}}
+defined('BASEPATH') OR exit('No direct script access allowed');
+$base_url = '/conference/' . $conference['conference_url'] . '/management';
+$columns = array(
+'overview' => array('Overview', 'fa fa-edit fa-fw'),
+'category' => array('Categories', 'fa fa-server fa-fw'),
+'participant' => array('Participants', 'fa fa-users fa-fw'),
+'attachment' => array('Attachments', 'fa fa-paperclip fa-fw')
+);
+{{@end}}
+<div class="col-md-2 content-lf">
+    {{@for $item in $columns key $action_name}}
+    {{@if $action_name == $action}}
+    <span class="btn btn-block btn-light active content-lf-btn" style="text-align: left">
+                <span class="{{$item[1]}}"></span>&nbsp;&nbsp;{{$item[0]}}
+             </span>
+    {{@else}}
+    <a class="btn btn-block btn-light content-lf-btn" style="text-align: left"
+       href="{{$base_url}}/{{$action_name}}">
+        <span class="{{$item[1]}}"></span>&nbsp;&nbsp;{{$item[0]}}
+    </a>
+    {{@end}}
+    {{@end}}
+</div>

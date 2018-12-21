@@ -158,7 +158,7 @@ class Conference extends CF_Controller
             }
         }
         $this->_login_redirect();
-        show_error('You do not have the permission to do this action.', 403);
+        show_error('403 Forbidden<br>You do not have the permission to do this action.', 403);
         return FALSE;
     }
 
@@ -167,32 +167,32 @@ class Conference extends CF_Controller
      */
     public function index()
     {
-            switch ($this->_method) {
-                case 'paper-submit':
-                    {
-                        $this->_paper_submit();
-                        break;
-                    }
-                case 'management':
-                    {
-                        $this->_management();
-                        break;
-                    }
-                case 'member':
-                    {
-                        $this->_member();
-                        break;
-                    }
-                case 'paper-review':
-                    {
-                        $this->_paper_review();
-                        break;
-                    }
-                default:
-                    {
-                        $this->_default();
-                    }
-            }
+        switch ($this->_method) {
+            case 'paper-submit':
+                {
+                    $this->_paper_submit();
+                    break;
+                }
+            case 'management':
+                {
+                    $this->_management();
+                    break;
+                }
+            case 'member':
+                {
+                    $this->_member();
+                    break;
+                }
+            case 'paper-review':
+                {
+                    $this->_paper_review();
+                    break;
+                }
+            default:
+                {
+                    $this->_default();
+                }
+        }
     }
 
     /**
@@ -285,8 +285,9 @@ class Conference extends CF_Controller
      * @param string $title
      * @param array $arguments
      */
-    protected function _render($body_view, $title = '', $arguments = array())
+    protected function _render(string $body_view, string $title = '', array $arguments = array()): void
     {
+
         parent::_render(
             $body_view,
             $title,
@@ -703,21 +704,27 @@ class Conference extends CF_Controller
      */
     private function _default()
     {
-        //处理输入
-        $category_id = $this->input->get('cid');
-        $category_id = $category_id == '' ? 0 : intval($category_id);
-        //进入业务逻辑
-        $data = $this->sConference->homepage($this->_conference_id, $category_id);
-        $this->_render(
-            'conference/show',
-            $this->_conference_data['conference_name'],
-            array(
-                'conference' => $this->_conference_data,
-                'category_list' => $data->category_list,
-                'active_category_id' => $category_id,
-                'active_category_document_id' => $data->document_id,
-                'active_document_content' => $data->document_html,
-            )
-        );
+        try {
+            //处理输入
+            $category_id = $this->input->get('cid');
+            $category_id = $category_id == '' ? 0 : intval($category_id);
+            //进入业务逻辑
+
+            $data = $this->sConference->homepage($this->_conference_id, $category_id);
+
+            $this->_render(
+                'conference/show',
+                $this->_conference_data['conference_name'],
+                array(
+                    'conference' => $this->_conference_data,
+                    'category_list' => $data->category_list,
+                    'active_category_id' => $category_id,
+                    'active_category_document_id' => $data->document_id,
+                    'active_document_content' => $data->document_html,
+                )
+            );
+        } catch (\sConference\CategoryNotFoundException $e) {
+            $this->_error_page(404, 'The category you are visiting is not found, or it might have been deleted.');
+        }
     }
 }

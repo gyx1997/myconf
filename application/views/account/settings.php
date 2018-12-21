@@ -17,25 +17,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <div class="form-group">
                                 <lable for="account_name"> User Name</lable>
                                 <input type="text" class="form-control" id="account_name" name="account_name"
-                                       disabled="disabled" value="<?php echo $login_user['user_name']; ?>"/>
+                                       disabled="disabled" value="<?php echo $user_name; ?>"/>
                             </div>
                             <div class="row mt-3"></div>
                             <div class="form-group">
                                 <lable for="account_email">User Email&nbsp;&nbsp;&nbsp;<span class="badge badge-info">Can not be changed until next version.</span>
                                 </lable>
                                 <input type="text" class="form-control" id="account_email" name="account_email"
-                                       disabled="disabled" value="<?php echo $login_user['user_email']; ?>"/>
+                                       disabled="disabled" value="<?php echo $email; ?>"/>
                             </div>
+                            <!--
                             <div class="row mt-3"></div>
                             <div class="form-group">
                                 <label for="account_org"> Organization </label>
                                 <input type="text" class="form-control" id="account_org" name="account_org"
                                        placeholder="Your Organization"
-                                       value="<?php echo $login_user['organization']; ?>"/>
-                            </div>
+                                       value="<?php echo $organization; ?>"/>
+                            </div>-->
                             <div class="row mt-3"></div>
                             <div class="form-group">
-                                <button type="submit" class="form-control">Submit</button>
+                                <button type="submit" class="form-control" disabled="disabled">Submit</button>
                             </div>
                         </div>
                     </form>
@@ -65,7 +66,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             </div>
                             <div class="row mt-3"></div>
                             <div class="form-group">
-                                <img alt="Avatar" src="<?php echo '/data/avatar/' . $login_user['avatar']; ?>"
+                                <img alt="Avatar" src="<?php echo '/data/avatar/' . $avatar; ?>"
                                      style="height:200px; width: 200px;"/>
                             </div>
                         </div>

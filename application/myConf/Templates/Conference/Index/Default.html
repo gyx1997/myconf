@@ -1,0 +1,24 @@
+{{@include /Common/Header}}
+{{@include /Conference/Header}}
+<div class="col-md-2">
+    {{@for $category in $category_list}}
+    {{@if $category['category_id'] != $active_category_id }}
+    <a class="btn btn-block btn-light content-lf-btn"
+       href="/conference/<?php echo $conference['conference_url']; ?>/?cid=<?php echo $category['category_id']; ?>">
+        <?php echo $category['category_title']; ?>
+    </a>
+    {{@else}}
+    <span class="btn btn-block btn-light active content-lf-btn">
+                <?php echo $category['category_title']; ?>
+            </span>
+    {{@end}}
+    {{@end}}
+</div>
+
+<div class="col-md-10 content-rf content-rf-doc">
+    <?php echo $active_document_content; ?>
+</div>
+{{@include /Conference/Footer}}
+{{@include /Common/Footer}}
+
+

@@ -1,0 +1,13 @@
+.status-code {
+    line-height: 24px;
+    font-size: 18px;
+}
+
+.date {
+    float: left;
+}
+
+.performance {
+    float: right;
+    font-size: 10px;
+}

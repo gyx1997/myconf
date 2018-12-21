@@ -8,28 +8,11 @@
  * </code>
  * Where site_model is the model Class
  *
- * ---------------------- Models to Load ----------------------
- * <examples>
- * 下面是基本DB模型
- * @property mAttachment $mAttachment
- * @property mCategory $mCategory
- * @property mConference $mConference
- * @property mConfig $mConfig
- * @property mDocument $mDocument
- * @property mUser $mUser
- * @property mConfMember $mConfMember
- * @property mPaper $mPaper
- * @property mScholar $mScholar
- * 下面是微服务模型
- * @property sConference $sConference
- * @property sAttachment $sAttachment
- * @property sAccount $sAccount
- * 下面是辅助类库
- * @property Attach $attach
- */
-class my_models
-{
-
-}
-
-// End my_models.php
+ *
+ * class my_models
+ * {
+ *
+ * }
+ *
+ * // End my_models.php
+ * */

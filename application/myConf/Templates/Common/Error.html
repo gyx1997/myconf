@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{$title}}</title>
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.0/css/bootstrap-grid.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.0/css/bootstrap-reboot.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/myconf.css" rel="stylesheet">
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="/static/font-awesome/css/awesome-bootstrap-checkbox.css" rel="stylesheet">
+    <link href="/static/myconf.error.css" rel="stylesheet"/>
+
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script type="text/javascript" src="/static/md5.js"></script>
+    <script type="text/javascript" src="/static/jquery.base64.js"></script>
+    <script type="text/javascript" src="/static/bs-table/bootstrap-table.js"></script>
+    <script type="text/javascript" src="/static/bs-table/locale/bootstrap-table-en-US.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="top-blank"></div>
+<div id="container" class="col-md-9 container-main">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="modal-title">Something went wrong...</h4>
+        </div>
+        <div class="card-body">
+            <table>
+                <tr height="100">
+                    <td width="200" style="text-align: center;">
+                        <img src="/static/img/error_head.jpg" width="150" height="150"/>
+                    </td>
+                    <td>
+
+                        <div>
+                            <h5 class="status-code">{{$status}}</h5>
+                            <p> {{$message}} </p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+        {{@eval}}
+        global $start_ts;
+        global $end_ts;
+        $end_ts = (float)microtime(true);
+        $elapsed_time = sprintf("%.2f", $end_ts - $start_ts);
+        $mem_usage = function_exists('memory_get_peak_usage') ? sprintf("%.2f", memory_get_peak_usage() / 1048576) :
+        'Unknown';
+        $CI = &get_instance();
+        $sql_queries = $CI->db->total_queries();
+        log_message('INFO', "$elapsed_time, $mem_usage MiB, $sql_queries queries.");
+        {{@end}}
+        <div class="card-footer">
+            <span class="date">{{$date}}</span><span class="performance">Processed in {{$elapsed_time}} seconds, using {{$mem_usage}} MiB, {{$sql_queries}} queries. Zend(R) Opcache On.</span>
+        </div>
+    </div>
+</div>
+<script>
+    $('#ErrDialog').modal();
+</script>
+

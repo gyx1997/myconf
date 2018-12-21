@@ -6,10 +6,10 @@
  * Date: 2018/11/12
  * Time: 16:47
  */
-class Home extends CF_Controller
+class Home extends CI_Controller
 {
     public function index()
     {
-        header('location:/conference/csqrwc2019/');
+        include APPPATH . 'myConf' . DIRECTORY_SEPARATOR . 'MainExecute.php';
     }
 }

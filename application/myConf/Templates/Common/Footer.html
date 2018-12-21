@@ -1,0 +1,29 @@
+{{@include /Common/Msgbox}}
+{{@eval}}
+global $start_ts;
+global $end_ts;
+$end_ts = (float)microtime(true);
+$elapsed_time = sprintf("%.2f", $end_ts - $start_ts);
+$mem_usage = function_exists('memory_get_peak_usage') ? sprintf("%.2f", memory_get_peak_usage() / 1048576) : 'Unknown';
+$CI = &get_instance();
+$sql_queries = $CI->db->total_queries();
+log_message('INFO', "$elapsed_time, $mem_usage MiB, $sql_queries queries.");
+{{@end}}
+</div>
+<div class="bottom-blank"></div>
+<nav class="navbar navbar-expand-sm bg-light fixed-bottom" role="navigation" style="font-size:80%;">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <span class="navbar-brand" style="font-size:100%;"><?php echo $footer1; ?></span>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+            <li><?php echo $mitbeian ?>&nbsp;&nbsp;&nbsp;&nbsp;</li>
+            <li>Processed in <strong><?php echo $elapsed_time; ?></strong> seconds, using
+                <strong><?php echo $mem_usage; ?></strong> MiB, <strong><?php echo $sql_queries; ?></strong> queries.
+                Zend® Opcache On.
+            </li>
+        </ul>
+    </div>
+</nav>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{{@eval}}
+$tabs = array();
+$conf_url = '/conference/' . $conference['conference_url'];
+{{@end}}
+<div class="page-header" style="text-align: left;">
+    <div class="banner-image" style="background-image: url(/data/attachment/{{$conference['banner_image']}});">
+    </div>
+    <div class="row mt-3"></div>
+</div>
+<div id="body">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link
+            {{@if $tab_page == 'index' }}
+                active disabled
+            {{@end}}"
+               href="/conference/<?php echo $conference['conference_url']; ?>/"><span class="fa fa-home"></span>&nbsp;Home</a>
+        </li>
+
+        {{@if $login_status}}
+        <li class="nav-item">
+            <a class="nav-link <?php if ($tab_page == 'paper-submit') { ?>active disabled<?php } ?>"
+               href="/conference/<?php echo $conference['conference_url']; ?>/paper-submit/"><span
+                    class="fa fa-file-o"></span>&nbsp;Online Paper
+                Submission</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link disabled <?php if ($tab_page == 'downloads') { ?>active disabled<?php } ?>"><span
+                    class="fa fa-download"></span>&nbsp;Downloads</a>
+        </li>
+        {{@end}}
+        <!-- TODO 增加权限判断 -->
+        <?php if ($auth_review || $auth_arrange_review) { ?>
+        <li class="nav-item">
+            <a class="nav-link <?php if ($tab_page == 'paper_submit-review') { ?>active disabled<?php } ?>"
+               href="/conference/<?php echo $conference['conference_url']; ?>/paper-review/">Paper Review</a>
+        </li>
+        <?php } ?>
+        <?php if ($auth_management) { ?>
+        <li class="nav-item">
+            <a class="nav-link <?php if ($tab_page == 'management') { ?>active disabled<?php } ?>"
+               href="/conference/<?php echo $conference['conference_url']; ?>/management/"><span
+                    class="fa fa-cogs"></span>&nbsp;Management</a>
+        </li>
+        <?php } ?>
+
+    </ul>
+    <div class="row mt-2"></div>
+    <div class="col-md-12" style="border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+        <div class="row">

@@ -53,6 +53,11 @@ $route['default_controller'] = 'home';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = TRUE;
 
+$route['(:any)'] = 'home/index';
+$route['(:any)/(:any)'] = 'home/index';
+$route['(:any)/(:any)/(:any)'] = 'home/index';
+$route['(:any)/(:any)/(:any)/(:any)'] = 'home/index';
+
 //应需求，conference第二段URI不对应控制器，所有参数顺移一位
 $route['conference/(:any)'] = 'conference/index';
 $route['conference/(:any)/(:any)'] = 'conference/index/$1/$2';

@@ -1,0 +1,27 @@
+<?php
+    defined('BASEPATH') OR die('No direct script access allowed');
+    ?>
+<div style="padding : 20px;">
+    <div>
+        <h1>myConf Administrator Panel</h1>
+    </div>
+    <div style="padding:15px;">
+        <a href="/admin/">Home</a>
+        <a href="/admin/conf/">Conference Management</a>
+        <a href="/admin/user/">User Management</a>
+        <a href="/admin/sys/">System Management</a>
+    </div>
+    <div style="padding:15px;">
+        Operations in System Management:
+        <a href="/admin/sys/files/">Uploaded Files</a>
+        <a href="/admin/sys/template/">Template</a>
+        <a href="/admin/sys/opcache/">PHP OpCache</a>
+        <a href="/admin/sys/dcache/">Data Cache</a>
+    </div>
+    <div style="padding: 15px; border: 1px solid gray;">
+        <h3>Operation</h3>
+        <ul>
+            <a href="/admin/sys/template/?do=clear">Clear Template Cache</a>
+        </ul>
+    </div>
+</div>

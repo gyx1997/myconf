@@ -36,6 +36,9 @@
  * @filesource
  */
 
+$start_ts = (float)microtime(true);
+$end_ts = $start_ts;
+
 /*
  *---------------------------------------------------------------
  * APPLICATION ENVIRONMENT
