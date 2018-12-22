@@ -9,13 +9,13 @@
 namespace myConf;
 
 /**
- * Class SessionManager Session管理器
+ * Class Session Session管理器
  * @package myConf
  * @property int $user_id 当前登陆用户ID，0为未登录
  * @property int $user_login_time 当前用户登录时间
  * @property string $captcha 当前使用的验证码
  */
-class SessionManager
+class Session
 {
     private $_ci_session;
 

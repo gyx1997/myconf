@@ -11,12 +11,6 @@
     class ConferenceMembers extends \myConf\BaseTable {
 
         /**
-         * 表的字段
-         * @var array
-         */
-        private static $fields = array('id', 'conference_id', 'user_id', 'user_role',);
-
-        /**
          * ConfMember constructor.
          */
         public function __construct() {
@@ -27,7 +21,7 @@
          * 返回主键名。relation table this function for dummy use.
          * @return string
          */
-        public static function primary_key() : string {
+        public function primary_key() : string {
             return 'id';
         }
 
@@ -35,16 +29,8 @@
          * 返回当前表名
          * @return string
          */
-        public static function table() : string {
-            return self::make_table('conference_members');
-        }
-
-        /**
-         * 返回当前表的所有字段
-         * @return array
-         */
-        public static function fields() : array {
-            return self::$fields;
+        public function table() : string {
+            return $this->make_table('conference_members');
         }
 
         /**
@@ -55,9 +41,9 @@
         public function get_conference_members(int $conference_id) : array {
             //NOTE:使用连表查询，写死了表明，后面需要注意
             //NOTE:过滤角色信息，请在上一层处理，因为返回的是数组展开的字符串
-            $scholar_table = self::make_table('scholars');
-            $user_table = self::make_table('users');
-            $this_table = self::table();
+            $scholar_table = $this->make_table('scholars');
+            $user_table = $this->make_table('users');
+            $this_table = $this->table();;
             $sql = "SELECT $scholar_table.scholar_first_name AS first_name, $scholar_table.scholar_last_name AS last_name, $this_table.user_id, $this_table.conference_id, $this_table.user_role, $user_table.user_name, $user_table.user_email FROM $this_table INNER JOIN $user_table ON $user_table.user_id = $this_table.user_id INNER JOIN $scholar_table ON $scholar_table.scholar_email = $user_table.user_email WHERE $user_table.user_id = $this_table.user_id AND $this_table.conference_id = " . strval($conference_id) . " ORDER BY $this_table.id ASC";
             $data = $this->fetch_all_raw($sql);
             foreach ($data as &$item) {
@@ -73,7 +59,7 @@
          * @return int
          */
         public function get_conference_members_count(int $conference_id) : int {
-            $sql_result = $this->fetch_first_raw('SELECT COUNT(1) FROM ' . self::table() . ' WHERE conference_id = ' . strval($conference_id));
+            $sql_result = $this->fetch_first_raw('SELECT COUNT(1) FROM ' . $this->table() . ' WHERE conference_id = ' . strval($conference_id));
             return intval($sql_result['COUNT(1)']);
         }
 
@@ -105,7 +91,11 @@
          * @return int
          */
         public function user_join_in_conference(int $user_id, int $conference_id) : int {
-            $this->db->insert(self::table(), array('user_id' => $user_id, 'conference_id' => $conference_id, 'user_role' => 'scholar'));
+            $this->db->insert($this->table(), array(
+                'user_id' => $user_id,
+                'conference_id' => $conference_id,
+                'user_role' => 'scholar',
+            ));
             return $this->db->insert_id();
         }
 
@@ -117,7 +107,7 @@
         public function user_remove_from_conference(int $user_id, int $conference_id) : void {
             $this->db->where('user_id', $user_id);
             $this->db->where('conference_id', $conference_id);
-            $this->db->delete(self::table());
+            $this->db->delete($this->table());
         }
 
         /**
@@ -140,7 +130,7 @@
         public function set_user_roles_in_conference(int $user_id, int $conference_id, array $roles) : void {
             $this->db->where('user_id', $user_id);
             $this->db->where('conference_id', $conference_id);
-            $this->db->update(self::table(), array('user_role' => implode(',', $roles)));
+            $this->db->update($this->table(), array('user_role' => implode(',', $roles)));
         }
 
         /**

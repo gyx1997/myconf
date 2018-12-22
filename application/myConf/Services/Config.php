@@ -21,16 +21,16 @@ class Config extends \myConf\BaseService
 
     public function get_footer(): string
     {
-        return $this->models()->Config->footer1;
+        return $this->Models->Config->get('footer1');
     }
 
     public function get_mitbeian(): string
     {
-        return $this->models()->Config->mitbeian;
+        return $this->Models->Config->get('mitbeian');
     }
 
     public function get_title(): string
     {
-        return $this->models()->Config->title;
+        return $this->Models->Config->get('title');
     }
 }

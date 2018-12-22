@@ -9,34 +9,30 @@
 namespace myConf;
 
 /**
- * Class ModelManager 模型管理器
+ * Class Models 模型管理器
  * @package myConf
  * @property-read \myConf\Models\User $User
- * @property-read \myConf\Models\Scholars $Scholar
+ * @property-read \myConf\Models\Scholar $Scholar
  * @property-read \myConf\Models\Config $Config
- * @property-read \myConf\Models\Documents $Document
+ * @property-read \myConf\Models\Document $Document
  * @property-read \myConf\Models\Conference $Conference
  * @property-read \myConf\Models\Category $Category
  * @property-read \myConf\Models\ConfMember $ConfMember
  * @property-read \myConf\Models\Attachment $Attachment
  */
-class ModelManager
+class Models
 {
     /**
      * @var array 模型数组
      */
     private $_models = array();
     /**
-     * @var int 载入计数
-     */
-    private $_loaded_count = 0;
-    /**
      * @var \CI_DB_active_record CI 数据库对象，用来操作事务
      */
     private $_db;
 
     /**
-     * ModelManager constructor.
+     * Models constructor.
      */
     public function __construct()
     {
@@ -54,7 +50,6 @@ class ModelManager
         if (!isset($this->_models[$model_name])) {
             $class_name = '\\myConf\\Models\\' . $model_name;
             $this->_models[$model_name] = new $class_name();
-            $this->_loaded_count++;
         }
         return $this->_models[$model_name];
     }
@@ -79,7 +74,7 @@ class ModelManager
             return;
         }
         $this->_db->trans_rollback();
-        throw new \myConf\Exceptions\DbTransactionException('DB_TRANS_ERROR', 'DataTableManager transaction exception. Closest SQL: ' . $this->_db->last_query() . '  .', 10002);
+        throw new \myConf\Exceptions\DbTransactionException('DB_TRANS_ERROR', 'Tables transaction exception. Closest SQL: ' . $this->_db->last_query() . '  .', 10002);
     }
 
     /**

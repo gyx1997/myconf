@@ -12,6 +12,14 @@ namespace myConf;
 use myConf\Exceptions\SendExitInstructionException;
 use myConf\Libraries\File;
 
+/**
+ * Class BaseController
+ * @package myConf
+ * @author _g63<522975334@qq.com>
+ * @version 2019.1
+ * @property-read \myConf\Services $Services
+ * @property-read \CI_Session $Session
+ */
 class BaseController
 {
     public $input;
@@ -58,10 +66,7 @@ class BaseController
      * @var bool|string 当前接收到的用于跳转的redirect参数。
      */
     protected $_url_redirect = '';
-    /**
-     * @var Response
-     */
-    private $_response_manager;
+
     private $_service_manager;
     private $_session_manager;
 
@@ -110,9 +115,9 @@ class BaseController
             $this->_action = 'default';
         }
         //加载微服务管理器
-        $this->_service_manager = new \myConf\ServiceManager();
+        $this->_service_manager = new \myConf\Services;
         //加载会话管理器
-        $this->_session_manager = new \myConf\SessionManager();
+        $this->_session_manager = new \myConf\Session;
         //获得参数
         $this->_do = $this->input->get('do');
         $this->_url_encoded = base64_encode($this->_get_url());
@@ -122,7 +127,7 @@ class BaseController
     }
 
     /**
-     * @param array $ret_vars
+     * @param array &$ret_vars
      * @throws Exceptions\URLRequestException
      */
     public final function run(array &$ret_vars): void
@@ -141,15 +146,14 @@ class BaseController
 
     /**
      * 获取输出变量列表
-     * @return array
      */
     protected function _collect_output_variables(): void
     {
         $this->add_output_variables(
             array(
-                'title' => $this->services()->Config->get_title(),
-                'footer1' => $this->services()->Config->get_footer(),
-                'mitbeian' => $this->services()->Config->get_mitbeian(),
+                'title' => $this->Services->Config->get_title(),
+                'footer1' => $this->Services->Config->get_footer(),
+                'mitbeian' => $this->Services->Config->get_mitbeian(),
                 'csrf_name' => $this->security->get_csrf_token_name(),
                 'csrf_hash' => $this->security->get_csrf_hash(),
                 'url' => $this->_url_encoded,
@@ -195,21 +199,18 @@ class BaseController
     }
 
     /**
-     * 返回服务管理器
-     * @return ServiceManager 返回服务管理器实例
+     * 魔术方法，获取控制器使用的类
+     * @param $key
+     * @return \CI_Session|\myConf\Services|null
      */
-    public function services(): \myConf\ServiceManager
-    {
-        return $this->_service_manager;
-    }
-
-    /**
-     * 返回绘画管理器。目前依然使用CI自带的session，以保持兼容
-     * @return \CI_Session 返回会话管理器实例
-     */
-    public function session(): \CI_Session
-    {
-        return $this->session;
+    public function __get($key) {
+        if ($key === 'Services') {
+            return $this->_service_manager;
+        } else if ($key === 'Session') {
+            return $this->session;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -232,12 +233,12 @@ class BaseController
     protected function _check_login(): bool
     {
         try {
-            $this->_user_id = intval($this->session()->userdata('user_id'));
+            $this->_user_id = intval($this->Session->userdata('user_id'));
             if ($this->_user_id === 0) {
                 return FALSE;
             }
-            $this->_login_time = $this->session()->userdata('login_time');
-            $this->_current_user = $this->services()->Account->user_account_info($this->_user_id);
+            $this->_login_time = $this->Session->userdata('login_time');
+            $this->_current_user = $this->Services->Account->user_account_info($this->_user_id);
             //避免session失效问题，刷新session
             $this->_set_login($this->_current_user);
             return TRUE;
@@ -254,8 +255,8 @@ class BaseController
      */
     protected function _set_login(array $user_data): void
     {
-        $this->session()->set_userdata('user_id', $user_data['user_id']);
-        $this->session()->set_userdata('login_time', time());
+        $this->Session->set_userdata('user_id', $user_data['user_id']);
+        $this->Session->set_userdata('login_time', time());
         $this->_user_id = intval($user_data['user_id']);
     }
 

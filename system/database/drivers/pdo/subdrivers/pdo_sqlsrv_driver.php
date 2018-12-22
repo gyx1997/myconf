@@ -38,13 +38,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * PDO SQLSRV DataTableManager Adapter Class
+ * PDO SQLSRV Tables Adapter Class
  * Note: _DB is an extender class that the app controller
  * creates dynamically based on whether the query builder
  * class is being used or not.
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -95,7 +95,7 @@ class CI_DB_pdo_sqlsrv_driver extends CI_DB_pdo_driver
             $this->dsn = 'sqlsrv:Server=' . (empty($this->hostname) ? '127.0.0.1' : $this->hostname);
 
             empty($this->port) OR $this->dsn .= ',' . $this->port;
-            empty($this->database) OR $this->dsn .= ';DataTableManager=' . $this->database;
+            empty($this->database) OR $this->dsn .= ';Tables=' . $this->database;
 
             // Some custom options
 
@@ -134,7 +134,7 @@ class CI_DB_pdo_sqlsrv_driver extends CI_DB_pdo_driver
     // --------------------------------------------------------------------
 
     /**
-     * DataTableManager connection
+     * Tables connection
      * @param    bool $persistent
      * @return    object
      */

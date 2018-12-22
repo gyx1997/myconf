@@ -27,6 +27,7 @@ class Response
 
     /**
      * 渲染并返回HTML页面
+     * @param string $template_name
      * @throws Exceptions\TemplateNotFoundException
      * @throws Exceptions\TemplateParseException
      */

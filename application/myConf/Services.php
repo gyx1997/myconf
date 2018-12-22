@@ -10,14 +10,14 @@ namespace myConf;
 
 
 /**
- * Class ServiceManager 微服务管理器
+ * Class Services 微服务管理器
  * @package myConf
  * @property-read \myConf\Services\Account $Account
  * @property-read \myConf\Services\Config $Config
  * @property-read \myConf\Services\Conference $Conference
  * @property-read \myConf\Services\ConferenceMember $ConferenceMember
  */
-class ServiceManager
+class Services
 {
     /**
      * @var array 当前加载的服务

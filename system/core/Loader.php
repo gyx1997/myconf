@@ -627,12 +627,12 @@ class CI_Loader
     // --------------------------------------------------------------------
 
     /**
-     * DataTableManager Loader
-     * @param    mixed $params DataTableManager configuration options
+     * Tables Loader
+     * @param    mixed $params Tables configuration options
      * @param    bool $return Whether to return the database object
      * @param    bool $query_builder Whether to enable Query Builder
      *                    (overrides the configuration setting)
-     * @return    object|bool    DataTableManager object if $return is set to TRUE,
+     * @return    object|bool    Tables object if $return is set to TRUE,
      *                    FALSE on failure, CI_Loader instance in any other case
      */
     public function database($params = '', $return = FALSE, $query_builder = NULL)
@@ -797,8 +797,8 @@ class CI_Loader
     // --------------------------------------------------------------------
 
     /**
-     * Load the DataTableManager Utilities Class
-     * @param    object $db DataTableManager object
+     * Load the Tables Utilities Class
+     * @param    object $db Tables object
      * @param    bool $return Whether to return the DB Utilities class object or not
      * @return    object
      */
@@ -826,8 +826,8 @@ class CI_Loader
     // --------------------------------------------------------------------
 
     /**
-     * Load the DataTableManager Forge Class
-     * @param    object $db DataTableManager object
+     * Load the Tables Forge Class
+     * @param    object $db Tables object
      * @param    bool $return Whether to return the DB Forge class object or not
      * @return    object
      */

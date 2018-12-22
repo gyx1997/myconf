@@ -39,7 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * PDO IBM DB2 Forge Class
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */

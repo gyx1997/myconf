@@ -3,3 +3,5 @@
 Stack trace:
 #0 {main}
   thrown in F:\csqrwc_git\index.php on line 57
+[21-Dec-2018 15:42:28 UTC] PHP Fatal error:  Class myConf\BaseTable contains 3 abstract methods and must therefore be declared abstract or implement the remaining methods (myConf\BaseTable::primary_key, myConf\BaseTable::table, myConf\BaseTable::fields) in F:\myconf\application\myConf\BaseTable.php on line 17
+[21-Dec-2018 15:49:51 UTC] PHP Fatal error:  Cannot make non static method myConf\BaseTable::primary_key() static in class myConf\Tables\Configs in F:\myconf\application\myConf\Tables\Configs.php on line 11

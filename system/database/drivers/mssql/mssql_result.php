@@ -42,7 +42,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * This class extends the parent result class: CI_DB_result
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */

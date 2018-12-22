@@ -30,7 +30,7 @@ class ConferenceMember extends \myConf\BaseService
     {
         //先定义返回结果集
         $members_data_set = array();
-        $members = $this->models()->ConfMember->get_conference_members($conference_id, $email_restrict);
+        $members = $this->Models->ConfMember->get_conference_members($conference_id, $email_restrict);
         foreach ($members as $member) {
             //过滤信息
             if ($name_restrict != '' && strpos($member['user_name'], $name_restrict) === FALSE) {

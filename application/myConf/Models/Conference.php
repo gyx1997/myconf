@@ -8,7 +8,12 @@
 
 namespace myConf\Models;
 
-
+/**
+ * Class Conference
+ * @package myConf\Models
+ * @author _g63<522975334@qq.com>
+ * @version 2019.1
+ */
 class Conference extends \myConf\BaseModel
 {
 
@@ -24,66 +29,6 @@ class Conference extends \myConf\BaseModel
         $this->_pk = 'conference_id';
     }
 
-    public function has_conference_by_url($url)
-    {
-        return $this->_exists(array('conference_url' => $url));
-    }
-
-    /**
-     * @deprecated
-     * @see \myConf\Models\Conference::exist()
-     * @param $conference_id
-     * @return bool
-     */
-    public function has_conference_by_id(int $conference_id)
-    {
-        return $this->exist(strval($conference_id));
-    }
-
-    public function get_conference_creator($conference_id)
-    {
-        return $this->get($conference_id)['conference_creator'];
-    }
-
-    /**
-     * @deprecated
-     * @param $conference_id
-     * @return array
-     */
-    public function get_conference_by_id($conference_id)
-    {
-        $result_array = $this->_fetch_first(array('conference_id' => $conference_id));
-        if (empty($result_array)) {
-            return array();
-        }
-        return $this->_pack_conference_data($result_array);
-    }
-
-    /**
-     * 重写父类的get，获取会议信息，因为有数组需要unserialize
-     * @param string $pk_val
-     * @return array
-     */
-    public function get(string $pk_val): array
-    {
-        $result_array = $this->_fetch_first(array('conference_id' => $pk_val));
-        if (empty($result_array)) {
-            return array();
-        }
-        return $this->_pack_conference_data($result_array);
-    }
-
-    private function _pack_conference_data($original_data)
-    {
-        $result = $original_data;
-        $extra_unserialized = unserialize($original_data['conference_extra']);
-        $result['conference_extra'] = NULL;
-
-        $result['banner_image'] = isset($extra_unserialized['banner_image']) ? $extra_unserialized['banner_image'] : '';
-        $result['host'] = isset($extra_unserialized['host']) ? $extra_unserialized['host'] : '';
-        $result['qr_code'] = isset($extra_unserialized['qr_code']) ? $extra_unserialized['qr_code'] : '';
-        return $result;
-    }
 
     /**
      * @param int $conference_id
@@ -118,12 +63,55 @@ class Conference extends \myConf\BaseModel
         );
     }
 
-    public function get_conference_by_url($url)
+    /**
+     * 通过url获取会议信息
+     * @param $url
+     * @return array
+     */
+    public function get_by_url($url) : array
     {
-        $result_array = $this->_fetch_first(array('conference_url' => $url));
+        $result_array = $this->Tables->Conferences->fetch_first(array('conference_url' => $url));
         if (empty($result_array)) {
             return array();
         }
-        return $this->_pack_conference_data($result_array);
+        return $result_array;
+    }
+
+    /**
+     * 判断用户是否加入了某个会议
+     * @param int $conference_id
+     * @param int $user_id
+     * @return bool
+     */
+    public function user_joint_in(int $conference_id, int $user_id) : bool {
+        return $this->Tables->ConferenceMembers->user_joint_in_conference($user_id, $conference_id);
+    }
+
+    /**
+     * 得到用户在某个会议的角色
+     * @param int $conference_id
+     * @param int $user_id
+     * @return array
+     */
+    public function user_roles(int $conference_id, int $user_id) : array {
+        return $this->Tables->ConferenceMembers->get_user_roles_in_conference($user_id, $conference_id);
+    }
+
+    /**
+     * 得到Home页面的所有栏目列表
+     * @param int $conference_id
+     * @return array
+     */
+    public function category_list(int $conference_id) : array {
+        return $this->Tables->Categories->fetch_all(array('conference_id' => $conference_id), 'category_display_order', 'ASC');
+    }
+
+    /**
+     * 得到某个会议的第一个栏目
+     * @param int $conference_id
+     * @return array
+     */
+    public function first_category(int $conference_id) : array {
+        return $this->Tables->Categories->fetch_first(array('conference_id' => $conference_id), 'category_display_order', 'ASC');
     }
 }

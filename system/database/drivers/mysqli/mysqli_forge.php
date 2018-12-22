@@ -41,7 +41,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * MySQLi Forge Class
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */

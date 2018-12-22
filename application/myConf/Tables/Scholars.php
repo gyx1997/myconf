@@ -6,7 +6,7 @@
      * Time: 17:32
      */
 
-    namespace myConf\Table;
+    namespace myConf\Tables;
 
     class Scholars extends \myConf\BaseTable {
 
@@ -20,7 +20,7 @@
          * 返回当前的主键
          * @return string
          */
-        public static function primary_key() : string {
+        public function primary_key() : string {
             return 'scholar_id';
         }
 
@@ -28,15 +28,15 @@
          * 返回当前的表名
          * @return string
          */
-        public static function table() : string {
-            return self::make_table('scholars');
+        public function table() : string {
+            return $this->make_table('scholars');
         }
 
         /**
          * 返回当前所有字段
          * @return array
          */
-        public static function fields() : array {
+        public function fields() : array {
             return self::$fields;
         }
 
@@ -57,7 +57,7 @@
          */
         public function update_by_email(string $email, array $data) : void {
             $this->db->where('scholar_email', $email);
-            $this->db->update(self::table(), $data);
+            $this->db->update($this->table(), $data);
         }
 
         /**
@@ -67,7 +67,7 @@
          */
         public function set_by_email(string $email, array $data = array()) : void {
             $this->db->where('scholar_email', $email);
-            $this->db->update(self::table(), $data);
+            $this->db->update($this->table(), $data);
             return;
         }
 

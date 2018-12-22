@@ -18,7 +18,7 @@
 
         public function __construct() {
             parent::__construct();
-            $tmp = $this->_fetch_all();
+            $tmp = $this->fetch_all();
             foreach ($tmp as $t) {
                 $this->_config_data[$t['k']] = $t;
             }
@@ -28,7 +28,7 @@
          * 得到当前的主键名
          * @return string
          */
-        public static function primary_key() : string {
+        public function primary_key() : string {
             return 'k';
         }
 
@@ -36,15 +36,15 @@
          * 得到当前表名
          * @return string
          */
-        public static function table() : string {
-            return self::make_table('configs');
+        public function table() : string {
+            return $this->make_table('configs');
         }
 
         /**
          * 得到当前表的所有字段
          * @return array
          */
-        public static function fields() : array {
+        public function fields() : array {
             return self::$fields;
         }
 
@@ -60,10 +60,10 @@
         /**
          * 重写父类方法，想config表写入值
          * @param string $key
-         * @param string $value
+         * @param array $value
          */
-        public function set(string $key, string $value) : void {
-            parent::set($key, array('v' => $value));
-            $this->_config_data[$key] = $value;
+        public function set(string $key, array $data = array()) : void {
+            parent::set($key, array('v' => $data['v']));
+            $this->_config_data[$key] = $data['v'];
         }
     }

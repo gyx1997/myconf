@@ -42,7 +42,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * This is the platform-independent base Query Builder implementation class.
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */

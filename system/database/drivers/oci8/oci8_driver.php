@@ -38,19 +38,19 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * oci8 DataTableManager Adapter Class
+ * oci8 Tables Adapter Class
  * Note: _DB is an extender class that the app controller
  * creates dynamically based on whether the query builder
  * class is being used or not.
  * @package        CodeIgniter
  * @subpackage  Drivers
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
 
 /**
- * oci8 DataTableManager Adapter Class
+ * oci8 Tables Adapter Class
  * This is a modification of the DB_driver class to
  * permit access to oracle databases
  * @author      Kelly McArdle
@@ -59,7 +59,7 @@ class CI_DB_oci8_driver extends CI_DB
 {
 
     /**
-     * DataTableManager driver
+     * Tables driver
      * @var    string
      */
     public $dbdriver = 'oci8';
@@ -607,7 +607,7 @@ class CI_DB_oci8_driver extends CI_DB
     // --------------------------------------------------------------------
 
     /**
-     * DataTableManager version number
+     * Tables version number
      * @return    string
      */
     public function version()

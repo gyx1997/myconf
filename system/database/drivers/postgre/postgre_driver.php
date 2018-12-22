@@ -38,13 +38,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Postgre DataTableManager Adapter Class
+ * Postgre Tables Adapter Class
  * Note: _DB is an extender class that the app controller
  * creates dynamically based on whether the query builder
  * class is being used or not.
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -52,13 +52,13 @@ class CI_DB_postgre_driver extends CI_DB
 {
 
     /**
-     * DataTableManager driver
+     * Tables driver
      * @var    string
      */
     public $dbdriver = 'postgre';
 
     /**
-     * DataTableManager schema
+     * Tables schema
      * @var    string
      */
     public $schema = 'public';
@@ -133,7 +133,7 @@ class CI_DB_postgre_driver extends CI_DB
     // --------------------------------------------------------------------
 
     /**
-     * DataTableManager connection
+     * Tables connection
      * @param    bool $persistent
      * @return    resource
      */
@@ -243,7 +243,7 @@ class CI_DB_postgre_driver extends CI_DB
     // --------------------------------------------------------------------
 
     /**
-     * DataTableManager version number
+     * Tables version number
      * @return    string
      */
     public function version()

@@ -39,7 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * CUBRID Utility Class
- * @category    DataTableManager
+ * @category    Tables
  * @author        Esen Sagynov
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -70,7 +70,7 @@ class CI_DB_cubrid_utility extends CI_DB_utility
      */
     protected function _backup($params = array())
     {
-        // No SQL based support in CUBRID as of version 8.4.0. DataTableManager or
+        // No SQL based support in CUBRID as of version 8.4.0. Tables or
         // table backup can be performed using CUBRID Manager
         // database administration tool.
         return $this->db->display_error('db_unsupported_feature');

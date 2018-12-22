@@ -11,11 +11,14 @@ namespace myConf;
 /**
  * Class BaseService
  * @package myConf
+ * @author _g63 <522975334@qq.com>
+ * @version 2019.1
+ * @property-read \myConf\Models Models
  */
 class BaseService
 {
     /**
-     * @var ModelManager 模型管理器
+     * @var Models 模型管理器
      */
     private $_models;
 
@@ -24,17 +27,19 @@ class BaseService
      */
     public function __construct()
     {
-        $this->_models = new \myConf\ModelManager();
+        $this->_models = new \myConf\Models();
     }
 
     /**
-     * 返回模型管理器
-     * @return ModelManager
+     * 魔术方法，获取服务的模型
+     * @param $key
+     * @return \myConf\Models|null
      */
-    public function models(): \myConf\ModelManager
-    {
-        return $this->_models;
+    public function __get($key) {
+        if ($key === 'Models') {
+            return $this->_models;
+        }
+        return null;
     }
-
 }
 

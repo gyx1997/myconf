@@ -39,7 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * SQLite3 Forge Class
- * @category    DataTableManager
+ * @category    Tables
  * @author    Andrey Andreev
  * @link    https://codeigniter.com/user_guide/database/
  */
@@ -64,7 +64,7 @@ class CI_DB_sqlite3_forge extends CI_DB_forge
 
     /**
      * Class constructor
-     * @param    object &$db DataTableManager object
+     * @param    object &$db Tables object
      * @return    void
      */
     public function __construct(&$db)

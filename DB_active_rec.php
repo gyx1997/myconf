@@ -44,7 +44,7 @@
  * This is the platform-independent base Active Record implementation class.
  * @package        CodeIgniter
  * @subpackage     Drivers
- * @category       DataTableManager
+ * @category       Tables
  * @author         ExpressionEngine Dev Team
  * @link           http://codeigniter.com/user_guide/database/
  * @method      int insert_id() insert_id() The insert ID number when performing database inserts.

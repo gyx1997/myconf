@@ -38,8 +38,8 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * DataTableManager Utility Class
- * @category    DataTableManager
+ * Tables Utility Class
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -47,7 +47,7 @@ abstract class CI_DB_utility
 {
 
     /**
-     * DataTableManager object
+     * Tables object
      * @var    object
      */
     protected $db;
@@ -79,13 +79,13 @@ abstract class CI_DB_utility
 
     /**
      * Class constructor
-     * @param    object &$db DataTableManager object
+     * @param    object &$db Tables object
      * @return    void
      */
     public function __construct(&$db)
     {
         $this->db =& $db;
-        log_message('info', 'DataTableManager Utility Class Initialized');
+        log_message('info', 'Tables Utility Class Initialized');
     }
 
     // --------------------------------------------------------------------
@@ -157,7 +157,7 @@ abstract class CI_DB_utility
     // --------------------------------------------------------------------
 
     /**
-     * Optimize DataTableManager
+     * Optimize Tables
      * @return    mixed
      */
     public function optimize_database()
@@ -290,7 +290,7 @@ abstract class CI_DB_utility
     // --------------------------------------------------------------------
 
     /**
-     * DataTableManager Backup
+     * Tables Backup
      * @param    array $params
      * @return    string
      */

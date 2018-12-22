@@ -39,7 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * SQLite3 Utility Class
- * @category    DataTableManager
+ * @category    Tables
  * @author    Andrey Andreev
  * @link    https://codeigniter.com/user_guide/database/
  */

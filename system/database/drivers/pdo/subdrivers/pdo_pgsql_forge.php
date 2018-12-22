@@ -39,7 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * PDO PostgreSQL Forge Class
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -81,7 +81,7 @@ class CI_DB_pdo_pgsql_forge extends CI_DB_pdo_forge
 
     /**
      * Class constructor
-     * @param    object &$db DataTableManager object
+     * @param    object &$db Tables object
      * @return    void
      */
     public function __construct(&$db)

@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | -------------------------------------------------------------------
 | This file will contain the settings needed to access your database.
 |
-| For complete instructions please consult the 'DataTableManager Connection'
+| For complete instructions please consult the 'Tables Connection'
 | page of the User Guide.
 |
 | -------------------------------------------------------------------

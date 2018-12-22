@@ -114,7 +114,7 @@ class Conference extends \myConf\BaseController
         try {
             //处理会议信息
             $this->_conference_url = $this->uri->segment(2, '');
-            $this->_conference_data = $this->services()->Conference->init_load_conference($this->_conference_url);
+            $this->_conference_data = $this->Services->Conference->init_load_conference($this->_conference_url);
             $this->_conference_id = $this->_conference_data['conference_id'];
             //处理权限信息
             $this->_check_privilege();
@@ -131,8 +131,8 @@ class Conference extends \myConf\BaseController
     {
         //将游客权限合并进基础权限
         $this->_privilege_table['scholar'] = array_merge($this->_privilege_table['guest'], $this->_privilege_table['scholar']);
-        if ($this->_has_login() && $this->services()->Conference->user_joint_in($this->_user_id, $this->_conference_id)) {
-            $roles = $this->services()->Conference->get_member_roles($this->_user_id, $this->_conference_id);
+        if ($this->_has_login() && $this->Services->Conference->user_joint_in($this->_user_id, $this->_conference_id)) {
+            $roles = $this->Services->Conference->get_member_roles($this->_user_id, $this->_conference_id);
         } else {
             $roles = array('guest');
         }
@@ -171,7 +171,7 @@ class Conference extends \myConf\BaseController
         $category_id = $category_id == '' ? 0 : intval($category_id);
         //进入业务逻辑
         try {
-            $data = $this->services()->Conference->homepage($this->_conference_id, $category_id);
+            $data = $this->Services->Conference->homepage($this->_conference_id, $category_id);
             $this->add_output_variables(
                 array(
                     'conference' => $this->_conference_data,
@@ -199,7 +199,7 @@ class Conference extends \myConf\BaseController
                 {
                     if ($this->_do == 'submit') {
                         try {
-                            $this->services()->Conference->update_conference_info($this->_conference_id, $this->input->post('conference_name_text'), $this->input->post('conference_host_text'), $this->input->post('conference_date_text'), 'banner_image', 'qr_code');
+                            $this->Services->Conference->update_conference_info($this->_conference_id, $this->input->post('conference_name_text'), $this->input->post('conference_host_text'), $this->input->post('conference_date_text'), 'banner_image', 'qr_code');
                             $this->add_output_variables(array('status' => 'SUCCESS'), OUTPUT_VAR_JSON_ONLY);
                         } catch (\myConf\Exceptions\UpdateConferenceException $e) {
                             $this->add_output_variables(array('status' => 'ERROR', 'err_flag' => $e->getErrorFlags()), OUTPUT_VAR_JSON_ONLY);
@@ -215,7 +215,7 @@ class Conference extends \myConf\BaseController
                         case'add':
                             {
                                 try {
-                                    $this->services()->Conference->add_category($this->_conference_id, $this->input->post('category_name_text'), intval($this->input->post('category_type_id')));
+                                    $this->Services->Conference->add_category($this->_conference_id, $this->input->post('category_name_text'), intval($this->input->post('category_type_id')));
                                     $this->add_output_variables(array('status' => 'SUCCESS'), OUTPUT_VAR_JSON_ONLY);
                                 } catch (\myConf\Exceptions\ConferenceNotFoundException $e) {
                                     throw new HttpStatusException(404, 'CONF_NOT_FOUND', $e->getMessage());
@@ -225,7 +225,7 @@ class Conference extends \myConf\BaseController
                         case 'rename':
                             {
                                 try {
-                                    $this->services()->Conference->rename_category($this->_conference_id, intval($this->input->post('category_id')), $this->input->post('category_name_text'));
+                                    $this->Services->Conference->rename_category($this->_conference_id, intval($this->input->post('category_id')), $this->input->post('category_name_text'));
                                 } catch (\myConf\Exceptions\CategoryNotFoundException $e) {
                                     throw new HttpStatusException(404, 'CAT_NOT_FOUND', 'The category you want to delete does not exists. It may have been deleted by administrator before you do this action.');
                                 }
@@ -236,7 +236,7 @@ class Conference extends \myConf\BaseController
                             {
                                 $category_id = intval($this->input->get('cid'));
                                 try {
-                                    $this->services()->Conference->delete_category($this->_conference_id, $category_id);
+                                    $this->Services->Conference->delete_category($this->_conference_id, $category_id);
                                 } catch (\myConf\Exceptions\CategoryNotFoundException $e) {
                                     throw new HttpStatusException(404, 'CAT_NOT_FOUND', 'The category you want to delete does not exists. It may have been deleted by administrator before you do this action.');
                                 }
@@ -246,7 +246,7 @@ class Conference extends \myConf\BaseController
                         case 'up':
                             {
                                 try {
-                                    $this->services()->Conference->move_up_category($this->_conference_id, intval($this->input->get('cid')));
+                                    $this->Services->Conference->move_up_category($this->_conference_id, intval($this->input->get('cid')));
                                     $this->_redirect_to('/conference/' . $this->_conference_url . '/management/category/');
                                 } catch (\myConf\Exceptions\CategoryNotFoundException $e) {
                                     throw new HttpStatusException(404, 'CAT_NOT_FOUND', 'The category you want to move down does not exists. It may have been deleted by administrator before you do this action.');
@@ -256,7 +256,7 @@ class Conference extends \myConf\BaseController
                         case 'down':
                             {
                                 try {
-                                    $this->services()->Conference->move_down_category($this->_conference_id, intval($this->input->get('cid')));
+                                    $this->Services->Conference->move_down_category($this->_conference_id, intval($this->input->get('cid')));
                                     $this->_redirect_to('/conference/' . $this->_conference_url . '/management/category/');
                                 } catch (\myConf\Exceptions\CategoryNotFoundException $e) {
                                     throw new HttpStatusException(404, 'CAT_NOT_FOUND', 'The category you want to move down does not exists. It may have been deleted by administrator before you do this action.');
@@ -265,7 +265,7 @@ class Conference extends \myConf\BaseController
                             }
                         default:
                             {
-                                $cat_data = $this->services()->Conference->get_category_list($this->_conference_id);
+                                $cat_data = $this->Services->Conference->get_category_list($this->_conference_id);
                                 $this->add_output_variables(array('category_list' => $cat_data));
                             }
                     }
@@ -287,7 +287,7 @@ class Conference extends \myConf\BaseController
                                         $user_role_restrict [] = $key;
                                     }
                                 }
-                                $members = $this->services()->ConferenceMember->get_conference_members($this->_conference_id, $user_role_restrict, $user_name_restrict, $user_email_restrict);
+                                $members = $this->Services->ConferenceMember->get_conference_members($this->_conference_id, $user_role_restrict, $user_name_restrict, $user_email_restrict);
                                 $this->add_output_variables(array('status' => 'SUCCESS', 'data' => $members, 'count' => count($members)), OUTPUT_VAR_JSON_ONLY);
                                 break;
                             }
@@ -308,7 +308,7 @@ class Conference extends \myConf\BaseController
                         case 'remove':
                             {
                                 $user_id = $this->input->get('uid');
-                                $this->services()->ConferenceMember;
+                                $this->Services->ConferenceMember;
                             }
                         case '':
                             {

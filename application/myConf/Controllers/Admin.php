@@ -30,7 +30,7 @@ class Admin extends \myConf\BaseController
         if ($this->_action === 'opcache' && $this->_do === 'reset') {
             opcache_reset();
         } else if ($this->_action === 'dcache' && $this->_do === 'reset') {
-            \myConf\DataCacheManager::clear();
+            \myConf\Cache::clear();
         } else if ($this->_action === 'template' && $this->_do === 'clear') {
             \myConf\Libraries\Response::clear_compiled_template();
         }

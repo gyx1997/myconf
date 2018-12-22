@@ -38,13 +38,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * MySQL DataTableManager Adapter Class
+ * MySQL Tables Adapter Class
  * Note: _DB is an extender class that the app controller
  * creates dynamically based on whether the query builder
  * class is being used or not.
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -52,7 +52,7 @@ class CI_DB_mysql_driver extends CI_DB
 {
 
     /**
-     * DataTableManager driver
+     * Tables driver
      * @var    string
      */
     public $dbdriver = 'mysql';
@@ -206,7 +206,7 @@ class CI_DB_mysql_driver extends CI_DB
     // --------------------------------------------------------------------
 
     /**
-     * DataTableManager version number
+     * Tables version number
      * @return    string
      */
     public function version()

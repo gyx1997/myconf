@@ -37,7 +37,7 @@ class Account extends \myConf\BaseController
                     $status = 'SUCCESS';
                     $redirect = '';
                     try {
-                        $current_user = $this->services()->Account->login($this->input->post('login_entry'), $this->input->post('login_password'));
+                        $current_user = $this->Services->Account->login($this->input->post('login_entry'), $this->input->post('login_password'));
                         $this->_set_login($current_user);
                         $redirect = $this->_url_redirect;
                     } catch (\myConf\Exceptions\UserPasswordException $e) {
@@ -80,10 +80,10 @@ class Account extends \myConf\BaseController
                     $hash_key = md5(uniqid());
                     $this->session->set_tempdata('pwd-reset-hash', $hash_key, 1800);
                     try {
-                        $this->services()->Account->send_verify_email($target_email, $hash_key);
+                        $this->Services->Account->send_verify_email($target_email, $hash_key);
                     } catch (\sAccount\AccountNotExistsException $e) {
                         $status = 'EMAIL_NOT_EXISTS';
-                        $this->session()->unset_tempdata('pwd-reset-hash');
+                        $this->Session->unset_tempdata('pwd-reset-hash');
                     }
                     $this->add_output_variables(array('status' => $status, 'email' => $target_email));
                     break;
@@ -99,7 +99,7 @@ class Account extends \myConf\BaseController
                     $new_password = $this->input->post('user_password');
                     $email = $this->input->post('user_email');
                     try {
-                        $this->services()->Account->reset_password($email, $hash_key, $hash_key_got, $new_password);
+                        $this->Services->Account->reset_password($email, $hash_key, $hash_key_got, $new_password);
                     } catch (\sAccount\EmailVerifyFailedException $e) {
                         $status = 'EMAIL_VERIFY_FAILED';
                     } catch (\sAccount\AccountNotExistsException $e) {
@@ -130,7 +130,7 @@ class Account extends \myConf\BaseController
                     $status = 'SUCCESS';
                     try {
                         //定义上会出Exception，实际上应该不会。
-                        $user = $this->services()->Account->register(
+                        $user = $this->Services->Account->register(
                             $this->input->post('register_email'),
                             $this->input->post('register_username'),
                             $this->input->post('register_password')
@@ -169,6 +169,7 @@ class Account extends \myConf\BaseController
     }
 
     /**
+     * @throws \myConf\Exceptions\DirectoryException
      * @throws \myConf\Exceptions\FileUploadException
      * @throws \myConf\Exceptions\SendRedirectInstructionException
      * @throws \sAccount\ScholarNotExistsException
@@ -181,13 +182,13 @@ class Account extends \myConf\BaseController
                 case 'general':
                     {
                         //deprecated
-                        //$this->services()->Account->update_extra($this->_user_id, array('organization' => $this->input->post('account_org')));
+                        //$this->Services->Account->update_extra($this->_user_id, array('organization' => $this->input->post('account_org')));
                         break;
                     }
                 case 'avatar':
                     {
                         try {
-                            $this->services()->Account->change_avatar($this->_user_id, 'avatar_image');
+                            $this->Services->Account->change_avatar($this->_user_id, 'avatar_image');
                         } catch (\myConf\Exceptions\AvatarNotSelectedException $e) {
                             //TODO 返回未选择头像
                         }
@@ -201,24 +202,18 @@ class Account extends \myConf\BaseController
                         $institution = $this->input->post('scholarInstitution');
                         $department = $this->input->post('scholarDepartment');
                         $address = $this->input->post('scholarAddress');
-                        $this->services()->Account->update_scholar_info($email, $first_name, $last_name, $institution, $department, $address);
-
+                        $this->Services->Account->update_scholar_info($email, $first_name, $last_name, $institution, $department, $address);
                     }
             }
             $this->_redirect_to('/account/my-settings/');
             return;
         } else {
-            try {
-                $user_data = $this->services()->Account->user_full_info($this->_user_id);
-            } catch (\Exception $e) {
-
-            }
+            $user_data = $this->Services->Account->user_full_info($this->_user_id);
             $this->add_output_variables(array(
-                    'user_name' => $user_data->user_name,
-                    'email' => $user_data->user_email,
-                    'organization' => $user_data->user_organization,
-                    'avatar' => $user_data->user_avatar,
-                    'scholar_info' => isset($user_data) ? $user_data->assigned_scholar_info : array()
+                    'user_name' => $user_data['user_name'],
+                    'email' => $user_data['user_email'],
+                    'avatar' => $user_data['user_avatar'],
+                    'scholar_info' => isset($user_data) ? $user_data['user_scholar_data'] : array(),
                 )
             );
         }

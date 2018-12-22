@@ -81,7 +81,7 @@ class CI_Migration
     protected $_migration_version = 0;
 
     /**
-     * DataTableManager table with migration info
+     * Tables table with migration info
      * @var string
      */
     protected $_migration_table = 'migrations';

@@ -27,51 +27,21 @@ class Category extends \myConf\BaseModel
     }
 
     /**
+     * 创建一个新的栏目
      * @param int $conference_id
      * @param string $category_name
      * @param string $category_type
      * @return int
      */
-    public function add_category(int $conference_id, string $category_name, string $category_type): int
+    public function create_new(int $conference_id, string $category_name, string $category_type) : int
     {
-        $this->db->insert(
-            $this->_table(),
+        return $this->Tables->Categories->insert(
             array(
                 'conference_id' => $conference_id,
                 'category_title' => $category_name,
                 'category_type' => $category_type
             )
         );
-        return $this->db->insert_id();
-    }
-
-    /**
-     * 找到某个会议的第一个category栏目。
-     * @param int $conference_id
-     * @param bool $display_order
-     * @return int 0表示未找到。
-     */
-    public function get_first_category_id(int $conference_id, bool $display_order = FALSE): int
-    {
-        if ($display_order == FALSE) {
-            $query = $this->db->query('
-				SELECT MIN(category_id) 
-				FROM ' . $this->_table() . ' WHERE `conference_id` = ' . strval($conference_id)
-            );
-            $qr = $query->result_array();
-            $category_id = empty($qr) ? 0 : $qr[0]['MIN(category_id)'];
-        } else {
-            $query = $this->db->query('
-				SELECT category_id 
-				FROM ' . $this->_table() . ' 
-				WHERE `conference_id` = ' . strval($conference_id) . ' 
-				ORDER BY category_display_order, category_id ASC 
-				LIMIT 1'
-            );
-            $qr = $query->result_array();
-            $category_id = empty($qr) ? 0 : $qr[0]['category_id'];
-        }
-        return $category_id;
     }
 
     /**

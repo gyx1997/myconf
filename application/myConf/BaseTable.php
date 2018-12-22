@@ -13,8 +13,9 @@
      * @package myConf
      * @author _g63 <522975334@qq.com>
      * @version 2019.1
+     * @property-read \myConf\Cache Cache
      */
-    abstract class BaseTable {
+    class BaseTable {
         /**
          * @var \CI_DB_active_record CI数据库接口
          */
@@ -24,6 +25,8 @@
          */
         private static $_table_prefix = 'myconf';
 
+        protected $_cache;
+
         /**
          * myConf BaseTable constructor.
          */
@@ -31,25 +34,37 @@
             //初始化CI数据库驱动
             $CI = &get_instance();
             $this->db = $CI->db;
+            //初始化缓存驱动器
+            $this->_cache = new Cache(get_called_class());
         }
 
         /**
+         * 魔术方法，读取缓存驱动器
+         * @param $key
+         * @return \myConf\Cache
+         */
+        public function __get($key) {
+            return $this->_cache;
+        }
+
+
+        /**
          * 得到当前表的主键名
+         * dummy for base class, should be override in derived classes.
          * @return string
          */
-        public static abstract function primary_key() : string;
+        public function primary_key() : string {
+            return '';  //dummy for base class
+        }
 
         /**
          * 得到当前表的包含前缀的表名
+         * dummy for base class, should be override in derived classes.
          * @return string
          */
-        public static abstract function table() : string;
-
-        /**
-         * 得到当前表的所有字段名
-         * @return array
-         */
-        public static abstract function fields() : array;
+        public function table() : string {
+            return '';  //dummy for base class, should be override in derived classes.
+        }
 
         /**
          * 根据指定的Where条件组合判断数据表的记录是否存在
@@ -61,7 +76,7 @@
                 $this->db->where($field, $value);
             }
             $this->db->select('COUNT(*)');
-            $query = $this->db->get(self::table());
+            $query = $this->db->get($this->table());
             $result = $query->row_array();
             return intval($result['COUNT(*)']) === 1;
         }
@@ -86,7 +101,7 @@
          */
         public function fetch_all(array $where_segment_array = array(), string $order_field = '', string $order_direction = '', int $start = 0, int $limit = 0) : array {
             $this->_pack_query_args($where_segment_array, $order_field, $order_direction, $start, $limit);
-            $query_result = $this->db->get(self::table());
+            $query_result = $this->db->get($this->table());
             if (empty($query_result->result_array())) {
                 return array();
             }
@@ -160,12 +175,13 @@
          * @return array
          */
         public function get(string $pk_val) : array {
-            $this->db->where(self::primary_key(), $pk_val);
-            $query_result = $this->db->get(self::table(), 1);
-            if (empty($query_result->row_array())) {
+            $this->db->where($this->primary_key(), $pk_val);
+            $query_result = $this->db->get($this->table(), 1);
+            $raw_data = $query_result->row_array();
+            if (empty($raw_data)) {
                 return array();
             }
-            return $query_result->row_array();
+            return $raw_data;
         }
 
         /**
@@ -174,9 +190,9 @@
          * @return bool
          */
         public function exist(string $pk_val) : bool {
-            $this->db->where(self::primary_key(), $pk_val);
+            $this->db->where($this->primary_key(), $pk_val);
             $this->db->select('COUNT(1)');
-            $query_result = $this->db->get(self::table(), 1);
+            $query_result = $this->db->get($this->table(), 1);
             return intval($query_result->row_array()['COUNT(1)']) !== 0;
         }
 
@@ -186,8 +202,8 @@
          * @param array $data
          */
         public function set(string $pk_val, array $data = array()) : void {
-            $this->db->where(self::primary_key(), $pk_val);
-            $this->db->update(self::table(), $data);
+            $this->db->where($this->primary_key(), $pk_val);
+            $this->db->update($this->table(), $data);
         }
 
         /**
@@ -196,7 +212,7 @@
          * @return int 返回当前自增键的最新一条记录的PK id
          */
         public function insert(array $data = array()) : int {
-            $this->db->insert(self::table(), $data);
+            $this->db->insert($this->table(), $data);
             return $this->db->insert_id();
         }
 
@@ -205,8 +221,8 @@
          * @param string $pk_val 主键键值
          */
         public function delete(string $pk_val) : void {
-            $this->db->where(self::primary_key(), $pk_val);
-            $this->db->delete(self::table());
+            $this->db->where($this->primary_key(), $pk_val);
+            $this->db->delete($this->table());
         }
 
         /**
@@ -215,7 +231,7 @@
          * @param string $field 需要自增的字段
          */
         public function self_increase(string $pk_val, string $field) : void {
-            $this->db->query('UPDATE ' . self::table() . " SET $field=$field+1 WHERE " . self::primary_key() . '=\'' . $pk_val . '\'');
+            $this->db->query('UPDATE ' . $this->table() . " SET $field=$field+1 WHERE " . $this->primary_key() . '=\'' . $pk_val . '\'');
         }
 
         /**
@@ -224,37 +240,15 @@
          * @param string $field 需要自减的字段
          */
         public function self_decrease(string $pk_val, string $field) : void {
-            $this->db->query('UPDATE ' . self::table() . " SET $field=$field-1 WHERE " . self::primary_key() . '=\'' . $pk_val . '\'');
+            $this->db->query('UPDATE ' . $this->table() . " SET $field=$field-1 WHERE " . $this->primary_key() . '=\'' . $pk_val . '\'');
         }
 
         /**
-         * 将需要序列化字段的数据序列化并合并到主数据上
-         * @param array $data
-         * @param string $field
-         * @param array $data_to_pack
-         * @return array
+         * 执行原生的SQL查询
+         * @param string $sql
+         * @param array $parameters
          */
-        public function pack_serialized_field(array $data, string $field, array $data_to_pack) : array {
-            return array_merge($data, array($field => serialize($data_to_pack)));
-        }
-
-        /**
-         * 从主数据中分离出序列化的数据
-         * @param array $data
-         * @param string $field
-         * @return array
-         */
-        public function unpack_serialized_field(array $data, string $field) : array {
-            if (!isset($data[$field])) {
-                return $data;
-            }
-            $new_data = array();
-            $unserialized_data = unserialize($data[$field]);
-            foreach ($data as $key => $value) {
-                if ($key !== $field) {
-                    $new_data[$key] = $value;
-                }
-            }
-            return array_merge($new_data, $unserialized_data);
+        public function query(string $sql, array $parameters = array()) : void {
+            $this->db->query($sql, $parameters);
         }
     }

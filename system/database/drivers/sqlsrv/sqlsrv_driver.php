@@ -38,13 +38,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * SQLSRV DataTableManager Adapter Class
+ * SQLSRV Tables Adapter Class
  * Note: _DB is an extender class that the app controller
  * creates dynamically based on whether the query builder
  * class is being used or not.
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -52,7 +52,7 @@ class CI_DB_sqlsrv_driver extends CI_DB
 {
 
     /**
-     * DataTableManager driver
+     * Tables driver
      * @var    string
      */
     public $dbdriver = 'sqlsrv';
@@ -111,7 +111,7 @@ class CI_DB_sqlsrv_driver extends CI_DB
     // --------------------------------------------------------------------
 
     /**
-     * DataTableManager connection
+     * Tables connection
      * @param    bool $pooling
      * @return    resource
      */
@@ -123,7 +123,8 @@ class CI_DB_sqlsrv_driver extends CI_DB
         $connection = array(
             'UID' => empty($this->username) ? '' : $this->username,
             'PWD' => empty($this->password) ? '' : $this->password,
-            'DataTableManager' => $this->database, 'ConnectionPooling' => ($pooling === TRUE) ? 1 : 0,
+            'Tables' => $this->database,
+            'ConnectionPooling' => ($pooling === true) ? 1 : 0,
             'CharacterSet' => $charset,
             'Encrypt' => ($this->encrypt === TRUE) ? 1 : 0,
             'ReturnDatesAsStrings' => 1
@@ -462,7 +463,7 @@ class CI_DB_sqlsrv_driver extends CI_DB
     // --------------------------------------------------------------------
 
     /**
-     * DataTableManager version number
+     * Tables version number
      * @return    string
      */
     public function version()

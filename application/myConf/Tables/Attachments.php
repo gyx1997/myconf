@@ -10,10 +10,12 @@
      */
     class Attachments extends \myConf\BaseTable {
 
-        /**
-         * @var array 当前字段的表名
-         */
-        private static $fields = array('attachment_id', 'attachment_file_size', 'attachment_is_image', 'attachment_file_name', 'attachment_image_width', 'attachment_image_height', 'attachment_download_times', 'attachment_original_name', 'attachment_tag_id', 'attachment_upload_time', 'attachment_tag_type', 'attachment_used');
+        public $tag_types = array('document' => 'document', 'paper' => 'paper', 'conf' => 'conf', '' => '');
+
+        public const tag_type_conference = 'conf';
+        public const tag_type_document = 'document';
+        public const tag_type_paper = 'paper';
+        public const tag_type_non_restrict = '';
 
         /**
          * Attachments constructor.
@@ -26,7 +28,7 @@
          * 返回当前表的主键
          * @return string
          */
-        public static function primary_key() : string {
+        public function primary_key() : string {
             return 'attachment_id';
         }
 
@@ -34,15 +36,22 @@
          * 返回当前表名
          * @return string
          */
-        public static function table() : string {
-            return self::make_table('attachments');
+        public function table() : string {
+            return $this->make_table('attachments');
         }
 
-        /**
-         * 返回当前表的所有字段
-         * @return array
-         */
-        public static function fields() : array {
-            return self::$fields;
+        public function get_list(string $tag_type = '', int $tag_id = 0, bool $image_only = false, int $start = 0, int $limit = 10) : array {
+            $this->db->select('*');
+            if ($tag_type !== '' && isset($this->tag_types[$tag_type])) {
+                $this->db->where('attachment_tag_type', $this->tag_types[$tag_type]);
+                if ($tag_id !== 0) {
+                    $this->db->where('attachment_tag_id', $tag_id);
+                }
+            }
+            $image_only === true && $this->db->where('attachment_is_image', 1);
+            $this->db->limit($limit, strval($start));
+            $this->db->order_by('attachment_id', 'DESC');
+            $query_result = $this->db->get($this->table());
+            return $query_result->result_array();
         }
     }

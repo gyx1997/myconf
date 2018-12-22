@@ -38,13 +38,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * DataTableManager Driver Class
+ * Tables Driver Class
  * This is the platform-independent base DB implementation class.
  * This class will not be called directly. Rather, the adapter
  * class for the specific database will extend and instantiate it.
  * @package        CodeIgniter
  * @subpackage    Drivers
- * @category    DataTableManager
+ * @category    Tables
  * @author        EllisLab Dev Team
  * @link        https://codeigniter.com/user_guide/database/
  */
@@ -80,13 +80,13 @@ abstract class CI_DB_driver
     public $hostname;
 
     /**
-     * DataTableManager name
+     * Tables name
      * @var    string
      */
     public $database;
 
     /**
-     * DataTableManager driver
+     * Tables driver
      * @var    string
      */
     public $dbdriver = 'mysqli';
@@ -135,7 +135,7 @@ abstract class CI_DB_driver
     public $swap_pre = '';
 
     /**
-     * DataTableManager port
+     * Tables port
      * @var    int
      */
     public $port = '';
@@ -358,7 +358,7 @@ abstract class CI_DB_driver
             }
         }
 
-        log_message('info', 'DataTableManager Driver Class Initialized');
+        log_message('info', 'Tables Driver Class Initialized');
     }
 
     // --------------------------------------------------------------------
@@ -434,7 +434,7 @@ abstract class CI_DB_driver
     // --------------------------------------------------------------------
 
     /**
-     * DataTableManager version number
+     * Tables version number
      * Returns a string containing the version of the database being used.
      * Most drivers will override this method.
      * @return    string
@@ -592,7 +592,7 @@ abstract class CI_DB_driver
                     $trans_depth = $this->_trans_depth;
                     $this->trans_complete();
                     if ($trans_depth === $this->_trans_depth) {
-                        log_message('error', 'DataTableManager: Failure during an automated transaction commit/rollback!');
+                        log_message('error', 'Tables: Failure during an automated transaction commit/rollback!');
                         break;
                     }
                 }
@@ -855,8 +855,7 @@ abstract class CI_DB_driver
     // --------------------------------------------------------------------
 
     /**
-     * Initialize DataTableManager Settings
-     *
+     * Initialize Tables Settings
      * @return    bool
      */
     public function initialize()
