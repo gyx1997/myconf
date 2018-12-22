@@ -198,13 +198,15 @@ class Conference extends \myConf\BaseController
             case 'overview':
                 {
                     if ($this->_do == 'submit') {
+                        //修改会议信息提交
                         try {
-                            $this->Services->Conference->update_conference_info($this->_conference_id, $this->input->post('conference_name_text'), $this->input->post('conference_host_text'), $this->input->post('conference_date_text'), 'banner_image', 'qr_code');
+                            $this->Services->Conference->update_conference($this->_conference_id, $this->input->post('conference_name_text'), $this->input->post('conference_host_text'), $this->input->post('conference_date_text'), true, $this->input->post('conference_paper_submit_end'), 'banner_image', 'qr_code');
                             $this->add_output_variables(array('status' => 'SUCCESS'), OUTPUT_VAR_JSON_ONLY);
                         } catch (\myConf\Exceptions\UpdateConferenceException $e) {
                             $this->add_output_variables(array('status' => 'ERROR', 'err_flag' => $e->getErrorFlags()), OUTPUT_VAR_JSON_ONLY);
                         }
                     } else {
+                        //返回普通页面
                         $this->add_output_variables(array('conference' => $this->_conference_data), OUTPUT_VAR_HTML_ONLY);
                     }
                     break;

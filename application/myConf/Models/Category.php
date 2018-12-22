@@ -2,7 +2,12 @@
 
 namespace myConf\Models;
 
-
+/**
+ * Class Category
+ * @package myConf\Models
+ * @author _g63<522975334@qq.com>
+ * @version 2019.1
+ */
 class Category extends \myConf\BaseModel
 {
     /**
@@ -16,106 +21,144 @@ class Category extends \myConf\BaseModel
     }
 
     /**
-     * @deprecated
-     * @see \myConf\Models\Category::exist()
+     * 判断指定的栏目是否存在
      * @param int $category_id
      * @return bool
      */
-    public function has_category(int $category_id): bool
-    {
-        return $this->exist(strval($category_id));
+    public function exist(int $category_id) : bool {
+        return $this->Tables->Categories->exist(strval($category_id));
     }
 
     /**
-     * 创建一个新的栏目
+     * @param int $category_id
+     * @return array
+     */
+    public function first_document(int $category_id) : array {
+        return $this->Tables->Documents->fetch_first(array('document_category_id' => $category_id));
+    }
+
+    /**
      * @param int $conference_id
      * @param string $category_name
-     * @param string $category_type
+     * @param int $category_type
      * @return int
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbTransactionException
      */
-    public function create_new(int $conference_id, string $category_name, string $category_type) : int
+    public function create_new(int $conference_id, string $category_name, int $category_type) : int
     {
-        return $this->Tables->Categories->insert(
+        \myConf\Libraries\DbHelper::begin_trans();
+        $category_id = $this->Tables->Categories->insert(
             array(
                 'conference_id' => $conference_id,
                 'category_title' => $category_name,
                 'category_type' => $category_type
             )
         );
+        $this->Tables->Documents->insert(array(
+            'document_category_id' => $category_id,
+            'document_title' => 'Untitled Document',
+            'document_html' => '',
+        ));
+        \myConf\Libraries\DbHelper::end_trans();
+        //刷新缓存
+        $this->Tables->Categories->get_ids_by_conference($conference_id, true);
+        return $category_id;
     }
 
     /**
-     * 得到某个会议的按照display order排序的categories集合。
-     * @see \myConf\Models\Category::get()
      * @param int $conference_id
-     * @param bool $display_order
-     * @param bool $from_db
-     * @return array
+     * @param int $category_id
      * @throws \myConf\Exceptions\CacheDriverException
      */
-    public function get_categories_from_conference(int $conference_id, bool $display_order = TRUE, bool $from_db = false): array
+    public function delete(int $conference_id, int $category_id) : void
     {
-        $result = array();
-        //先从缓存中取，失败再从数据库中读取。如果参数$from_db设置为true，无论如何从数据库读取，并刷新缓存
-        if ($from_db === false) {
-            try {
-                //注意缓存键的设置，同时包含两个参数
-                $result = $this->cache()->get('cat_list\\' . strval($conference_id) . strval($display_order));
-            } catch (\myConf\Exceptions\CacheMissException $e) {
-                $from_db = true;
-            }
-        }
-        if ($from_db === true) {
-            $query = $this->db->query('
-			SELECT category_id, category_title, category_type, category_display_order 
-			FROM ' . $this->_table() . ' WHERE conference_id = ' . strval($conference_id) .
-                ($display_order ? ' ORDER BY category_display_order' : '')
-            );
-            $result = $query->result_array();
-            $result = empty($result) ? array() : $result;
-            $this->cache()->set('cat_list\\' . strval($conference_id) . strval($display_order), $result, 3600);
-        }
-        return $result;
+        $this->Tables->Categories->delete(strval($category_id));
+        //刷新非主键缓存
+        $this->Tables->Categories->get_ids_by_conference($conference_id, true);
     }
 
     /**
-     * @param int $conference_id
-     */
-    public function cache_categories_delete(int $conference_id): void
-    {
-        $this->cache()->delete('cat_list\\' . strval($conference_id));
-    }
-
-    /**
-     * @param int $category_id
-     */
-    public function delete_category(int $category_id): void
-    {
-        $this->db->where('category_id', $category_id);
-        $this->db->delete($this->_table());
-    }
-
-    /**
-     * 修改某个cateogry的名字。
-     * @deprecated
-     * @see \myConf\Models\Category::set()
+     * 修改某个category的名称（标题）
      * @param int $category_id
      * @param string $new_category_name
+     * @throws \myConf\Exceptions\CacheDriverException
      */
-    public function rename_category(int $category_id, string $new_category_name): void
+    public function rename(int $category_id, string $new_category_name) : void
     {
-        $this->set($category_id, array('category_title' => $new_category_name));
+        $this->Tables->Categories->set(strval($category_id), array('category_title' => $new_category_name));
     }
 
     /**
      * 修改某个category的display_order。
-     * @deprecated
-     * @see \myConf\Models\Category::set()
-     * @param $category_id
-     * @param $display_order
+     * @param int $category_id
+     * @param int $display_order
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function set_category_display_order(int $category_id, int $display_order): void
     {
-        $this->set($category_id, array('category_display_order' => $display_order));
+        $this->Tables->Categories->set($category_id, array('category_display_order' => $display_order));
+    }
+
+    /**
+     * 将指定的category上移一位
+     * @param int $conference_id
+     * @param int $category_id
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbTransactionException
+     */
+    public function move_up(int $conference_id, int $category_id) : void {
+        $categories = $this->Tables->Categories->get_ids_by_conference($conference_id);
+        //找到当前记录的id号
+        $i = 0;
+        foreach ($categories as $cid) {
+            if ($cid == $category_id) {
+                break;
+            }
+            $i++;
+        }
+        if ($i != 0) {
+            $j = 0;
+            //不是第一个，需要更新
+            //因为多条UPDATE，需要使用事务
+            \myConf\Libraries\DbHelper::begin_trans();
+            foreach ($categories as $cid) {
+                $this->Tables->Categories->set($cid, array('category_display_order' => $j == $i - 1 ? $i : ($j == $i ? $i - 1 : $j)));
+                $j++;
+            }
+            \myConf\Libraries\DbHelper::end_trans();
+        }
+        //删除旧缓存
+        $this->Tables->Categories->delete_conference_categories_cache($conference_id);
+    }
+
+    /**
+     * 将指定的category下移一位
+     * @param int $conference_id
+     * @param int $category_id
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbTransactionException
+     */
+    public function move_down(int $conference_id, int $category_id) : void {
+        $categories = $this->Tables->Categories->get_ids_by_conference($conference_id, true);
+        $i = 0;
+        $category_count = count($categories);
+        foreach ($categories as $cid) {
+            if ($cid == $category_id) {
+                break;
+            }
+            $i++;
+        }
+        if ($i < $category_count - 1) {
+            $j = 0;
+            \myConf\Libraries\DbHelper::begin_trans();
+            foreach ($categories as $cid) {
+                $this->Tables->Categories->set($cid, array('category_display_order' => $j === $i + 1 ? $i : ($j === $i ? $i + 1 : $j)));
+                $j++;
+            }
+            \myConf\Libraries\DbHelper::end_trans();
+        }
+        //删除旧缓存
+        $this->Tables->Categories->delete_conference_categories_cache($conference_id);
     }
 }

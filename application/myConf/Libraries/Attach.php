@@ -22,7 +22,7 @@ class Attach
         $file_data = Upload::parse_upload_file($file_field_name, $stored_data['short_name'], ATTACHMENT_DIR . $stored_data['directory'], true);
         $is_image = ($stored_data['extension'] == '.jpg' || $stored_data['extension'] == '.jpeg'
             || $stored_data['extension'] == '.png' || $stored_data['extension'] == '.gif') ? TRUE : FALSE;
-        if ($is_image) {
+        if ($is_image === true) {
             $image_info = @getimagesize(FCPATH . RELATIVE_ATTACHMENT_DIR . $stored_data['directory'] . $stored_data['short_name']);
         }
         $result['mime_type'] = $file_data['mime_type'];

@@ -29,52 +29,50 @@ class Conference extends \myConf\BaseModel
         $this->_pk = 'conference_id';
     }
 
-
     /**
      * @param int $conference_id
-     * @param string $conference_name
-     * @param string $conference_start_time
+     * @param $conference_name
+     * @param $conference_start_time
      * @param string $conference_banner
      * @param string $conference_qr_code
      * @param string $conference_host
+     * @param bool $use_paper_submission
+     * @param int $paper_submission_deadline
+     * @throws \myConf\Exceptions\DbTransactionException
      */
-    public function update_conference($conference_id,
-                                      $conference_name,
-                                      $conference_start_time,
+    public function update_conference(int $conference_id, $conference_name = '', $conference_start_time = 0,
                                       $conference_banner = '',
-                                      $conference_qr_code = '',
-                                      $conference_host = '')
+                                      $conference_qr_code = '', $conference_host = '', $use_paper_submission = true, $paper_submission_deadline = 0)
     {
-        $this->db->where('conference_id', $conference_id);
-        $extra_data = array();
-        $this->db->update(
-            $this->_table(),
-            array(
+        $this->Tables->Conferences->set(strval($conference_id), array(
                 'conference_name' => $conference_name,
                 'conference_start_time' => $conference_start_time,
-                'conference_extra' => serialize(
-                    array(
-                        'banner_image' => $conference_banner,
-                        'qr_code' => $conference_qr_code,
-                        'host' => $conference_host
-                    )
-                )
+                'conference_banner_image' => $conference_banner,
+                'conference_qr_code' => $conference_qr_code,
+                'conference_host' => $conference_host,
+                'conference_use_paper_submit' => $use_paper_submission,
+                'conference_paper_submit_end' => $paper_submission_deadline,
             )
         );
     }
 
     /**
      * 通过url获取会议信息
-     * @param $url
+     * @param string $url
      * @return array
      */
-    public function get_by_url($url) : array
+    public function get_by_url(string $url) : array
     {
-        $result_array = $this->Tables->Conferences->fetch_first(array('conference_url' => $url));
-        if (empty($result_array)) {
-            return array();
-        }
-        return $result_array;
+        return $this->Tables->Conferences->fetch_first(array('conference_url' => $url));
+    }
+
+    /**
+     * 通过id获取会议信息
+     * @param int $conference_id
+     * @return array
+     */
+    public function get_by_id(int $conference_id) : array {
+        return $this->Tables->Conferences->get(strval($conference_id));
     }
 
     /**
@@ -101,9 +99,15 @@ class Conference extends \myConf\BaseModel
      * 得到Home页面的所有栏目列表
      * @param int $conference_id
      * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
      */
-    public function category_list(int $conference_id) : array {
-        return $this->Tables->Categories->fetch_all(array('conference_id' => $conference_id), 'category_display_order', 'ASC');
+    public function categories(int $conference_id) : array {
+        $result = array();
+        $ids = $this->Tables->Categories->get_ids_by_conference($conference_id);
+        foreach ($ids as $id) {
+            $result [] = $this->Tables->Categories->get(strval($id));
+        }
+        return $result;
     }
 
     /**
@@ -113,5 +117,14 @@ class Conference extends \myConf\BaseModel
      */
     public function first_category(int $conference_id) : array {
         return $this->Tables->Categories->fetch_first(array('conference_id' => $conference_id), 'category_display_order', 'ASC');
+    }
+
+    /**
+     * 返回当前的会议是否存在
+     * @param int $conference_id
+     * @return bool
+     */
+    public function exist(int $conference_id) : bool {
+        return $this->Tables->Conferences->exist(strval($conference_id));
     }
 }

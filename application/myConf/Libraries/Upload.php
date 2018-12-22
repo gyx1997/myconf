@@ -15,12 +15,6 @@ namespace myConf\Libraries;
 class Upload
 {
     public static $checked = array();
-
-    public static function parse_attach()
-    {
-
-    }
-
     /**
      * 处理指定表单名上传的文件，返回原文件名、目标文件名、文件大小和MIME类型。
      * @param string $field POST表单名

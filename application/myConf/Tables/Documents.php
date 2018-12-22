@@ -14,6 +14,7 @@
 
         public function __construct() {
             parent::__construct();
+            $this->_use_pk_cache = false;
         }
 
         /**
@@ -44,7 +45,7 @@
          * @param int $category_id
          * @return array
          */
-        public function get_documents_in_category(int $category_id) : array {
+        public function get_in_category(int $category_id) : array {
             $this->db->where('document_category_id', $category_id);
             $this->db->select('*');
             $query = $this->db->get($this->table());

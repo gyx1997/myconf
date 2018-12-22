@@ -51,16 +51,17 @@
         /**
          * 重写父类方法，只从数据库读一次config，其余从临时变量读取
          * @param string $key
+         * @param bool $from_db
          * @return array
          */
-        public function get(string $key) : array {
+        public function get(string $key, bool $from_db = false) : array {
             return isset($this->_config_data[$key]) ? $this->_config_data[$key] : array();
         }
 
         /**
          * 重写父类方法，想config表写入值
          * @param string $key
-         * @param array $value
+         * @param array $data
          */
         public function set(string $key, array $data = array()) : void {
             parent::set($key, array('v' => $data['v']));

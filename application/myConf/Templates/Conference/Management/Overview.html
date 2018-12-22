@@ -16,10 +16,10 @@
                 <div class="col-md-12">
                     <div class="row">
                         <label class="control-label col-md-3" for="conference_url_text">Conference URL</label>
-                        <input disabled="disabled" type="text" class="form-control col-md-3"
+                        <input disabled="disabled" type="text" class="form-control col-md-2"
                                name="conference_url_text" id="conference_url_text"
                                value="<?php echo $conference['conference_url']; ?>"/>
-                        <label class="control-label col-md-3" for="conference_create_time_text">Create Date</label>
+                        <label class="control-label col-md-4" for="conference_create_time_text">Create Date</label>
                         <input disabled="disabled" type="text" class="form-control col-md-3"
                                name="conference_create_time_text" id="conference_create_time_text"
                                value="<?php echo date('Y-m-d', intval($conference['conference_create_time'])); ?>"/>
@@ -33,9 +33,10 @@
                         <label for="conference_host_text" class="col-md-3">Host</label>
                         <input type="text" name="conference_host_text" id="conference_host_text"
                                placeholder="Enter the host of the conference."
-                               class="form-control col-md-3"
-                               value="<?php echo $conference['host']; ?>"/>
-                        <label for="conference_date_text" class="col-md-3">Start Date</label>
+                               class="form-control col-md-2"
+                               value="<?php echo $conference['conference_host']; ?>"/>
+                        <label for="conference_date_text" class="col-md-4">Start Date&nbsp;&nbsp;<span
+                                class="badge badge-info">yyyy-mm-dd</span></label>
                         <input type="text" name="conference_date_text" id="conference_date_text"
                                placeholder="Enter the start date of the conference."
                                class="form-control col-md-3"
@@ -52,6 +53,26 @@
                                placeholder="Enter full name of conference here"
                                id="conference_name_text" name="conference_name_text"
                                value="<?php echo $conference['conference_name']; ?>"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3"></div>
+            <div class="form-inline">
+                <div class=" col-md-12">
+                    <div class="row">
+                        <label for="conference_use_submit" class="col-md-3">Use paper submission system</label>
+                        <input type="checkbox" name="conference_use_submit" id="conference_use_submit"
+                               class="form-control col-md-2"
+                               value="<?php echo $conference['conference_use_paper_submit']; ?>"
+                               disabled="disabled"
+                               checked="checked"
+                        />
+                        <label for="conference_paper_submit_end" class="col-md-4">Paper Submit Deadline&nbsp;&nbsp;<span
+                                class="badge badge-info">yyyy-mm-dd</span></label>
+                        <input type="text" name="conference_paper_submit_end" id="conference_paper_submit_end"
+                               placeholder="Enter the deadline of paper submission."
+                               class="form-control col-md-3"
+                               value="<?php echo date('Y-m-d', intval($conference['conference_paper_submit_end'])); ?>"/>
                     </div>
                 </div>
             </div>
@@ -78,9 +99,9 @@
             <div class="form-group col-md-12">
                 <div class="row">
                     <div class="col-md-3"></div>
-                    <?php if (isset($conference['banner_image']) && $conference['banner_image'] != '') { ?>
+                    <?php if (isset($conference['conference_banner_image'])) { ?>
                     <div class="alert alert-success col-md-9">
-                        <img src="/data/attachment/<?php echo($conference['banner_image']); ?>"
+                        <img src="/data/attachment/<?php echo($conference['conference_banner_image']); ?>"
                              style="width:100%;height:100px;"/>
                     </div>
                     <?php } else { ?>
@@ -113,9 +134,10 @@
             <div class="form-group col-md-12">
                 <div class="row">
                     <div class="col-md-3"></div>
-                    <?php if (isset($conference['qr_code']) && $conference['qr_code'] != '') { ?>
+                    <?php if (isset($conference['conference_qr_code'])) { ?>
                     <div class="alert alert-success col-md-9">
-                        <img src="/data/attachment/<?php echo($conference['qr_code']); ?>" height='100' width='100'/>
+                        <img src="/data/attachment/<?php echo($conference['conference_qr_code']); ?>" height='100'
+                             width='100'/>
                     </div>
                     <?php } else { ?>
                     <div class="alert alert-warning col-md-9">

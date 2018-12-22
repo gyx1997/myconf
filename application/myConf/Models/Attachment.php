@@ -24,27 +24,27 @@ class Attachment extends \myConf\BaseModel
     }
 
     /**
-     * 以文档附件的形式插入一个附件
-     * @param string $file_name
-     * @param int $file_size
+     * @param string $tag_type
+     * @param int $tag_id
+     * @param string $full_name
      * @param string $original_name
-     * @param int $document_id
+     * @param int $file_size
      * @param bool $is_image
-     * @param int $image_width
-     * @param int $image_height
-     * @return int 附件的id号
+     * @param bool $used
+     * @return int
      */
-    public function add_as_document(string $file_name, int $file_size, string $original_name, int $document_id = 0, bool $is_image = false, int $image_width = 0, int $image_height = 0) : int
+    public function add_new(string $tag_type, int $tag_id, string $full_name, string $original_name, int $file_size, bool $is_image = false, bool $used = true) : int
     {
         return $this->Tables->Attachments->insert(array(
-                'attachment_file_name' => $file_name,
+                'attachment_file_name' => $full_name,
                 'attachment_is_image' => $is_image ? 1 : 0,
                 'attachment_file_size' => $file_size,
                 'attachment_original_name' => $original_name,
-                'attachment_image_height' => empty($image_height) ? 0 : $image_height,
-                'attachment_image_width' => empty($image_width) ? 0 : $image_width,
-                'attachment_tag_id' => $document_id,
-                'attachment_tag_type' => 'document'
+                'attachment_image_height' => 0, //unused
+                'attachment_image_width' => 0,  //unused
+                'attachment_tag_id' => $tag_id,
+                'attachment_tag_type' => $tag_type,
+                'attachment_used' => $used ? 1 : 0,
             )
         );
     }
