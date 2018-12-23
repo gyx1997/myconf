@@ -8,13 +8,19 @@
 
     namespace myConf\Tables;
 
-    class Configs extends \myConf\BaseTable {
+    use \myConf\Libraries\DbHelper;
+
+    /**
+     * Class Configs
+     * @package myConf\Tables
+     * @author _g63<522975334@qq.com>
+     * @version 2019.1
+     */
+    class Configs extends \myConf\BaseEntityTable {
         /**
          * Configs constructor.
          */
         private $_config_data = array();
-
-        private static $fields = array('k', 'v');
 
         public function __construct() {
             parent::__construct();
@@ -37,15 +43,7 @@
          * @return string
          */
         public function table() : string {
-            return $this->make_table('configs');
-        }
-
-        /**
-         * 得到当前表的所有字段
-         * @return array
-         */
-        public function fields() : array {
-            return self::$fields;
+            return DbHelper::make_table('configs');
         }
 
         /**
@@ -54,7 +52,7 @@
          * @param bool $from_db
          * @return array
          */
-        public function get(string $key, bool $from_db = false) : array {
+        public function get($key, bool $from_db = false) : array {
             return isset($this->_config_data[$key]) ? $this->_config_data[$key] : array();
         }
 
@@ -62,8 +60,9 @@
          * 重写父类方法，想config表写入值
          * @param string $key
          * @param array $data
+         * @throws \myConf\Exceptions\CacheDriverException
          */
-        public function set(string $key, array $data = array()) : void {
+        public function set($key, array $data = array()) : void {
             parent::set($key, array('v' => $data['v']));
             $this->_config_data[$key] = $data['v'];
         }

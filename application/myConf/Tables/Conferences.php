@@ -8,8 +8,16 @@
 
     namespace myConf\Tables;
 
-    class Conferences extends \myConf\BaseTable {
-        public static $conference_status = array('moderated' => 0, 'normal' => 1);
+    use \myConf\Libraries\DbHelper;
+
+    class Conferences extends \myConf\BaseEntityTable {
+        /**
+         * @var array 会议状态
+         */
+        public static $conference_status = [
+            'moderated' => 0,       //正在被审核
+            'normal' => 1,          //正常显示
+        ];
 
         public function __construct() {
             parent::__construct();
@@ -28,7 +36,7 @@
          * @return string
          */
         public function table() : string {
-            return $this->make_table('conferences');
+            return DbHelper::make_table('conferences');
         }
 
         /**
@@ -37,11 +45,7 @@
          * @return array
          */
         public function get_by_url(string $url) : array {
-            $result_array = $this->fetch_first(array('conference_url' => $url));
-            if (empty($result_array)) {
-                return array();
-            }
-            return $result_array;
+            return DbHelper::fetch_first($this->table(), ['conference_url' => $url]);
         }
 
         /**

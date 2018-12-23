@@ -8,7 +8,9 @@
 
     namespace myConf\Tables;
 
-    class Users extends \myConf\BaseTable {
+    use \myConf\Libraries\DbHelper;
+
+    class Users extends \myConf\BaseEntityTable {
         private static $fields_extra = array('avatar', 'organization');
 
         public function __construct() {
@@ -24,7 +26,7 @@
         }
 
         public function table() : string {
-            return $this->make_table('users');
+            return DbHelper::make_table('users');
         }
 
         /**
@@ -36,15 +38,15 @@
          * @return int
          */
         public function create($username, $password, $email, $salt) {
-            return $this->insert(array(
-                'user_name' => $username,
-                'user_email' => $email,
-                'user_password' => $password,
-                'password_salt' => $salt,
-                'is_frozen' => 1,
-                'user_role' => 'user',
-                'user_extra' => serialize(array('avatar' => '', 'organization' => '',)),
-            ));
+            return $this->insert([
+                    'user_name' => $username,
+                    'user_email' => $email,
+                    'user_password' => $password,
+                    'password_salt' => $salt,
+                    'is_frozen' => 1,
+                    'user_role' => 'user',
+                    'user_avatar' => '',
+                ]);
         }
 
         /**
@@ -52,8 +54,7 @@
          * @param $user_id
          */
         public function activate($user_id) {
-            $this->db->where('user_id', $user_id);
-            $this->db->update($this->table(), array('is_frozen' => 0));
+            DbHelper::update($this->table(), ['is_frozen' => 0], ['user_id' => $user_id]);
         }
 
         /**
@@ -62,7 +63,7 @@
          * @return array
          */
         public function get_by_username(string $username) : array {
-            return $this->fetch_first(array('user_name' => $username));
+            return DbHelper::fetch_first($this->table(), ['user_name' => $username]);
         }
 
         /**
@@ -72,9 +73,10 @@
          * @param string $salt
          */
         public function update_user_password_by_email(string $user_email, string $password, string $salt) : void {
-            $this->db->where('user_email', $user_email);
-            $this->db->update($this->table(), array('user_password' => $password, 'password_salt' => $salt));
-            return;
+            DbHelper::update($this->table(), [
+                    'user_password' => $password,
+                    'password_salt' => $salt,
+                ], ['user_email' => $user_email]);
         }
 
         /**
@@ -83,7 +85,7 @@
          * @return array
          */
         public function get_by_email(string $email) : array {
-            return $this->fetch_first(array('user_email' => $email));
+            return DbHelper::fetch_first($this->table(), ['user_email' => $email]);
         }
 
         /**

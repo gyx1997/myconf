@@ -278,7 +278,6 @@ class Conference extends \myConf\BaseController
                     switch ($this->_do) {
                         case 'getAll':
                             {
-                                //处理输入
                                 $page = $this->input->get('page');
                                 $page == '' ? $page = 0 : $page = intval($page) - 1;
                                 $user_name_restrict = $this->input->get('username');
@@ -289,8 +288,12 @@ class Conference extends \myConf\BaseController
                                         $user_role_restrict [] = $key;
                                     }
                                 }
-                                $members = $this->Services->ConferenceMember->get_conference_members($this->_conference_id, $user_role_restrict, $user_name_restrict, $user_email_restrict);
-                                $this->add_output_variables(array('status' => 'SUCCESS', 'data' => $members, 'count' => count($members)), OUTPUT_VAR_JSON_ONLY);
+                                $members = $this->Services->Conference->get_members($this->_conference_id, $user_role_restrict, $user_name_restrict, $user_email_restrict);
+                                $this->add_output_variables([
+                                    'status' => 'SUCCESS',
+                                    'data' => $members,
+                                    'count' => count($members),
+                                ], OUTPUT_VAR_JSON_ONLY);
                                 break;
                             }
                         case 'toggleRole':
@@ -298,10 +301,10 @@ class Conference extends \myConf\BaseController
                                 $user_id = $this->input->get('uid');
                                 $role = $this->input->get('role');
                                 if (array_key_exists($role, $this->_privilege_table)) {
-                                    if ($this->mConfMember->member_is_role($user_id, $this->_conference_id, $role)) {
-                                        $this->mConfMember->delete_role_from_member($user_id, $this->_conference_id, $role);
+                                    if ($this->Services->Conference->member_is_role($this->_conference_id, $user_id, $role)) {
+                                        $this->Services->Conference->member_remove_role($this->_conference_id, $user_id, $role);
                                     } else {
-                                        $this->mConfMember->add_role_to_member($user_id, $this->_conference_id, $role);
+                                        $this->Services->Conference->member_add_role($this->_conference_id, $user_id, $role);
                                     }
                                 }
                                 $this->add_output_variables(array('status' => 'SUCCESS'), OUTPUT_VAR_JSON_ONLY);
@@ -378,26 +381,24 @@ class Conference extends \myConf\BaseController
                         case 'get':
                             {
                                 $document_id = intval($this->input->get('id'));
-                                if (empty($document_id) || $document_id == NULL || $document_id == 0) {
-                                    echo '';
+                                $data = ['status' => 'DOC_NOT_FOUND'];
+                                if ($document_id !== 0) {
+                                    try {
+                                        $document = $this->Services->Document->get_content($document_id);
+                                        $data['status'] = 'SUCCESS';
+                                        $data['doc_html'] = $document['document_html'];
+                                        $data['doc_title'] = $document['title'];
+                                    } catch (\myConf\Exceptions\DocumentNotExistsException $e) {
+                                        //do nothing.
+                                    }
                                 }
-                                $document = $this->mDocument->get_document($document_id);
-                                if (empty($document)) {
-                                    echo '';
-                                }
-                                echo $document['document_html'];
+                                $this->add_output_variables($data);
                                 break;
                             }
                         case 'edit':
                             {
                                 $document_id = intval($this->input->get('id'));
-                                $this->_render(
-                                    'conference/management/edit_document',
-                                    'Edit Document',
-                                    array(
-                                        'document_id' => $document_id
-                                    )
-                                );
+                                $this->add_output_variables(['document_id' => $document_id]);
                                 break;
                             }
                         default:

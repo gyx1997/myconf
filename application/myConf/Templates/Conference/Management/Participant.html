@@ -199,7 +199,7 @@
                     $('#' + chkName).change(function (e) {
                         $.ajax({
                             type: 'GET',
-                            url: '{{$base_url}}/participant/?do=toggleRole&uid=' + e.target.getAttribute('data-user-id') + '&role=' + e.target.getAttribute('data-role'),
+                            url: '{{$base_url}}/participant/?do=toggleRole&ajax=true&uid=' + e.target.getAttribute('data-user-id') + '&role=' + e.target.getAttribute('data-role'),
                             async: true,
                             dataType: 'json',
                             success: function (rdata) {

@@ -45,9 +45,10 @@ class Scholar extends \myConf\BaseModel
      * 获取某一个scholar的信息
      * @param string $email
      * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function get_by_email(string $email) : array {
-        return $this->Tables->Scholars->get_by_email($email);
+        return $this->Tables->Scholars->get($email);
     }
 
     /**
@@ -60,6 +61,7 @@ class Scholar extends \myConf\BaseModel
      * @param string $address
      * @param string $prefix
      * @param string $chn_full_name
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function set_by_email(string $email, string $first_name, string $last_name, string $institution, string $department, string $address, string $prefix = '', string $chn_full_name = '') : void
     {
@@ -72,7 +74,7 @@ class Scholar extends \myConf\BaseModel
             'scholar_prefix' => $prefix,
             'scholar_chn_full_name' => $chn_full_name
         );
-        $this->Tables->Scholars->set_by_email($email, $data_to_update);
+        $this->Tables->Scholars->set($email, $data_to_update);
         return;
     }
 
@@ -83,6 +85,6 @@ class Scholar extends \myConf\BaseModel
      */
     public function exist_by_email(string $email) : bool
     {
-        return $this->Tables->Scholars->exist_by_email($email);
+        return $this->Tables->Scholars->exist($email);
     }
 }

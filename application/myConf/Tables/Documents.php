@@ -8,7 +8,9 @@
 
     namespace myConf\Tables;
 
-    class Documents extends \myConf\BaseTable {
+    use \myConf\Libraries\DbHelper;
+
+    class Documents extends \myConf\BaseEntityTable {
 
         private static $fields = array('document_id', 'document_category_id', 'document_display_order', 'document_title', 'document_html',);
 
@@ -22,7 +24,7 @@
          * @return string
          */
         public function table() : string {
-            return $this->make_table('documents');
+            return DbHelper::make_table('documents');
         }
 
         /**
@@ -44,6 +46,8 @@
         /**
          * @param int $category_id
          * @return array
+         * @throws \myConf\Exceptions\CacheDriverException
+         * @throws \myConf\Exceptions\CacheMissException
          */
         public function get_in_category(int $category_id) : array {
             $this->db->where('document_category_id', $category_id);

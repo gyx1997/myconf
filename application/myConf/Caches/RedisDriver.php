@@ -149,7 +149,12 @@
             return new \myConf\Exceptions\CacheDriverException('REDIS_DRIVER_ERROR', 'An error occurred when trying to ' . $operation . ' the key "' . $key . '". Message : ' . $this->_redis_object->getLastError());
         }
 
+        /**
+         * @param string $prefix
+         * @param string $key
+         * @return string
+         */
         private function _make_key(string $prefix, string $key) : string {
-            return $prefix . '-' . $key;
+            return $prefix . $key;
         }
     }

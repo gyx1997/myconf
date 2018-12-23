@@ -38,6 +38,7 @@ class User extends \myConf\BaseModel
     /**
      * @param int $user_id
      * @param string $password
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function set_password(int $user_id, string $password) : void {
         $salt = $this->_generate_password_salt();
@@ -81,10 +82,15 @@ class User extends \myConf\BaseModel
      * @param string $password
      * @param string $email
      * @return int
+     * @throws \myConf\Exceptions\DbTransactionException
      */
     public function create_new(string $username, string $password, string $email) : int {
         $salt = $this->_generate_password_salt();
-        return $this->Tables->Users->create($username, md5($password . $salt), $email, $salt);
+        \myConf\Libraries\DbHelper::begin_trans();
+        $user_id = $this->Tables->Users->create($username, md5($password . $salt), $email, $salt);
+        $this->Tables->Scholars->insert(array('scholar_email' => $email));
+        \myConf\Libraries\DbHelper::end_trans();
+        return $user_id;
     }
 
     /**
@@ -96,9 +102,10 @@ class User extends \myConf\BaseModel
     }
 
     /**
-     * 得到相关联的scholar信息
+     * 得到相关联的Scholar信息
      * @param int $user_id
      * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function get_assigned_scholar(int $user_id) : array {
         $user = $this->Tables->Users->get(strval($user_id));

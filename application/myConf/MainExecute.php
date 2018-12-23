@@ -75,20 +75,8 @@
         return false;
     });
 
-    //加载所有静态方法类
-    /*
-    $lib_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'Libraries' . DIRECTORY_SEPARATOR;
-    $libraries = scandir($lib_path);
-    if ($libraries === false) {
-        show_error('Load static library failed.');
-    }
-    foreach ($libraries as $file) {
-        if (strpos($file, '.php') !== false) {
-            log_message('DEBUG', 'lib: "' . $file . '" loaded.');
-            require $lib_path . $file;
-        }
-    }
-    */
+    //初始化静态数据库类
+    \myConf\Libraries\DbHelper::init();
 
     //加载请求，开始应用逻辑响应
     $request = new \myConf\Request();

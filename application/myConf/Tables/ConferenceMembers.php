@@ -8,21 +8,24 @@
 
     namespace myConf\Tables;
 
-    class ConferenceMembers extends \myConf\BaseTable {
+    use \myConf\Libraries\DbHelper;
+
+    class ConferenceMembers extends \myConf\BaseMultiRelationTable {
 
         /**
-         * ConfMember constructor.
+         * ConferenceMembers constructor.
+         * @throws \myConf\Exceptions\CacheDriverException
          */
         public function __construct() {
             parent::__construct();
         }
 
         /**
-         * 返回主键名。relation table this function for dummy use.
-         * @return string
+         * 返回主键名。
+         * @return array
          */
-        public function primary_key() : string {
-            return 'id';
+        public function primary_key() : array {
+            return ['user_id', 'conference_id'];
         }
 
         /**
@@ -30,7 +33,7 @@
          * @return string
          */
         public function table() : string {
-            return $this->make_table('conference_members');
+            return DbHelper::make_table('conference_members');
         }
 
         /**
@@ -41,6 +44,7 @@
         public function get_conference_members(int $conference_id) : array {
             //NOTE:使用连表查询，写死了表明，后面需要注意
             //NOTE:过滤角色信息，请在上一层处理，因为返回的是数组展开的字符串
+            /*
             $scholar_table = $this->make_table('scholars');
             $user_table = $this->make_table('users');
             $this_table = $this->table();;
@@ -51,6 +55,19 @@
                 unset($item['user_role']);
             }
             return $data;
+            */
+            $members = DbHelper::fetch_all($this->table(), ['conference_id' => $conference_id]);
+            foreach ($members as &$member) {
+                unset($member['conference_id']);
+                unset($member['id']);
+                $member['user_roles'] = explode(',', $member['user_role']);
+                unset($member['user_role']);
+            }
+            return $members;
+        }
+
+        public function get_user_ids_by_conference(int $conference_id) : array {
+
         }
 
         /**
@@ -59,7 +76,7 @@
          * @return int
          */
         public function get_conference_members_count(int $conference_id) : int {
-            $sql_result = $this->fetch_first_raw('SELECT COUNT(1) FROM ' . $this->table() . ' WHERE conference_id = ' . strval($conference_id));
+            $sql_result = DbHelper::fetch_all_raw('SELECT COUNT(1) FROM ' . $this->table() . ' WHERE conference_id = ' . strval($conference_id));
             return intval($sql_result['COUNT(1)']);
         }
 
@@ -71,7 +88,7 @@
          * @return array
          */
         public function get_conferences_from_user(int $user_id, int $start = 0, int $limit = 10) : array {
-            return $this->fetch_all(array('user_id' => $user_id), '', '', $start, $limit);
+            return DbHelper::fetch_all($this->table(), ['user_id' => $user_id], '', '', $start, $limit);
         }
 
         /**
@@ -88,15 +105,13 @@
          * 将用户加入会议
          * @param int $user_id
          * @param int $conference_id
-         * @return int
          */
-        public function user_join_in_conference(int $user_id, int $conference_id) : int {
-            $this->db->insert($this->table(), array(
+        public function user_join_in_conference(int $user_id, int $conference_id) : void {
+            DbHelper::insert($this->table(), [
                 'user_id' => $user_id,
                 'conference_id' => $conference_id,
                 'user_role' => 'scholar',
-            ));
-            return $this->db->insert_id();
+            ]);
         }
 
         /**
@@ -105,20 +120,7 @@
          * @param int $conference_id
          */
         public function user_remove_from_conference(int $user_id, int $conference_id) : void {
-            $this->db->where('user_id', $user_id);
-            $this->db->where('conference_id', $conference_id);
-            $this->db->delete($this->table());
-        }
-
-        /**
-         * 得到用户角色
-         * @param int $user_id
-         * @param int $conference_id
-         * @return array
-         */
-        public function get_user_roles_in_conference(int $user_id, int $conference_id) : array {
-            $user = $this->fetch_first(array('user_id' => $user_id, 'conference_id' => $conference_id));
-            return explode(',', $user['user_role']);
+            DbHelper::delete($this->table(), ['user_id' => $user_id, 'conference_id' => $conference_id]);
         }
 
         /**
@@ -126,32 +128,17 @@
          * @param int $user_id
          * @param int $conference_id
          * @param array $roles
-         */
-        public function set_user_roles_in_conference(int $user_id, int $conference_id, array $roles) : void {
-            $this->db->where('user_id', $user_id);
-            $this->db->where('conference_id', $conference_id);
-            $this->db->update($this->table(), array('user_role' => implode(',', $roles)));
-        }
-
-        /**
-         * dummy method for relation table
-         * @deprecated
-         * @param string $pk_val
-         * @param bool $from_db
-         * @return array
          * @throws \myConf\Exceptions\CacheDriverException
          */
-        public function get(string $pk_val, bool $from_db = false) : array {
-            return parent::get($pk_val, $from_db); // TODO: Change the autogenerated stub
-        }
-
-        /**
-         * dummy method for relation table
-         * @deprecated
-         * @param string $pk_val
-         * @param array $data
-         */
-        public function set(string $pk_val, array $data = array()) : void {
-            parent::set($pk_val, $data); // TODO: Change the autogenerated stub
+        public function set_user_roles_in_conference(int $user_id, int $conference_id, array $roles) : void {
+            try {
+                //使用set虽然效率较低（需要判断主键），但是避免了重新更新缓存的代码。
+                $this->set([
+                    'user_id' => $user_id,
+                    'conference_id' => $conference_id,
+                ], ['user_role' => implode(',', $roles)]);
+            } catch (\myConf\Exceptions\DbCompositeKeysException $e) {
+                //dummy because this exception should never be thrown.
+            }
         }
     }

@@ -15,7 +15,7 @@ namespace myConf;
  * @property-read \myConf\Services\Account $Account
  * @property-read \myConf\Services\Config $Config
  * @property-read \myConf\Services\Conference $Conference
- * @property-read \myConf\Services\ConferenceMember $ConferenceMember
+ * @property-read \myConf\Services\Document $Document
  */
 class Services
 {

@@ -2,10 +2,13 @@
 
     namespace myConf\Tables;
 
-    class Categories extends \myConf\BaseTable {
+    use \myConf\Libraries\DbHelper;
+
+    class Categories extends \myConf\BaseEntityTable {
 
         /**
          * Categories constructor.
+         * @throws \myConf\Exceptions\CacheDriverException
          */
         public function __construct() {
             parent::__construct();
@@ -24,7 +27,7 @@
          * @return string
          */
         public function table() : string {
-            return $this->make_table('categories');
+            return DbHelper::make_table('categories');
         }
 
         /**
@@ -36,7 +39,7 @@
          */
         public function get_ids_by_conference(int $conference_id, bool $force_read_db = false) : array {
             $data = array();
-            $cache_key = 'Cats-Conf[' . strval($conference_id) . ']';
+            $cache_key = '<cats_in_conf>[' . strval($conference_id) . ']';
             if ($force_read_db === false) {
                 try {
                     $data = $this->Cache->get($cache_key);
@@ -45,7 +48,7 @@
                 }
             }
             if ($force_read_db === true) {
-                $data = $this->fetch_all_raw("SELECT category_id FROM " . $this->table() . " WHERE conference_id = $conference_id ORDER BY category_display_order ASC");
+                $data = DbHelper::fetch_all_raw("SELECT category_id FROM " . $this->table() . " WHERE conference_id = $conference_id ORDER BY category_display_order ASC");
                 foreach ($data as &$val) {
                     $val = $val['category_id'];
                 }
@@ -60,7 +63,7 @@
          * @throws \myConf\Exceptions\CacheDriverException
          */
         public function delete_conference_categories_cache(int $conference_id) : void {
-            $cache_key = 'Cats-Conf[' . strval($conference_id) . ']';
+            $cache_key = '<cats_in_conf>[' . strval($conference_id) . ']';
             $this->Cache->delete($cache_key);
             return;
         }

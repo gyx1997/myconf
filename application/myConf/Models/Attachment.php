@@ -132,4 +132,19 @@ class Attachment extends \myConf\BaseModel
     {
         return $this->Tables->Attachments->get_list($tag_type, $tag_id, $image_only, $start, $limit);
     }
+
+    public function get_list(string $tag_type = '', int $tag_id = 0, bool $image_only = false, int $start = 0, int $limit = 10) : array {
+        $this->db->select('*');
+        if ($tag_type !== '' && isset($this->tag_types[$tag_type])) {
+            $this->db->where('attachment_tag_type', $this->tag_types[$tag_type]);
+            if ($tag_id !== 0) {
+                $this->db->where('attachment_tag_id', $tag_id);
+            }
+        }
+        $image_only === true && $this->db->where('attachment_is_image', 1);
+        $this->db->limit($limit, strval($start));
+        $this->db->order_by('attachment_id', 'DESC');
+        $query_result = $this->db->get($this->table());
+        return $this->Tables->Attachments->fetch_all();
+    }
 }

@@ -42,29 +42,24 @@ class Account extends \myConf\BaseService
     }
 
     /**
-     * 注册逻辑
+     * 新建账号业务逻辑
      * @param string $email
      * @param string $username
      * @param string $password
      * @return array
-     * @throws \Exception
-     * @throws \sAccount\EmailAlreadyExistsException
-     * @throws \sAccount\UsernameAlreadyExistsException
+     * @throws \myConf\Exceptions\DbTransactionException
+     * @throws \myConf\Exceptions\EmailExistsException
+     * @throws \myConf\Exceptions\UsernameExistsException
      */
-    public function register(string $email, string $username, string $password): array
+    public function new_account(string $email, string $username, string $password) : array
     {
         if ($email === '' || $this->Models->User->exist_by_email($email)) {
-            throw new \sAccount\EmailAlreadyExistsException();
+            throw new \myConf\Exceptions\EmailExistsException();
         }
         if ($username === '' || $this->Models->User->exist_by_username($username)) {
-            throw new \sAccount\UsernameAlreadyExistsException();
+            throw new \myConf\Exceptions\UsernameExistsException();
         }
-        //新建用户事务开始
-        $this->Models->trans_block_begin();
         $user_id = $this->Models->User->create_new($username, $password, $email);
-        $this->Models->Scholar->create_new($email);
-        $this->Models->trans_block_end();
-        //新建用户事务结束
         return $this->Models->User->get_by_id($user_id);
     }
 
@@ -101,6 +96,7 @@ class Account extends \myConf\BaseService
      * @param string $hash_original
      * @param string $hash_to_verify
      * @param string $new_password
+     * @throws \myConf\Exceptions\CacheDriverException
      * @throws \myConf\Exceptions\EmailVerifyFailedException
      * @throws \myConf\Exceptions\UserNotExistsException
      */
@@ -112,8 +108,8 @@ class Account extends \myConf\BaseService
         if (!$this->Models->User->exist_by_email($email)) {
             throw new \myConf\Exceptions\UserNotExistsException();
         }
-        $salt = $this->_generate_password_salt();
-        $this->Models->User->update_user_password_by_email($email, md5($new_password . $salt), $salt);
+        $user_id = $this->Models->User->get_by_email($email)['user_id'];
+        $this->Models->User->set_password($user_id, $new_password);
         return;
     }
 

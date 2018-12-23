@@ -16,8 +16,6 @@ class Category extends \myConf\BaseModel
     public function __construct()
     {
         parent::__construct();
-        $this->_table_name = 'categories';
-        $this->_pk = 'category_id';
     }
 
     /**

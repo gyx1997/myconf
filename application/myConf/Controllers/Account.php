@@ -23,7 +23,9 @@ class Account extends \myConf\BaseController
     }
 
     /**
-     * 登录页面
+     * 登录
+     * @throws \myConf\Exceptions\SendExitInstructionException
+     * @throws \myConf\Exceptions\SendRedirectInstructionException
      */
     public function login()
     {
@@ -69,6 +71,11 @@ class Account extends \myConf\BaseController
         //header('location:' . $this->_url_redirect);
     }
 
+    /**
+     * 重置密码
+     * @throws \myConf\Exceptions\HttpStatusException
+     * @throws \myConf\Exceptions\SendExitInstructionException
+     */
     public function reset_password()
     {
         switch ($this->_do) {
@@ -81,7 +88,7 @@ class Account extends \myConf\BaseController
                     $this->session->set_tempdata('pwd-reset-hash', $hash_key, 1800);
                     try {
                         $this->Services->Account->send_verify_email($target_email, $hash_key);
-                    } catch (\sAccount\AccountNotExistsException $e) {
+                    } catch (\myConf\Exceptions\UserNotExistsException $e) {
                         $status = 'EMAIL_NOT_EXISTS';
                         $this->Session->unset_tempdata('pwd-reset-hash');
                     }
@@ -100,9 +107,9 @@ class Account extends \myConf\BaseController
                     $email = $this->input->post('user_email');
                     try {
                         $this->Services->Account->reset_password($email, $hash_key, $hash_key_got, $new_password);
-                    } catch (\sAccount\EmailVerifyFailedException $e) {
+                    } catch (\myConf\Exceptions\EmailVerifyFailedException $e) {
                         $status = 'EMAIL_VERIFY_FAILED';
-                    } catch (\sAccount\AccountNotExistsException $e) {
+                    } catch (\myConf\Exceptions\UserNotExistsException $e) {
                         $status = 'EMAIL_ERROR';
                     }
                     $this->add_output_variables(array('status' => $status));
@@ -116,6 +123,7 @@ class Account extends \myConf\BaseController
     }
 
     /**
+     * 注册
      * @throws \Exception mysqli_insert_id()出错，认为可以忽略。如果偶然出现会被最外层的_exception_handler抓住。
      */
     public function register()
@@ -130,15 +138,15 @@ class Account extends \myConf\BaseController
                     $status = 'SUCCESS';
                     try {
                         //定义上会出Exception，实际上应该不会。
-                        $user = $this->Services->Account->register(
+                        $user = $this->Services->Account->new_account(
                             $this->input->post('register_email'),
                             $this->input->post('register_username'),
                             $this->input->post('register_password')
                         );
                         $this->_set_login($user);
-                    } catch (\sAccount\EmailAlreadyExistsException $e) {
+                    } catch (\myConf\Exceptions\EmailExistsException $e) {
                         $status = 'EMAIL_EXISTS';
-                    } catch (\sAccount\UsernameAlreadyExistsException $e) {
+                    } catch (\myConf\Exceptions\UsernameExistsException $e) {
                         $status = 'USERNAME_EXISTS';
                     }
                     $this->add_output_variables(array('status' => $status));

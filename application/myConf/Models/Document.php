@@ -15,8 +15,6 @@ class Document extends \myConf\BaseModel
     public function __construct()
     {
         parent::__construct();
-        $this->_table_name = 'documents';
-        $this->_pk = 'document_id';
     }
 
     /**
@@ -53,6 +51,43 @@ class Document extends \myConf\BaseModel
     public function get_document(int $document_id): array
     {
         return $this->get($document_id);
+    }
+
+    /**
+     * 得到某个id的document
+     * @param int $id
+     * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
+     */
+    public function get_by_id(int $id) : array {
+        return $this->Tables->Documents->get(strval($id));
+    }
+
+    /**
+     * 根据指定的id更新document的内容
+     * @param int $id
+     * @param string $content
+     * @param string $title
+     * @throws \myConf\Exceptions\CacheDriverException
+     */
+    public function update_content_by_id(int $id, string $content = '', string $title = '') : void {
+        $this->Tables->Documents->set(strval($id), ['document_html' => $content, 'document_title' => $title]);
+    }
+
+    /**
+     * 将document从显示列表上移一位
+     * @param int $id
+     */
+    public function move_up(int $id) : void {
+        //todo: add method body
+    }
+
+    /**
+     * 将document从显示列表下移一位
+     * @param int $id
+     */
+    public function move_down(int $id) : void {
+        //todo: add method body.
     }
 
     /**

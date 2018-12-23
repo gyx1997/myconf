@@ -58,11 +58,12 @@ class Conference extends \myConf\BaseService
      * 根据会议的ID号得到会议信息
      * @param int $conference_id
      * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
      * @throws \myConf\Exceptions\ConferenceNotFoundException
      */
     public function get_conference_by_id(int $conference_id): array
     {
-        $conf = $this->Models->Conference->get(strval($conference_id));
+        $conf = $this->Models->Conference->get_by_id((strval($conference_id)));
         if (empty($conf)) {
             throw $this->_exception_conf_not_found();
         }
@@ -81,18 +82,20 @@ class Conference extends \myConf\BaseService
     }
 
     /**
-     * 获取会议成员的角色
+     * 获取用户成员角色
      * @param int $user_id
      * @param int $conference_id
      * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbCompositeKeysException
      */
     public function get_member_roles(int $user_id, int $conference_id): array
     {
-        return $this->Models->Conference->user_roles($conference_id, $user_id);
+        return $this->Models->Conference->get_user_roles($conference_id, $user_id);
     }
 
     /**
-     * 更新会议信息
+     * 更新会议基本信息
      * @param int $id
      * @param string $title
      * @param string $host
@@ -101,8 +104,8 @@ class Conference extends \myConf\BaseService
      * @param string $submit_end_date
      * @param string $banner_field
      * @param string $qr_field
+     * @throws \myConf\Exceptions\CacheDriverException
      * @throws \myConf\Exceptions\ConferenceNotFoundException
-     * @throws \myConf\Exceptions\DbTransactionException
      * @throws \myConf\Exceptions\UpdateConferenceException
      */
     public function update_conference(int $id, string $title, string $host, string $date, bool $paper_submission, string $submit_end_date, string $banner_field = '', string $qr_field = '') : void
@@ -272,6 +275,92 @@ class Conference extends \myConf\BaseService
     }
 
     /**
+     * @param int $conference_id
+     * @param array $roles_restrict
+     * @param string $name_restrict
+     * @param string $email_restrict
+     * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
+     */
+    public function get_members(int $conference_id, array $roles_restrict = array(), string $name_restrict = '', string $email_restrict = '') : array {
+        //先定义返回结果集
+        $members_data_set = array();
+        $members = $this->Models->Conference->get_members($conference_id, $email_restrict);
+        foreach ($members as $member) {
+            //过滤信息
+            if ($name_restrict != '' && strpos($member['user_name'], $name_restrict) === false) {
+                continue;
+            }
+            if ($email_restrict != '' && $member['user_email'] !== $email_restrict) {
+                continue;
+            }
+            $continue = false;
+            foreach ($roles_restrict as $role) {
+                if (in_array($role, $member['user_role']) === false) {
+                    $continue = true;
+                    break;
+                }
+            }
+            if ($continue == true) {
+                continue;
+            }
+            $members_data_set [] = $member;
+        }
+        return $members_data_set;
+    }
+
+    /**
+     * 判断用户是否是某一个角色
+     * @param int $conference_id
+     * @param int $user_id
+     * @param string $role
+     * @return bool
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbCompositeKeysException
+     */
+    public function member_is_role(int $conference_id, int $user_id, string $role) {
+        return in_array($role, $this->Models->Conference->get_user_roles($conference_id, $user_id));
+    }
+
+    /**
+     * 将用户添加某个角色
+     * @param int $conference_id
+     * @param int $user_id
+     * @param string $role
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbCompositeKeysException
+     */
+    public function member_add_role(int $conference_id, int $user_id, string $role) : void {
+        $roles = $this->Models->Conference->get_user_roles($conference_id, $user_id);
+        //先判断是否已经存在这个角色，如果存在就不用进行数据库操作了。
+        //否则，增加额外的数据库操作，且缓存也失效了。
+        //下面的member_remove_role同理
+        if (!in_array($role, $roles)) {
+            $roles [] = $role;
+            $this->Models->Conference->set_user_roles($conference_id, $user_id, $roles);
+        }
+    }
+
+    /**
+     * 将用户移除某个角色
+     * @param int $conference_id
+     * @param int $user_id
+     * @param string $role
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbCompositeKeysException
+     */
+    public function member_remove_role(int $conference_id, int $user_id, string $role) : void {
+        $roles = $this->Models->Conference->get_user_roles($conference_id, $user_id);
+        $roles_new = array();
+        foreach ($roles as $r) {
+            $r !== $role && $roles_new [] = $r;
+        }
+        if (!empty(array_diff($roles, $roles_new))) {
+            $this->Models->Conference->set_user_roles($conference_id, $user_id, $roles_new);
+        }
+    }
+
+    /**
      * 会议未找到时的异常
      * @return ConferenceNotFoundException
      */
@@ -289,13 +378,4 @@ class Conference extends \myConf\BaseService
         return new \myConf\Exceptions\CategoryNotFoundException('CAT_NOT_FOUND', 'The request category does not exists, or has been deleted.');
     }
 
-    /**
-     * 刷新条目列表缓存
-     * @param int $conference_id
-     * @throws \myConf\Exceptions\CacheDriverException
-     */
-    private function _refresh_category_list_cache(int $conference_id): void
-    {
-        $this->Models->Category->get_categories_from_conference($conference_id, true, true);
-    }
 }

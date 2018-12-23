@@ -25,20 +25,18 @@ class Conference extends \myConf\BaseModel
     public function __construct()
     {
         parent::__construct();
-        $this->_table_name = 'conferences';
-        $this->_pk = 'conference_id';
     }
 
     /**
      * @param int $conference_id
-     * @param $conference_name
-     * @param $conference_start_time
+     * @param string $conference_name
+     * @param int $conference_start_time
      * @param string $conference_banner
      * @param string $conference_qr_code
      * @param string $conference_host
      * @param bool $use_paper_submission
      * @param int $paper_submission_deadline
-     * @throws \myConf\Exceptions\DbTransactionException
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function update_conference(int $conference_id, $conference_name = '', $conference_start_time = 0,
                                       $conference_banner = '',
@@ -63,13 +61,14 @@ class Conference extends \myConf\BaseModel
      */
     public function get_by_url(string $url) : array
     {
-        return $this->Tables->Conferences->fetch_first(array('conference_url' => $url));
+        return $this->Tables->Conferences->fetch_first(['conference_url' => $url]);
     }
 
     /**
      * 通过id获取会议信息
      * @param int $conference_id
      * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function get_by_id(int $conference_id) : array {
         return $this->Tables->Conferences->get(strval($conference_id));
@@ -86,13 +85,31 @@ class Conference extends \myConf\BaseModel
     }
 
     /**
-     * 得到用户在某个会议的角色
+     * 得到用户角色
      * @param int $conference_id
      * @param int $user_id
      * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbCompositeKeysException
      */
-    public function user_roles(int $conference_id, int $user_id) : array {
-        return $this->Tables->ConferenceMembers->get_user_roles_in_conference($user_id, $conference_id);
+    public function get_user_roles(int $conference_id, int $user_id) : array {
+        $user = $this->Tables->ConferenceMembers->get(['user_id' => $user_id, 'conference_id' => $conference_id]);
+        return explode(',', $user['user_role']);
+    }
+
+    /**
+     * 设置用户的角色。
+     * @param int $conference_id
+     * @param int $user_id
+     * @param array $roles
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbCompositeKeysException
+     */
+    public function set_user_roles(int $conference_id, int $user_id, array $roles = array()) : void {
+        $this->Tables->ConferenceMembers->set([
+            'conference_id' => $conference_id,
+            'user_id' => $user_id,
+        ], ['user_role' => implode(',', $roles)]);
     }
 
     /**
@@ -126,5 +143,26 @@ class Conference extends \myConf\BaseModel
      */
     public function exist(int $conference_id) : bool {
         return $this->Tables->Conferences->exist(strval($conference_id));
+    }
+
+    /**
+     * @param int $conference_id
+     * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
+     */
+    public function get_members(int $conference_id) : array {
+        $members = $this->Tables->ConferenceMembers->get_conference_members($conference_id);
+        foreach ($members as &$member) {
+            $account_data = $this->Tables->Users->get($member['user_id']);
+            $member['user_email'] = $account_data['user_email'];
+            $member['user_name'] = $account_data['user_name'];
+            $scholar_data = $this->Tables->Scholars->get($member['user_email']);
+            $member['first_name'] = $scholar_data['scholar_first_name'];
+            $member['last_name'] = $scholar_data['scholar_last_name'];
+            $member['prefix'] = $scholar_data['scholar_prefix'];
+            $member['institution'] = $scholar_data['scholar_institution'];
+            $member['department'] = $scholar_data['scholar_department'];
+        }
+        return $members;
     }
 }
