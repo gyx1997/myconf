@@ -58,7 +58,7 @@ $end_ts = $start_ts;
  */
 //define('ENVIRONMENT', 'production');
 define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
-define('IN_LAB', FALSE);
+define('IN_LAB', TRUE);
 /*
  *---------------------------------------------------------------
  * ERROR REPORTING
