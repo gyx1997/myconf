@@ -21,7 +21,15 @@
         }
 
         /**
-         * 返回主键名。
+         * 实际主键
+         * @return string
+         */
+        protected function _actual_pk() : string {
+            return 'id';
+        }
+
+        /**
+         * 返回逻辑主键名。
          * @return array
          */
         public function primary_key() : array {

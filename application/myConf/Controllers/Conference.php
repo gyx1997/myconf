@@ -29,21 +29,23 @@ class Conference extends \myConf\BaseController
                 'action' => '',
             ),
         ),
+        'user' => [
+            [
+                'method' => 'paper-submit',
+                'action' => '',
+            ],
+            [
+                'method' => 'member',
+                'action' => '',
+            ],
+        ],
         'scholar' => array(
             array(
                 'method' => 'index',
                 'action' => '',
             ),
             array(
-                'method' => 'paper-submit',
-                'action' => '',
-            ),
-            array(
                 'method' => 'download',
-                'action' => '',
-            ),
-            array(
-                'method' => 'member',
                 'action' => '',
             ),
         ),
@@ -124,15 +126,22 @@ class Conference extends \myConf\BaseController
     }
 
     /**
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbCompositeKeysException
      * @throws \myConf\Exceptions\HttpStatusException
      * @throws \myConf\Exceptions\SendRedirectInstructionException
      */
     private function _check_privilege(): void
     {
-        //将游客权限合并进基础权限
-        $this->_privilege_table['scholar'] = array_merge($this->_privilege_table['guest'], $this->_privilege_table['scholar']);
-        if ($this->_has_login() && $this->Services->Conference->user_joint_in($this->_user_id, $this->_conference_id)) {
-            $roles = $this->Services->Conference->get_member_roles($this->_user_id, $this->_conference_id);
+        //将游客、未加入会议的注册用户的角色权限合并进基础权限
+        $this->_privilege_table['user'] = array_merge($this->_privilege_table['user'], $this->_privilege_table['guest']);
+        $this->_privilege_table['scholar'] = array_merge($this->_privilege_table['scholar'], $this->_privilege_table['user']);
+        if ($this->_has_login()) {
+            if ($this->Services->Conference->user_joint_in($this->_user_id, $this->_conference_id)) {
+                $roles = $this->Services->Conference->get_member_roles($this->_user_id, $this->_conference_id);
+            } else {
+                $roles = ['user'];
+            }
         } else {
             $roles = array('guest');
         }
@@ -313,7 +322,8 @@ class Conference extends \myConf\BaseController
                         case 'remove':
                             {
                                 $user_id = $this->input->get('uid');
-                                $this->Services->ConferenceMember;
+                                $this->Services->Conference->remove_member($this->_conference_id, $user_id);
+                                $this->add_output_variables(array('status' => 'SUCCESS'), OUTPUT_VAR_JSON_ONLY);
                             }
                         case '':
                             {
@@ -337,45 +347,9 @@ class Conference extends \myConf\BaseController
                                 $document_id = intval($this->input->post('document_id'));
                                 //检查附件表是否有多余的附件、没有添加的附件，并进行相关操作
                                 $document_html = $this->input->post('document_html');
-                                $old_attachments = $this->mAttachment->get_used_attachments('document', $document_id);
-                                $old_attachment_ids = array();
-                                foreach ($old_attachments as $old_attachment) {
-                                    $old_attachment_ids [$old_attachment['attachment_id']] = TRUE;
-                                }
-                                //以下载的特征url进行正则匹配
-                                $regex_a = "/\"\/attachment\/get\/.*?\/\?aid=.*?\"/";
-                                $array_links = array();
-                                if (preg_match_all($regex_a, $document_html, $array_links)) {
-                                    //将本次新加入的附件标记位使用的附件
-                                    foreach ($array_links[0] as $link) {
-                                        $link = substr($link, 0, strlen($link) - 1);
-                                        $aid = intval(substr($link, strpos($link, '?aid=') + 5));
-                                        if (!isset($old_attachment_ids[$aid])) {
-                                            $this->mAttachment->set_attachment_used($aid);
-                                        }
-                                        $old_attachment_ids[$aid] = FALSE;
-                                    }
-                                    //标记为没有使用的附件
-                                    foreach ($old_attachment_ids as $old_attachment_id => $is_unused) {
-                                        if ($is_unused) {
-                                            $this->mAttachment->set_attachment_used($old_attachment_id, FALSE);
-                                        }
-                                    }
-                                }
-                                //修改文章信息
-                                $this->mDocument->modify_document(
-                                    $document_id,
-                                    $this->input->post('document_title'),
-                                    str_replace(
-                                        'href=',
-                                        'target="_blank" href=',
-                                        str_replace('target="_blank"',
-                                            '',
-                                            $this->input->post('document_html')
-                                        )
-                                    )
-                                );
-                                header('location:/conference/' . $this->_conference_url . '/management/category/');
+                                $this->Services->Document->submit_content($document_id, '', $document_html);
+                                $this->add_output_variables(['status' => 'SUCCESS']);
+                                usleep(500000);
                                 break;
                             }
                         case 'get':
@@ -403,9 +377,93 @@ class Conference extends \myConf\BaseController
                             }
                         default:
                             {
-                                show_404();
+                                throw new HttpStatusException(400, 'UNKNOWN_DO_PARAM', 'The request parameters are invalid.');
                             }
                     }
+                    break;
+                }
+        }
+    }
+
+    public function paper_submit() {
+        switch ($this->_action) {
+            case 'new':
+                {
+                    if ($this->_do == 'submit') {
+                        //处理作者
+                        $authors = json_decode($this->input->post('authors'), true);
+                        if (!isset($authors) || empty($authors)) {
+                            $this->exit_promptly(['status' => 'AUTHOR_EMPTY']);
+                        }
+                        //如果作者在scholar表中不存在，则添加进去
+                        foreach ($authors as $author) {
+                            if ($this->Services->Scholar->exist_by_email($author['email']) === false) {
+                                $this->Services->Scholar->add_new($author['email'], $author['first_name'], $author['last_name'], $author['chn_full_name'], $author['address'], $author['prefix'], $author['institution'], $author['department']);
+                            }
+                        }
+                        //提交文章
+                        try {
+                            $this->Services->Paper->submit_new($this->_user_id, $this->_conference_id, $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $authors, 'paper_pdf', 'paper_copyright_pdf', $this->input->post('paper_type_text'), $this->input->post('paper_suggested_session'));
+                            $this->add_output_variables(array('status' => 'SUCCESS'));
+                        } catch (\myConf\Exceptions\FileUploadException $e) {
+                            $this->add_output_variables(['status' => 'FILE_ERROR']);
+                        }
+
+                    } else if ($this->_do === 'save') {
+
+                    }
+                    break;
+                }
+            case 'edit':
+                {
+                    $this->_render('conference/paper_submit/paper_edit.php', '', array());
+                    break;
+                }
+            case 'author':
+                {
+                    $data = $this->Services->Scholar->get_by_email(base64_decode($this->input->get('email')));
+                    if ($this->_do == 'get') {
+                        $this->add_output_variables([
+                            'status' => 'SUCCESS',
+                            'found' => !empty($data),
+                            'data' => $data,
+                        ]);
+                    }
+                    break;
+                }
+            case 'default':
+                {
+                    $joint = $this->Services->Conference->user_joint_in($this->_user_id, $this->_conference_id);
+                    if ($joint === true) {
+                        $papers = $this->Services->Paper->get_user_conference_papers($this->_user_id, $this->_conference_id);
+                    }
+                    $this->add_output_variables([
+                        'has_joint' => $joint,
+                        'papers' => isset($papers) ? $papers : [],
+                    ]);
+                    break;
+                }
+            default:
+                {
+                    throw new HttpStatusException(400, 'UNKNOWN_DO_PARAM', 'The request parameters are invalid.');
+                }
+
+        }
+    }
+
+    /**
+     * @throws \myConf\Exceptions\SendExitInstructionException
+     * @throws \myConf\Exceptions\SendRedirectInstructionException
+     */
+    public function member() {
+        switch ($this->_do) {
+            case 'register':
+                {
+                    if ($this->Services->Conference->user_joint_in($this->_user_id, $this->_conference_id)) {
+                        $this->exit_promptly(array('status' => 'ALREADY_JOIN'));
+                    }
+                    $this->Services->Conference->add_member($this->_conference_id, $this->_user_id);
+                    $this->_self_redirect();
                     break;
                 }
         }

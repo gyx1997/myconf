@@ -24,8 +24,7 @@ class Attachment extends \myConf\BaseModel
     }
 
     /**
-     * @param string $tag_type
-     * @param int $tag_id
+     * @param int $document_id
      * @param string $full_name
      * @param string $original_name
      * @param int $file_size
@@ -33,20 +32,9 @@ class Attachment extends \myConf\BaseModel
      * @param bool $used
      * @return int
      */
-    public function add_new(string $tag_type, int $tag_id, string $full_name, string $original_name, int $file_size, bool $is_image = false, bool $used = true) : int
+    public function add_as_document_attached(int $document_id, string $full_name, string $original_name, int $file_size, bool $is_image = false) : int
     {
-        return $this->Tables->Attachments->insert(array(
-                'attachment_file_name' => $full_name,
-                'attachment_is_image' => $is_image ? 1 : 0,
-                'attachment_file_size' => $file_size,
-                'attachment_original_name' => $original_name,
-                'attachment_image_height' => 0, //unused
-                'attachment_image_width' => 0,  //unused
-                'attachment_tag_id' => $tag_id,
-                'attachment_tag_type' => $tag_type,
-                'attachment_used' => $used ? 1 : 0,
-            )
-        );
+        return $this->add($full_name, $file_size, $original_name, 'document', $document_id, $is_image, 0, 0, 0);
     }
 
     /**
@@ -77,8 +65,48 @@ class Attachment extends \myConf\BaseModel
     }
 
     /**
+     * @param string $file_name
+     * @param int $file_size
+     * @param string $original_name
+     * @param string $tag_type
+     * @param int $tag_id
+     * @param bool $is_image
+     * @param bool $used
+     * @param int $image_width
+     * @param int $image_height
+     * @return int
+     */
+    public function add(string $file_name, int $file_size, string $original_name, string $tag_type, int $tag_id = 0, bool $is_image = false, bool $used = false, int $image_width = 0, int $image_height = 0) {
+        return $this->Tables->Attachments->insert(array(
+            'attachment_file_name' => $file_name,
+            'attachment_is_image' => $is_image ? 1 : 0,
+            'attachment_file_size' => $file_size,
+            'attachment_original_name' => $original_name,
+            'attachment_image_height' => empty($image_height) ? 0 : $image_height,
+            'attachment_image_width' => empty($image_width) ? 0 : $image_width,
+            'attachment_tag_id' => $tag_id,
+            'attachment_tag_type' => $tag_type,
+            'attachment_used' => $used ? 1 : 0,
+            'attachment_filename_hash' => crc32($file_name),
+        ));
+    }
+
+    /**
+     * @param string $filename
+     * @return int
+     */
+    public function get_id_from_filename(string $filename) : int {
+        $img = $this->Tables->Attachments->fetch_first([
+            'attachment_filename_hash' => crc32($filename),
+            'attachment_file_name' => $filename,
+        ]);
+        return empty($img) ? 0 : $img['attachment_id'];
+    }
+
+    /**
      * @param int $attachment_id
      * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function get(int $attachment_id) : array
     {
@@ -87,6 +115,7 @@ class Attachment extends \myConf\BaseModel
 
     /**
      * @param int $attachment_id
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function increase_download_times(int $attachment_id): void
     {
@@ -110,11 +139,25 @@ class Attachment extends \myConf\BaseModel
     }
 
     /**
-     * 给指定序号的ID设置used状态
+     * 获取某一类的未使用的附件
+     * @param string $tag_type
+     * @param int $tag_id
+     * @return array
+     */
+    public function get_unused(string $tag_type, int $tag_id) : array {
+        return $this->Tables->Attachments->fetch_all([
+            'attachment_tag_type' => $tag_type,
+            'attachment_tag_id' => $tag_id,
+            'attachment_used' => 0,
+        ]);
+    }
+
+    /**
      * @param int $attachment_id
      * @param bool $used_status
+     * @throws \myConf\Exceptions\CacheDriverException
      */
-    public function set_used(int $attachment_id, bool $used_status = true) : void
+    public function set_used_status(int $attachment_id, bool $used_status = true) : void
     {
         $this->Tables->Attachments->set(strval($attachment_id), array('attachment_used' => ($used_status ? '1' : '0')));
     }
@@ -130,21 +173,8 @@ class Attachment extends \myConf\BaseModel
      */
     public function get_list(string $tag_type = '', int $tag_id = 0, bool $image_only = false, int $start = 0, int $limit = 10) : array
     {
-        return $this->Tables->Attachments->get_list($tag_type, $tag_id, $image_only, $start, $limit);
-    }
-
-    public function get_list(string $tag_type = '', int $tag_id = 0, bool $image_only = false, int $start = 0, int $limit = 10) : array {
-        $this->db->select('*');
-        if ($tag_type !== '' && isset($this->tag_types[$tag_type])) {
-            $this->db->where('attachment_tag_type', $this->tag_types[$tag_type]);
-            if ($tag_id !== 0) {
-                $this->db->where('attachment_tag_id', $tag_id);
-            }
-        }
-        $image_only === true && $this->db->where('attachment_is_image', 1);
-        $this->db->limit($limit, strval($start));
-        $this->db->order_by('attachment_id', 'DESC');
-        $query_result = $this->db->get($this->table());
-        return $this->Tables->Attachments->fetch_all();
+        $where = ['attachment_tag_type' => $tag_type, 'attachment_tag_id' => $tag_id];
+        $image_only === true && $where['attachment_is_image'] = 1;
+        return $this->Tables->Attachments->fetch_all($where, '', '', $start, $limit);
     }
 }

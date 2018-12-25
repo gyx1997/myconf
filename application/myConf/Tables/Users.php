@@ -21,8 +21,8 @@
             return 'user_id';
         }
 
-        public function fields() : array {
-            // TODO: Implement fields() method.
+        protected function _actual_pk() : string {
+            return 'user_id';
         }
 
         public function table() : string {

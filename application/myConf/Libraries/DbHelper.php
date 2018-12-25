@@ -181,6 +181,14 @@
 
         /**
          * @param string $table
+         * @param array $data
+         */
+        public static function insert_array(string $table, array $data) : void {
+            self::$_db_object->insert_batch($table, $data);
+        }
+
+        /**
+         * @param string $table
          * @param array $where_segment_array
          * @return bool
          */

@@ -285,7 +285,7 @@ class Conference extends \myConf\BaseService
     public function get_members(int $conference_id, array $roles_restrict = array(), string $name_restrict = '', string $email_restrict = '') : array {
         //先定义返回结果集
         $members_data_set = array();
-        $members = $this->Models->Conference->get_members($conference_id, $email_restrict);
+        $members = $this->Models->Conference->get_members($conference_id);
         foreach ($members as $member) {
             //过滤信息
             if ($name_restrict != '' && strpos($member['user_name'], $name_restrict) === false) {
@@ -358,6 +358,24 @@ class Conference extends \myConf\BaseService
         if (!empty(array_diff($roles, $roles_new))) {
             $this->Models->Conference->set_user_roles($conference_id, $user_id, $roles_new);
         }
+    }
+
+    /**
+     * @param int $conference_id
+     * @param int $user_id
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbCompositeKeysException
+     */
+    public function remove_member(int $conference_id, int $user_id) : void {
+        $this->Models->Conference->remove_member($conference_id, $user_id);
+    }
+
+    /**
+     * @param int $conference_id
+     * @param int $user_id
+     */
+    public function add_member(int $conference_id, int $user_id) : void {
+        $this->Models->Conference->add_member($conference_id, $user_id);
     }
 
     /**

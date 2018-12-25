@@ -1,0 +1,76 @@
+{{@include /Common/Header}}
+{{@include /Conference/Header}}
+{{@include /Conference/Paper_submit/Left_bar}}
+<div class="col-md-10 content-rf content-rf-doc">
+    <?php if ($has_joint === FALSE) { ?>
+    <div class="alert alert-warning">
+        You have not entered in this conference.
+        <br/>
+        To submit your paper, you should
+        <a class="alert_link"
+           href="/conference/<?php echo $conference['conference_url']; ?>/member/?do=register&redirect=<?php echo $url; ?>">register
+            in <?php echo $conference['conference_name']; ?>
+        </a>
+        .
+    </div>
+    <?php } else { ?>
+    <div>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Submitted Papers</h4>
+                {{@if empty($papers)}}
+                <div class="alert alert-info">
+                    You have not submitted a paper yet.
+                </div>
+                {{@else}}
+                <table class="table table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th>
+                            Paper Title
+                        </th>
+                        <th>
+                            Authors
+                        </th>
+                        <th>
+                            Submit Time
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{@for $paper in $papers}}
+                    <tr>
+                        <td>
+                            {{$paper['paper_title']}}
+                        </td>
+                        <td>
+                            {{@for $author in $paper['authors']}}
+                            {{$author['author_first_name']}} , {{$author['author_last_name']}} <br>
+                            {{@end}}
+                        </td>
+                        <td>
+                            <?php echo(date('Y-m-d', $paper['paper_submit_time'])); ?>
+                        </td>
+                        <td>
+                            {{@switch $paper['paper_status']}}
+                            {{@case 0}}
+                            Submitted
+                            {{@end}}
+                            {{@end}}
+                        </td>
+                    </tr>
+                    {{@end}}
+                    </tbody>
+                </table>
+                {{@end}}
+
+            </div>
+        </div>
+    </div>
+    <?php } ?>
+</div>
+{{@include /Conference/Footer}}
+{{@include /Common/Footer}}

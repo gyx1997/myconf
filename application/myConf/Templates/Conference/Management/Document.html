@@ -4,7 +4,7 @@
 <div class="col-md-10 content-rf">
     <div class="col-md-12">
         <div class="row">
-            <form id="document_data" name="document_data" action="{{$base_url}}/document/?do=submit"
+            <form id="document_data" name="document_data" action="{{$base_url}}/document/?do=submit&ajax=true"
                   method="post" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h4 class="modal-title">Content Editor</h4>
@@ -29,7 +29,7 @@
                     <p></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-secondary" onclick="SubmitFormDocument();">Submit</button>
+                    <button type="button" class="btn btn-secondary" onclick="SubmitFormDocument();">Submit</button>
                     <button type="button" class="btn btn-secondary"
                             onclick="window.location.href='<?php echo $base_url; ?>/category/'">Cancel
                     </button>
@@ -116,9 +116,28 @@
         var text_box = document.getElementById('document_html');
         content = UE.getEditor('document_html_editor').getContent();
         text_box.value = content;
-        return true;
+        messageBox('Saving document. Please wait for a moment...', 'Message');
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "{{$base_url}}/document/?do=submit&ajax=true",
+            contentType: false,
+            data: new FormData($('#document_data')[0]),
+            processData: false,
+            cache: false,
+            dataType: "json",
+            success: function (d) {
+                if (d.status === 'SUCCESS') {
+                    window.location.href = "/conference/<?php echo $conference['conference_url']?>/management/category/";
+                }
+            },
+            error: function () {
+                messageBox("Something wrong occurred at server side when saving this document.", "An error occurred", function () {
+                    window.location.href = "/conference/<?php echo $conference['conference_url']?>/management/category/";
+                });
+            }
+        });
     };
 </script>
-
 {{@include /Conference/Footer}}
 {{@include /Common/Footer}}

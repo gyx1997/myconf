@@ -165,4 +165,26 @@ class Conference extends \myConf\BaseModel
         }
         return $members;
     }
+
+    /**
+     * @param int $conference_id
+     * @param int $user_id
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbCompositeKeysException
+     */
+    public function remove_member(int $conference_id, int $user_id) : void {
+        $this->Tables->ConferenceMembers->delete(['conference_id' => $conference_id, 'user_id' => $user_id]);
+    }
+
+    /**
+     * @param int $conference_id
+     * @param int $user_id
+     */
+    public function add_member(int $conference_id, int $user_id) : void {
+        $this->Tables->ConferenceMembers->insert([
+            'conference_id' => $conference_id,
+            'user_id' => $user_id,
+            'user_role' => 'scholar',
+        ]);
+    }
 }

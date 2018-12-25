@@ -34,6 +34,7 @@ class Config extends \myConf\BaseModel
     /**
      * @param string $key
      * @param string $value
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function set(string $key, string $value) : void
     {

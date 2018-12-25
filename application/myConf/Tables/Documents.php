@@ -36,6 +36,13 @@
         }
 
         /**
+         * @return string
+         */
+        protected function _actual_pk() : string {
+            return 'document_id';
+        }
+
+        /**
          * 返回当前的字段名列表
          * @return array
          */

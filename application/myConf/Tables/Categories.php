@@ -23,6 +23,13 @@
         }
 
         /**
+         * @return string
+         */
+        protected function _actual_pk() : string {
+            return 'category_id';
+        }
+
+        /**
          * 得到当前表名
          * @return string
          */

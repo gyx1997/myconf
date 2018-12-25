@@ -35,6 +35,12 @@
         public abstract function primary_key();
 
         /**
+         * 得到当前表的（实际）主键
+         * @return string
+         */
+        protected abstract function _actual_pk() : string;
+
+        /**
          * 得到当前表的包含前缀的表名
          * dummy for base class, should be override in derived classes.
          * @return string
@@ -83,7 +89,8 @@
          * @throws \myConf\Exceptions\CacheDriverException
          */
         public function set($pk_val, array $data = array()) : void {
-            DbHelper::update($this->table(), $data, [$this->primary_key() => $pk_val]);
+            //对于实际主键id和逻辑主键id不一致的，先查询找出实际主键id
+            DbHelper::update($this->table(), $data, [$this->_actual_pk() => $this->_actual_pk_val($pk_val)]);
             $this->pk_cache_delete($pk_val);
         }
 
@@ -92,7 +99,7 @@
          * @param array $data
          * @return int 返回当前自增键的最新一条记录的PK id（实体表应该对应有id）
          */
-        public function insert(array $data = array()) {
+        public function insert(array $data = array()) : int {
             DbHelper::insert($this->table(), $data);
             return DbHelper::last_insert_id();
         }
@@ -103,7 +110,7 @@
          * @throws \myConf\Exceptions\CacheDriverException
          */
         public function delete($pk_val) : void {
-            DbHelper::query('DELETE FROM `' . $this->table() . '` WHERE ' . $this->primary_key() . '= \'' . $pk_val . '\'');
+            DbHelper::query('DELETE FROM `' . $this->table() . '` WHERE ' . $this->_actual_pk() . '= \'' . $this->_actual_pk_val($pk_val) . '\'');
             $this->pk_cache_delete($pk_val);
         }
 
@@ -114,7 +121,7 @@
          * @throws \myConf\Exceptions\CacheDriverException
          */
         public function self_increase(string $pk_val, string $field) : void {
-            DbHelper::query('UPDATE ' . $this->table() . " SET $field=$field+1 WHERE " . $this->primary_key() . '=\'' . $pk_val . '\'');
+            DbHelper::query('UPDATE ' . $this->table() . " SET $field=$field+1 WHERE " . $this->_actual_pk() . '=\'' . $this->_actual_pk_val($pk_val) . '\'');
             $this->pk_cache_delete($pk_val);
         }
 
@@ -125,7 +132,7 @@
          * @throws \myConf\Exceptions\CacheDriverException
          */
         public function self_decrease(string $pk_val, string $field) : void {
-            DbHelper::query('UPDATE ' . $this->table() . " SET $field=$field-1 WHERE " . $this->primary_key() . '=\'' . $pk_val . '\'');
+            DbHelper::query('UPDATE ' . $this->table() . " SET $field=$field-1 WHERE " . $this->_actual_pk() . '=\'' . $this->_actual_pk_val($pk_val) . '\'');
             $this->pk_cache_delete($pk_val);
         }
 
@@ -136,5 +143,13 @@
          */
         public function pk_cache_name($pk_val) : string {
             return '<' . $this->primary_key() . '>[' . $pk_val . ']';
+        }
+
+        /**
+         * @param $pk_val
+         * @return mixed
+         */
+        protected function _actual_pk_val($pk_val) : int {
+            return ($this->primary_key() !== $this->_actual_pk()) ? DbHelper::fetch_first_raw('SELECT ' . $this->_actual_pk() . ' FROM ' . $this->table() . ' WHERE ' . $this->primary_key() . '=\'' . $pk_val . '\' LIMIT 1')[$this->_actual_pk()] : $pk_val;
         }
     }

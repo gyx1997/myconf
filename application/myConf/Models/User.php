@@ -22,6 +22,7 @@ class User extends \myConf\BaseModel
     /**
      * @param int $user_id
      * @param string $new_avatar
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function set_avatar(int $user_id, string $new_avatar) : void {
         $this->Tables->Users->set(strval($user_id), array('user_avatar' => $new_avatar));
@@ -30,6 +31,7 @@ class User extends \myConf\BaseModel
     /**
      * @param int $user_id
      * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function get_by_id(int $user_id) : array {
         return $this->Tables->Users->get(strval($user_id));

@@ -39,6 +39,13 @@
         }
 
         /**
+         * @return string
+         */
+        protected function _actual_pk() : string {
+            return 'k';
+        }
+
+        /**
          * 得到当前表名
          * @return string
          */

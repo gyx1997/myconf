@@ -14,14 +14,16 @@
      * @package myConf
      * @author _g63<522975334@qq.com>
      * @version 2019.1
-     * @property-read \myConf\Tables\Attachments Attachments
-     * @property-read \myConf\Tables\Categories Categories
-     * @property-read \myConf\Tables\ConferenceMembers ConferenceMembers
-     * @property-read \myConf\Tables\Conferences Conferences
-     * @property-read \myConf\Tables\Configs Configs
-     * @property-read \myConf\Tables\Documents Documents
-     * @property-read \myConf\Tables\Scholars Scholars
-     * @property-read \myConf\Tables\Users Users
+     * @property-read \myConf\Tables\Attachments $Attachments
+     * @property-read \myConf\Tables\Categories $Categories
+     * @property-read \myConf\Tables\ConferenceMembers $ConferenceMembers
+     * @property-read \myConf\Tables\Conferences $Conferences
+     * @property-read \myConf\Tables\Configs $Configs
+     * @property-read \myConf\Tables\Documents $Documents
+     * @property-read \myConf\Tables\Scholars $Scholars
+     * @property-read \myConf\Tables\Users $Users
+     * @property-read \myConf\Tables\Papers $Papers
+     * @property-read \myConf\Tables\PaperAuthors $PaperAuthors
      */
     class Tables {
         /**

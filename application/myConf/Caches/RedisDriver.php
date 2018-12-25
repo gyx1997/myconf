@@ -10,6 +10,9 @@
 
     class RedisDriver implements ICacheDriver {
 
+        /**
+         * @var \Redis Redis实例对象
+         */
         private $_redis_object;
 
         private static $_instance = null;
@@ -39,7 +42,7 @@
         private function __construct() {
             $this->_redis_object = new \Redis();
             //要求安装本地redis服务器
-            $this->_redis_object->connect('127.0.0.1');
+            $this->_redis_object->pconnect('127.0.0.1');
         }
 
         /**

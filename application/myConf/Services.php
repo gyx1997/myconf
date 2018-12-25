@@ -16,6 +16,9 @@ namespace myConf;
  * @property-read \myConf\Services\Config $Config
  * @property-read \myConf\Services\Conference $Conference
  * @property-read \myConf\Services\Document $Document
+ * @property-read \myConf\Services\Attachment $Attachment
+ * @property-read \myConf\Services\Scholar $Scholar
+ * @property-read \myConf\Services\Paper $Paper
  */
 class Services
 {

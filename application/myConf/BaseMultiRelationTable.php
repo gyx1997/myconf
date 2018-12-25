@@ -21,10 +21,16 @@
         }
 
         /**
-         * 联系表的主键，是一个数组，表示数据库表的列名
+         * 联系表的(逻辑)主键，是一个数组，表示数据库表的列名
          * @return array
          */
         public abstract function primary_key() : array;
+
+        /**
+         * 得到当前表的（实际）主键
+         * @return string
+         */
+        protected abstract function _actual_pk() : string;
 
         /**
          * 表名
@@ -81,7 +87,7 @@
          */
         public function set($pk_val, array $data = array()) : void {
             $this->_check_primary_key($pk_val);
-            DbHelper::update($this->table(), $data, $pk_val);
+            DbHelper::update($this->table(), $data, [$this->_actual_pk() => $this->_actual_pk_val($pk_val)]);
             $this->pk_cache_delete($pk_val);
         }
 
@@ -99,11 +105,11 @@
         /**
          * 插入数据
          * @param array $data
-         * @return bool
+         * @return int
          */
-        public function insert(array $data = array()) {
+        public function insert(array $data = array()) : int {
             DbHelper::insert($this->table(), $data);
-            return true;
+            return DbHelper::last_insert_id();
         }
 
         /**
@@ -114,7 +120,7 @@
          */
         public function delete($pk_val) : void {
             $this->_check_primary_key($pk_val);
-            DbHelper::delete($this->table(), $pk_val);
+            DbHelper::delete($this->table(), [$this->_actual_pk() => $this->_actual_pk_val($pk_val)]);
             //从缓存中删除脏数据
             $this->pk_cache_delete($pk_val);
         }
@@ -129,5 +135,13 @@
             if ($success === false) {
                 throw new \myConf\Exceptions\DbCompositeKeysException('DB_PK_ERROR', 'Columns are out of primary key array given, or there are primary key columns which are not given.');
             }
+        }
+
+        /**
+         * @param mixed $pk_val
+         * @return int
+         */
+        protected function _actual_pk_val($pk_val) : int {
+            return DbHelper::fetch_first($this->table(), $pk_val)[$this->_actual_pk()];
         }
     }

@@ -2,40 +2,42 @@
     /**
      * Created by PhpStorm.
      * User: 52297
-     * Date: 2018/12/15
-     * Time: 17:32
+     * Date: 2018/12/24
+     * Time: 13:46
      */
 
     namespace myConf\Tables;
 
-    use \myConf\Libraries\DbHelper;
+    use myConf\Libraries\DbHelper;
 
-    class Scholars extends \myConf\BaseEntityTable {
+    /**
+     * Class Papers
+     * @package myConf\Tables
+     * @author _g63<522975334@qq.com>
+     * @version 2019.1
+     */
+    class Papers extends \myConf\BaseEntityTable {
 
         public function __construct() {
             parent::__construct();
         }
 
         /**
-         * 返回当前的主键
          * @return string
          */
-        public function primary_key() : string {
-            return 'scholar_email';
+        public function primary_key() {
+            return 'paper_id';
         }
 
-        /**
-         * @return string
-         */
         protected function _actual_pk() : string {
-            return 'scholar_id';
+            return 'paper_id';
         }
 
         /**
-         * 返回当前的表名
          * @return string
          */
         public function table() : string {
-            return DbHelper::make_table('scholars');
+            return DbHelper::make_table('papers');
         }
+
     }

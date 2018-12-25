@@ -29,7 +29,7 @@ class Scholar extends \myConf\BaseModel
      * @return int
      */
     public function create_new(string $email, string $first_name = '', string $last_name = '', string $chn_full_name = '', string $address = '', string $institution = '', string $department = '', string $prefix = '') : int {
-        return $this->Tables->Scholars->insert(array(
+        return $this->Tables->Scholars->insert([
             'scholar_email' => $email,
             'scholar_first_name' => $first_name,
             'scholar_last_name' => $last_name,
@@ -38,7 +38,7 @@ class Scholar extends \myConf\BaseModel
             'scholar_institution' => $institution,
             'scholar_department' => $department,
             'scholar_prefix' => $prefix,
-        ));
+        ]);
     }
 
     /**

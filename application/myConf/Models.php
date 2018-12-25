@@ -19,6 +19,7 @@ namespace myConf;
  * @property-read \myConf\Models\Category $Category
  * @property-read \myConf\Models\ConfMember $ConfMember
  * @property-read \myConf\Models\Attachment $Attachment
+ * @property-read \myConf\Models\Paper $Paper
  */
 class Models
 {

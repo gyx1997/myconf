@@ -32,6 +32,13 @@
         }
 
         /**
+         * @return string
+         */
+        protected function _actual_pk() : string {
+            return 'conference_id';
+        }
+
+        /**
          * 返回当前表名
          * @return string
          */

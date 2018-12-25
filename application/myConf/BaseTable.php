@@ -58,10 +58,23 @@
         }
 
         /**
-         * 得到当前表的主键。
+         * 得到当前表的(逻辑)主键。
          * @return mixed
          */
         public abstract function primary_key();
+
+        /**
+         * 得到当前表的（实际）主键
+         * @return string
+         */
+        protected abstract function _actual_pk() : string;
+
+        /**
+         * 通过逻辑主键值得到实际主键值，UPDATE和DELETE要用
+         * @param $pk_val
+         * @return int
+         */
+        protected abstract function _actual_pk_val($pk_val) : int;
 
         /**
          * 返回主键缓存的键名。
@@ -111,9 +124,9 @@
         /**
          * 插入一条数据
          * @param array $data
-         * @return int|false 返回当前的自增id值，如果没有表里这项，返回false。
+         * @return int 返回当前的自增id值.
          */
-        public abstract function insert(array $data = array());
+        public abstract function insert(array $data = array()) : int;
 
         /**
          * 根据指定的主键值删除数据
@@ -152,6 +165,13 @@
          */
         public function fetch_all(array $where_segment = array(), string $order_field = '', string $order_direction = '', int $start = 0, int $limit = 0) : array {
             return DbHelper::fetch_all($this->table(), $where_segment, $order_field, $order_direction, $start, $limit);
+        }
+
+        /**
+         * @param array $data_set
+         */
+        public function insert_array(array $data_set) : void {
+            DbHelper::insert_array($this->table(), $data_set);
         }
 
         /**
