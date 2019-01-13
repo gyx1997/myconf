@@ -27,6 +27,7 @@
 
         public static function init() {
             $CI = &get_instance();
+            $CI->load->database();
             self::$_db_object = $CI->db;
         }
 
@@ -216,5 +217,21 @@
             $order_field !== '' && $order_direction !== '' && self::$_db_object->order_by($order_field, $order_direction);
             $limit !== 0 && self::$_db_object->limit($limit, $start);
             return;
+        }
+
+        /**
+         * 获取数据库的相关信息
+         * @return string
+         */
+        public static function server_version() : string {
+            return self::$_db_object->platform() . ' ' . self::$_db_object->version();
+        }
+
+        /**
+         * 获取数据库Connector的信息
+         * @return string
+         */
+        public static function connector_info() : string {
+            return self::$_db_object->platform();
         }
     }

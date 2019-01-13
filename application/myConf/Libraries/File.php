@@ -23,6 +23,10 @@ class File
         return substr($filename, strrpos($filename, '.') + 1);
     }
 
+    /**
+     * @param string $directory
+     * @param bool $include_self
+     */
     public static function clear_directory_with_files(string $directory, bool $include_self = true): void
     {
         //先删除目录下的文件：
@@ -34,7 +38,6 @@ class File
                     unlink($fullpath);
                 } else {
                     self::clear_directory_with_files($fullpath, true);
-
                 }
             }
         }

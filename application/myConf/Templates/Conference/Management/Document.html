@@ -58,12 +58,7 @@
         }
     };
 
-    initEditor({
-    {
-        $document_id
-    }
-    })
-    ;
+    initEditor(<?php echo $document_id; ?>);
 
     function initEditor(document_id) {
         $.get("{{$base_url}}/document/?do=get&id=" + document_id + "&ajax=true", function (result) {

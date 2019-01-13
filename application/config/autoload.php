@@ -62,7 +62,6 @@ $autoload['libraries'] = array(
     'email',
     'ftp',
     'zip',
-    'database'
 );
 
 /*
@@ -137,35 +136,3 @@ $autoload['language'] = array();
 |
 |	$autoload['model'] = array('first_model' => 'first');
 */
-$autoload['model'] = array(
-    //基本数据模型
-    'db_models/mAttachment',
-    'db_models/mCategory',
-    'db_models/mConference',
-    'db_models/mConfig',
-    'db_models/mConfMember',
-    'db_models/mDocument',
-    'db_models/mPaper',
-    'db_models/mScholar',
-    'db_models/mUser',
-    //微服务
-    'micro_services/sAttachment',
-    'micro_services/sConference',
-    'micro_services/sAccount'
-);
-
-require APPPATH . 'classes/MyConfBase.class.php';
-require APPPATH . 'classes/exception/ExceptionBase.php';
-//自动加载myConf的类
-spl_autoload_register(function ($class_name) {
-    $modules = array('ret', 'exception', 'obj');
-    foreach ($modules as $module) {
-        $file_to_load = APPPATH . 'classes/' . $module . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class_name) . '.php';
-        if (file_exists($file_to_load)) {
-            include $file_to_load;
-            return TRUE;
-        }
-    }
-    return FALSE;
-});
-

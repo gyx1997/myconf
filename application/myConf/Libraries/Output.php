@@ -31,22 +31,8 @@ class Output
 
     public static function return_json(array $parameters = array()): void
     {
-        self::_get_benchmark_info();
         header('Content-Type:application/json;charset=utf-8');
         echo json_encode($parameters);
-    }
-
-    private static function _get_benchmark_info(): array
-    {
-        global $start_ts;
-        global $end_ts;
-        $end_ts = (int)microtime(true);
-        $time_str = sprintf("%.3f", ($end_ts - $start_ts) / 1000);
-        $mem = function_exists('memory_get_peak_usage') ? sprintf("%.2f", memory_get_peak_usage() / 1048576) : 'Unknown';
-        $CI = &get_instance();
-        $sql = $CI->db->total_queries();
-        log_message('INFO', "$time_str sec, $mem MiB, $sql queries");
-        return array('sql_queries' => $sql, 'elapsed_time' => $time_str, 'mem_usage' => $mem);
     }
 
     public static function clear_compiled_template(): void

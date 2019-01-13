@@ -44,7 +44,19 @@
             if ($type === 'file') {
                 $this->Models->Attachment->increase_download_times($attachment_id);
             }
-            \myConf\Libraries\Attach::download_attach($attach_info['attachment_file_name'], $attach_info['attachment_original_name'], $attach_info['attachment_file_size']);
+            \myConf\Libraries\Attach::download_attach($attach_info['attachment_file_name'], $attach_info['attachment_original_name'], $attach_info['attachment_file_size'], \myConf\Libraries\Attach::get_mode_download);
+            throw new \myConf\Exceptions\SendExitInstructionException('DOWNLOAD_OK', 'Download success.');
+        }
+
+        /**
+         * @param int $attachment_id
+         * @throws \myConf\Exceptions\AttachFileCorruptedException
+         * @throws \myConf\Exceptions\CacheDriverException
+         * @throws \myConf\Exceptions\SendExitInstructionException
+         */
+        public function download_pdf_as_preview(int $attachment_id) : void {
+            $attach_info = $this->Models->Attachment->get($attachment_id);
+            \myConf\Libraries\Attach::preview_attach($attach_info['attachment_file_name'], $attach_info['attachment_original_name'], $attach_info['attachment_file_size'], \myConf\Libraries\Attach::file_type_pdf);
             throw new \myConf\Exceptions\SendExitInstructionException('DOWNLOAD_OK', 'Download success.');
         }
 

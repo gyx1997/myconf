@@ -1,28 +1,47 @@
-<?php
-    defined('BASEPATH') OR die('No direct script access allowed');
-    ?>
-<div style="padding : 20px;">
-    <div>
-        <h1>myConf Administrator Panel</h1>
-    </div>
-    <div style="padding:15px;">
-        <a href="/admin/">Home</a>
-        <a href="/admin/conf/">Conference Management</a>
-        <a href="/admin/user/">User Management</a>
-        <a href="/admin/sys/">System Management</a>
-    </div>
-    <div style="padding: 15px; border: 1px solid gray;">
-        <h3>Application Information</h3>
-        <ul>
-            <li> Version: myConf 2019.1</li>
-            <li> Framework: Codeigniter <?php echo CI_VERSION; ?></li>
-            <li> Application Directory: <?php echo APPPATH; ?></li>
-        </ul>
-        <h3>PHP</h3>
-        <ul>
-            <li> PHP Version: <?php echo phpversion(); ?></li>
-            <li> Environment: <?php echo PHP_OS; ?></li>
-            <li> Server Software: <?php echo $_SERVER['SERVER_SOFTWARE']; ?></li>
-        </ul>
+{{@include /Admin/Header}}
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">System Information</h5>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <strong>System Information</strong> <br>
+                    Version: myConf 2019.1<br>
+                    Framework: Codeigniter <?php echo CI_VERSION; ?> <br>
+                    Application Directory: <?php echo APPPATH; ?> <br>
+                </li>
+                <li class="list-group-item">
+                    <p><strong>PHP</strong></p>
+                    <p>PHP Version: <?php echo phpversion(); ?></p>
+                </li>
+                <li class="list-group-item">
+                    <p><strong>MySQL</strong></p>
+                    <p>
+                        Version: <?php echo \myConf\Libraries\DbHelper::fetch_first_raw('select version();')['version()']; ?></p>
+                    <p>Connect: <?php echo \myConf\Libraries\DbHelper::connector_info(); ?></p>
+                    <p>Database Size:
+                        <?php
+                            \myConf\Libraries\DbHelper::query('use information_schema;');
+                            $size = \myConf\Libraries\DbHelper::fetch_first_raw("select round(sum(data_length/1024/1024),2) as data from tables where table_schema='conference';");
+                            echo $size['data'];
+                        ?> MiB
+                    </p>
+                </li>
+            </ul>
+            <h5>System Environment</h5>
+            <ul>
+                <li> PHP Version: <?php echo phpversion(); ?></li>
+                <li> Environment: <?php echo PHP_OS; ?></li>
+                <li> Server Software: <?php echo $_SERVER['SERVER_SOFTWARE']; ?></li>
+            </ul>
+            <h5>MySQL</h5>
+            <ul>
+                <li>
+
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
+{{@include /Admin/Footer}}

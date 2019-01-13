@@ -66,7 +66,11 @@ class Upload
             throw new \myConf\Exceptions\FileUploadException('NO_SUCH_FILE', 'No such file which form field is named "' . $field . '" in upload files, or the file was not uploaded');
         }
         if ($file['error'] !== 0) {
-            throw new \myConf\Exceptions\FileUploadException('PHP_UPLOAD_ERROR', 'PHP file upload received an error which code is "' . strval($file['error']) . '".');
+            if ($file['error'] === 4) {
+                throw new \myConf\Exceptions\FileUploadException('NO_SUCH_FILE', 'No file selected to upload.');
+            } else {
+                throw new \myConf\Exceptions\FileUploadException('PHP_UPLOAD_ERROR', 'PHP file upload received an error which code is "' . strval($file['error']) . '".');
+            }
         }
         if (!file_exists($file['tmp_name'])) {
             throw new \myConf\Exceptions\FileUploadException('TMP_FILE_NOT_FOUND', 'Temporary file "' . $file['tmp_name'] . '" does not exists');

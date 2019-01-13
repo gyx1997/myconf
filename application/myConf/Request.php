@@ -9,14 +9,37 @@ class Request
      * @var Response $_response 响应管理器
      */
     private $_response;
+
     /**
      * @var \myConf\BaseController $controller 控制器
      */
     private $_controller;
 
+    /**
+     * @var string 控制器名称
+     */
+    private $_controller_str;
+
+    /**
+     * @var string 控制器完整类名
+     */
+    private $_controller_class_name;
+
+    /**
+     * @var bool 是否是ajax请求
+     */
     private $_ajax;
 
-    public function __construct()
+    /**
+     * @var array 当前所有的变量
+     */
+    private $_vars;
+
+    /**
+     * Request constructor.
+     * @param string $default_controller 默认的控制器
+     */
+    public function __construct(string $default_controller = 'Home')
     {
         //返回变量
         $ret = 0;
@@ -26,61 +49,66 @@ class Request
         $CI = &get_instance();
         $this->_ajax = $CI->input->get('ajax') === 'true';
         $controller_str = ucfirst(strtolower($CI->uri->segment(1, '')));
-        $controller_class_name = '\\myConf\\Controllers\\' . $controller_str;
-        //尝试加载控制器，并将控制权交给控制器
-        try {
-            /**
-             * @var \myConf\BaseController $controller 实例化的控制器
-             */
-            $this->_controller = new $controller_class_name();
-            $vars = array();
-            $this->_controller->run($vars);
-            //输出响应
-            $this->_response->add_variables($this->_parse_variables($vars));
-            $this->_ajax === true ? $this->_response->json($vars) : $this->_response->html($this->_controller->template_name());
-        } catch (\myConf\Exceptions\SendRedirectInstructionException $e) {
-            //跳转指令
-            header('location:' . $e->getRedirectURL());
-        } catch (\myConf\Exceptions\SendExitInstructionException $e) {
-            if ($e->getAction() === \myConf\Exceptions\SendExitInstructionException::DO_OUTPUT_JSON) {
-                $this->_response->add_variables($e->getData());
-                $this->_response->json();
-            }
-        } catch (\myConf\Exceptions\HttpStatusException $e) {
-            $this->_response->handled_error($e->getMessage(), $e->getHttpStatus());
-        } catch (\Throwable $e) {
-            //控制器模块加载失败，或者控制器本身无法处理的异常，的错误处理。这里都是按照 HTTP 500 来处理。
-            log_message('ERROR', $e->getMessage() . PHP_EOL . $e->getTraceAsString());
-            $str = 'A fatal error occurred that your request could not be processed properly. We are so sorry for the inconvenience we have caused. <br/> Critical Information has been written down to our logging system to help us analyze and solve this problem. <br/> If you have further questions, please contact us with the email : xxxx@xxx.com. ';
-            if (ENVIRONMENT === 'production') {
-                $this->_response->handled_error($str, 500);
-            } else {
-                $trace_str = '';
-                foreach ($e->getTrace() as $trace) {
-                    $trace_str .= '<div><span style="font-family:Consolas;">' . (isset($trace['class']) ? $trace['class'] : '') . '::' . $trace['function'] . '</span><p>Line ' . $trace['line'] . ' in File ' . $trace['file'] . '</p></div>';
-                }
-
-                $this->_response->handled_error(
-                    $str .
-                    '<div style="border: 1px #333333 solid; padding: 10px;"><h3>Debug Information</h3><p>' . $e->getMessage() . '</p><p> At Line : <strong>' . $e->getLine() . '</strong> , in File : ' . $e->getFile() . '</p><p> <strong>BackTrace</strong> : </p>' . $trace_str . '</p></div>', 500);
-            }
-            $ret = -1;
-        }
-        exit($ret);
+        $this->_controller_str === '' && $controller_str = $default_controller;
+        $this->_controller_class_name = '\\myConf\\Controllers\\' . $controller_str;
     }
 
-    private function _parse_variables(array $vars_from_controller): array
-    {
+    /**
+     * 得到变量
+     * @param array $vars_from_controller
+     * @return array
+     */
+    private function _parse_variables(array $vars_from_controller) : array {
         $result = array();
         foreach ($vars_from_controller as $key => $var) {
-            if (
-                $var['type'] == OUTPUT_VAR_ALL ||
-                ($var['type'] === OUTPUT_VAR_HTML_ONLY && $this->_ajax === false) ||
-                ($var['type'] === OUTPUT_VAR_JSON_ONLY && $this->_ajax === true)
-            ) {
+            if ($var['type'] == OUTPUT_VAR_ALL || ($var['type'] === OUTPUT_VAR_HTML_ONLY && $this->_ajax === false) || ($var['type'] === OUTPUT_VAR_JSON_ONLY && $this->_ajax === true)) {
                 $result[$key] = $var['value'];
             }
         }
         return $result;
+    }
+
+    /**
+     * 返回response对象
+     * @return \myConf\Response
+     */
+    public function response() : \myConf\Response {
+        return $this->_response;
+    }
+
+    /**
+     * @throws \myConf\Exceptions\ClassNotFoundException
+     * @throws \myConf\Exceptions\URLRequestException
+     */
+    public function run() : void {
+        if (!class_exists($this->_controller_class_name)) {
+            //尝试加载控制器，并将控制权交给控制器
+            throw new \myConf\Exceptions\ClassNotFoundException('CLASS_NOT_FOUND', 'Requested controller class not found.');
+        }
+        try {
+            $class = $this->_controller_class_name;
+            $this->_controller = new $class();
+            $vars = [];
+            $this->_controller->run($vars);
+            $this->_response->add_variables($this->_parse_variables($vars));
+            $this->_ajax === true ? $this->_response->json() : $this->_response->html($this->_controller->template_name());
+        } catch (\myConf\Exceptions\SendRedirectInstructionException $e) {
+            //跳转指令
+            header('location:' . $e->getRedirectURL());
+        } catch (\myConf\Exceptions\SendExitInstructionException $e) {
+            //直接退出指令
+            if ($e->getAction() === \myConf\Exceptions\SendExitInstructionException::DO_OUTPUT_JSON) {
+                $this->_response->add_variables($e->getData());
+                $this->_response->json();
+            }
+        }
+    }
+
+    /**
+     * @param string $message
+     * @param int $code
+     */
+    public function show_error(string $message, int $code) : void {
+        $this->_response->handled_error($message, $code);
     }
 }

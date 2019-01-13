@@ -11,6 +11,8 @@ namespace myConf;
 
 use myConf\Exceptions\SendExitInstructionException;
 use myConf\Libraries\File;
+use myConf\Libraries\Session;
+use myCOnf\Libraries\Env;
 
 /**
  * Class BaseController
@@ -120,21 +122,21 @@ class BaseController
         $this->_session_manager = new \myConf\Session;
         //获得参数
         $this->_do = $this->input->get('do');
-        $this->_url_encoded = base64_encode($this->_get_url());
-        $this->_url_redirect = base64_decode($this->input->get_post('redirect'));
+        $this->_url_encoded = base64_encode(Env::get_current_url());
+        $this->_url_redirect = base64_decode(Env::get_redirect());
         //检查登录情况
         $this->_check_login();
     }
 
     /**
      * @param array &$ret_vars
-     * @throws Exceptions\URLRequestException
+     * @throws \myConf\Exceptions\HttpStatusException
      */
     public final function run(array &$ret_vars): void
     {
         $method = str_replace('-', '_', $this->_method);
         if (!method_exists($this, $method)) {
-            throw new \myConf\Exceptions\URLRequestException('METHOD_NOT_FOUND', 'Method "' . $method . '" from requested URL not found.');
+            throw new \myConf\Exceptions\HttpStatusException(404, 'METHOD_NOT_FOUND', 'Method "' . $method . '" from requested URL not found.');
         }
         //执行子方法
         $this->$method();
@@ -214,30 +216,17 @@ class BaseController
     }
 
     /**
-     * 获取当前请求的完整URL
-     * @return string
-     */
-    protected function _get_url(): string
-    {
-        $sys_protocol = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443' ? 'https://' : 'http://';
-        $php_self = $_SERVER['PHP_SELF'] ? $_SERVER['PHP_SELF'] : $_SERVER['SCRIPT_NAME'];
-        $path_info = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
-        $relate_url = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $php_self . (isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : $path_info);
-        return $sys_protocol . (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '') . $relate_url;
-    }
-
-    /**
      * @return bool
      * @throws \Exception
      */
     protected function _check_login(): bool
     {
         try {
-            $this->_user_id = intval($this->Session->userdata('user_id'));
+            $this->_user_id = intval(Session::get_user_data('user_id'));
             if ($this->_user_id === 0) {
                 return FALSE;
             }
-            $this->_login_time = $this->Session->userdata('login_time');
+            $this->_login_time = Session::get_user_data('login_time');
             $this->_current_user = $this->Services->Account->user_account_info($this->_user_id);
             //避免session失效问题，刷新session
             $this->_set_login($this->_current_user);
@@ -255,8 +244,8 @@ class BaseController
      */
     protected function _set_login(array $user_data): void
     {
-        $this->Session->set_userdata('user_id', $user_data['user_id']);
-        $this->Session->set_userdata('login_time', time());
+        Session::set_user_data('user_id', $user_data['user_id']);
+        Session::set_user_data('login_time', time());
         $this->_user_id = intval($user_data['user_id']);
     }
 
@@ -265,7 +254,7 @@ class BaseController
      */
     protected function _set_logout(): void
     {
-        $this->session->sess_destroy();
+        Session::destroy();
         $this->_self_redirect();
     }
 
@@ -296,8 +285,6 @@ class BaseController
      */
     protected function _self_redirect(): void
     {
-        //var_dump($this->_url_redirect);
-        //exit();
         throw new \myConf\Exceptions\SendRedirectInstructionException($this->_url_redirect === '' ? '/' : $this->_url_redirect);
     }
 
@@ -318,7 +305,7 @@ class BaseController
      */
     protected function _check_captcha(string $captcha_input): bool
     {
-        $captcha = $this->session->tempdata('captcha');
+        $captcha = Session::get_temp_data('captcha');
         return !empty($captcha) && $captcha === $captcha_input;
     }
 

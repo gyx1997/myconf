@@ -396,7 +396,8 @@ class Conference extends \myConf\BaseController
                             $this->exit_promptly(['status' => 'AUTHOR_EMPTY']);
                         }
                         //如果作者在scholar表中不存在，则添加进去
-                        foreach ($authors as $author) {
+                        foreach ($authors as &$author) {
+                            !isset($author['chn_full_name']) && $author['chn_full_name'] = '';  //临时fix，暂时不用中文名这个字段
                             if ($this->Services->Scholar->exist_by_email($author['email']) === false) {
                                 $this->Services->Scholar->add_new($author['email'], $author['first_name'], $author['last_name'], $author['chn_full_name'], $author['address'], $author['prefix'], $author['institution'], $author['department']);
                             }
@@ -416,7 +417,30 @@ class Conference extends \myConf\BaseController
                 }
             case 'edit':
                 {
-                    $this->_render('conference/paper_submit/paper_edit.php', '', array());
+                    $id = intval($this->input->get('id'));
+                    if ($this->_do === 'submit') {
+
+                        //处理作者
+                        $authors = json_decode($this->input->post('authors'), true);
+                        if (!isset($authors) || empty($authors)) {
+                            $this->exit_promptly(['status' => 'AUTHOR_EMPTY']);
+                        }
+                        //如果作者在scholar表中不存在，则添加进去
+                        foreach ($authors as &$author) {
+                            !isset($author['chn_full_name']) && $author['chn_full_name'] = '';  //临时fix，暂时不用中文名这个字段
+                            if ($this->Services->Scholar->exist_by_email($author['email']) === false) {
+                                $this->Services->Scholar->add_new($author['email'], $author['first_name'], $author['last_name'], $author['chn_full_name'], $author['address'], $author['prefix'], $author['institution'], $author['department']);
+                            }
+                        }
+                        try {
+                            $this->Services->Paper->update_paper($id, 'paper_pdf', 'paper_copyright_pdf', $authors, $this->input->post('paper_type_text'), $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $this->input->post('paper_suggested_session'));
+                        } catch (\myConf\Exceptions\FileUploadException $e) {
+                            $this->add_output_variables(['status' => 'FILE_ERROR']);
+                        }
+                    } else {
+                        $paper = $this->Services->Paper->get_paper($id);
+                        $this->add_output_variables(['paper' => $paper]);
+                    }
                     break;
                 }
             case 'author':

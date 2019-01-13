@@ -27,9 +27,13 @@
          * @return string
          */
         public function primary_key() : string {
-            return 'author_email';
+            return 'author_id';
         }
 
+        /**
+         * 返回实际主键
+         * @return string
+         */
         protected function _actual_pk() : string {
             return 'author_id';
         }

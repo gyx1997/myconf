@@ -38,6 +38,9 @@
                         <th>
                             Status
                         </th>
+                        <th>
+                            Operations
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -60,6 +63,9 @@
                             Submitted
                             {{@end}}
                             {{@end}}
+                        </td>
+                        <td>
+                            <a href="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_id']}}" class="btn btn-light">Edit</a>
                         </td>
                     </tr>
                     {{@end}}

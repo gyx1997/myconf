@@ -32,7 +32,7 @@ class Admin extends \myConf\BaseController
         } else if ($this->_action === 'dcache' && $this->_do === 'reset') {
             \myConf\Cache::clear();
         } else if ($this->_action === 'template' && $this->_do === 'clear') {
-            \myConf\Libraries\Response::clear_compiled_template();
+            \myConf\Libraries\NativeTpl::clear_compiled_template();
         }
     }
 }

@@ -41,6 +41,11 @@
             return;
         }
 
+        /**
+         * @throws \myConf\Exceptions\CacheDriverException
+         * @throws \myConf\Exceptions\HttpStatusException
+         * @throws \myConf\Exceptions\SendExitInstructionException
+         */
         public function get() {
             try {
                 $attachment_id = intval($this->input->get('aid'));
@@ -51,4 +56,21 @@
             }
         }
 
+        /**
+         * @throws \myConf\Exceptions\CacheDriverException
+         * @throws \myConf\Exceptions\HttpStatusException
+         * @throws \myConf\Exceptions\SendExitInstructionException
+         */
+        public function preview() {
+            try {
+                $attachment_id = intval($this->input->get('aid'));
+                if ($this->_action === 'pdf') {
+                    $this->Services->Attachment->download_pdf_as_preview($attachment_id);
+                } else {
+                    throw new \myConf\Exceptions\HttpStatusException(404, 'FILE_NOT_FOUND', 'The file you have requested for preview does not exists, it may have been deleted or moved before.');
+                }
+            } catch (\myConf\Exceptions\AttachFileCorruptedException $e) {
+                throw new \myConf\Exceptions\HttpStatusException(404, 'ATTACH_NOT_FOUND', 'The file you have requested for preview does not exists, it may have been deleted or moved before.');
+            }
+        }
     }

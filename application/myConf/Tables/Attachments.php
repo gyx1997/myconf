@@ -86,4 +86,14 @@
             $this->set(strval($attachment_id), array('attachment_used' => ($used_status ? '1' : '0')));
         }
 
+        /**
+         * 重写父类的insert方法，自动对文件名进行CRC32处理
+         * @param array $data
+         * @return int
+         */
+        public function insert(array $data = []) : int {
+            isset($data['attachment_file_name']) && $data['attachment_filename_hash'] = crc32($data['attachment_file_name']);
+            return parent::insert($data);
+        }
+
     }

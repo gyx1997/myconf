@@ -9,6 +9,10 @@ namespace myConf\Libraries;
  */
 class Attach
 {
+    public const file_type_pdf = 1;
+    public const file_type_jpeg = 2;
+    public const file_type_png = 3;
+
     /**
      * 处理附件。
      * @param string $file_field_name
@@ -67,7 +71,7 @@ class Attach
      * @throws \myConf\Exceptions\AttachFileCorruptedException
      */
     public static function download_attach(string $attach_relative_path, string $file_name_original, int $file_size, int $download_speed = 80000) : void {
-        $file_absolute_path = FCPATH . $attach_relative_path;
+        $file_absolute_path = ATTACHMENT_DIR . $attach_relative_path;
         if (!file_exists($file_absolute_path)) {
             throw new \myConf\Exceptions\AttachFileCorruptedException('ATTACH_NOT_EXIST', 'File "' . $file_absolute_path . '" does not exist.');
         }
@@ -77,7 +81,7 @@ class Attach
         header("Content-Disposition:attachment;filename=" . $file_name_original);
         header("Accept-ranges:bytes");
         header("Accept-length:" . $file_size);
-        $fp = @fopen($file_absolute_path, 'r');
+        $fp = fopen($file_absolute_path, 'r');
         if ($fp === false) {
             throw new \myConf\Exceptions\AttachFileCorruptedException('ATTACH_CANNOT_READ', 'File "' . $file_absolute_path . '" cannot be read.');
         }
@@ -91,6 +95,43 @@ class Attach
             ob_flush();
             usleep(100000);
         }
-        @fclose($fp);
+        fclose($fp);
+    }
+
+    /**
+     * @param string $attach_relative_path
+     * @param string $file_name_original
+     * @param int $file_size
+     * @param int $file_type
+     * @throws \myConf\Exceptions\AttachFileCorruptedException
+     */
+    public static function preview_attach(string $attach_relative_path, string $file_name_original, int $file_size, int $file_type) : void {
+        $file_absolute_path = ATTACHMENT_DIR . $attach_relative_path;
+        if (!file_exists($file_absolute_path)) {
+            throw new \myConf\Exceptions\AttachFileCorruptedException('ATTACH_NOT_EXIST', 'File "' . $file_absolute_path . '" does not exist.');
+        }
+        set_time_limit(1800);
+        ob_clean();
+        if ($file_type === self::file_type_pdf) {
+            header("Content-type:application/pdf");
+            header("Content-Disposition:inline;filename=" . $file_name_original);
+        }
+        header("Accept-ranges:bytes");
+        header("Accept-length:" . $file_size);
+        $fp = fopen($file_absolute_path, 'r');
+        if ($fp === false) {
+            throw new \myConf\Exceptions\AttachFileCorruptedException('ATTACH_CANNOT_READ', 'File "' . $file_absolute_path . '" cannot be read.');
+        }
+        $buffer = 1048576;
+        $buffer_count = 0;
+        while (!feof($fp) && $file_size - $buffer_count > 0) {
+            $data = fread($fp, $buffer);
+            $buffer_count += $buffer;
+            echo $data;
+            flush();
+            ob_flush();
+            usleep(100000);
+        }
+        fclose($fp);
     }
 }

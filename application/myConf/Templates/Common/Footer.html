@@ -11,15 +11,23 @@ log_message('INFO', "$elapsed_time, $mem_usage MiB, $sql_queries queries.");
 {{@end}}
 </div>
 <div class="bottom-blank"></div>
-<nav class="navbar navbar-expand-sm bg-light fixed-bottom" role="navigation" style="font-size:80%;">
+<nav class="navbar navbar-expand-sm bg-light fixed-bottom" role="navigation" style="font-size:75%;">
     <div class="container-fluid">
         <div class="navbar-header">
-            <span class="navbar-brand" style="font-size:100%;"><?php echo $footer1; ?></span>
+            <span class="navbar-brand" style="font-size:115%;">Copyright © <?php echo $footer1; ?>
+                                                               2018 - <?php echo date('Y', time()); ?></span>
         </div>
         <ul class="nav navbar-nav navbar-right">
             <li><?php echo $mitbeian ?>&nbsp;&nbsp;&nbsp;&nbsp;</li>
-            <li>Processed in <strong><?php echo $elapsed_time; ?></strong> second(s), using
-                <strong><?php echo $mem_usage; ?></strong> MiB, <strong><?php echo $sql_queries; ?></strong> queries.
+            <li>
+                <div style="text-align: right;">
+                    <span><strong>Mozilla Firefox</strong> and <strong>Google Chrome</strong> are recommended.</span>
+                    <br />
+                    Processed in <strong><?php echo $elapsed_time; ?></strong> second(s), using
+                    <strong><?php echo $mem_usage; ?></strong> MiB, <strong><?php echo $sql_queries; ?></strong>
+                    queries.
+                </div>
+
             </li>
         </ul>
     </div>
