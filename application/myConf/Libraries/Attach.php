@@ -104,6 +104,7 @@ class Attach
      * @param int $file_size
      * @param int $file_type
      * @throws \myConf\Exceptions\AttachFileCorruptedException
+     * @throws \myConf\Exceptions\SendExitInstructionException
      */
     public static function preview_attach(string $attach_relative_path, string $file_name_original, int $file_size, int $file_type) : void {
         $file_absolute_path = ATTACHMENT_DIR . $attach_relative_path;
@@ -133,5 +134,6 @@ class Attach
             usleep(100000);
         }
         fclose($fp);
+        throw new \myConf\Exceptions\SendExitInstructionException();
     }
 }

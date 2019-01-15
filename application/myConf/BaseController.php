@@ -262,7 +262,7 @@ class BaseController
      * 检查是否登录，如果没有登录，跳转到登录页面。
      * @throws Exceptions\SendRedirectInstructionException
      */
-    protected function _login_redirect()
+    protected function _login_redirect() : void
     {
         if (!$this->_has_login()) {
             $this->_redirect_to('/account/login/?redirect=' . $this->_url_encoded);

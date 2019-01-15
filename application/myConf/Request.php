@@ -16,11 +16,6 @@ class Request
     private $_controller;
 
     /**
-     * @var string 控制器名称
-     */
-    private $_controller_str;
-
-    /**
      * @var string 控制器完整类名
      */
     private $_controller_class_name;
@@ -36,21 +31,17 @@ class Request
     private $_vars;
 
     /**
+     * @var string 模板名
+     */
+    private $_template;
+
+    /**
      * Request constructor.
      * @param string $default_controller 默认的控制器
      */
-    public function __construct(string $default_controller = 'Home')
+    public function __construct(string $controller)
     {
-        //返回变量
-        $ret = 0;
-        //加载输出响应类
-        $this->_response = new \myConf\Response();
-        //使用实例化的CI核心类处理URL,为加载核心控制器模块做准备
-        $CI = &get_instance();
-        $this->_ajax = $CI->input->get('ajax') === 'true';
-        $controller_str = ucfirst(strtolower($CI->uri->segment(1, '')));
-        $this->_controller_str === '' && $controller_str = $default_controller;
-        $this->_controller_class_name = '\\myConf\\Controllers\\' . $controller_str;
+        $this->_controller_class_name = '\\myConf\\Controllers\\' . $controller;
     }
 
     /**
@@ -78,30 +69,24 @@ class Request
 
     /**
      * @throws \myConf\Exceptions\ClassNotFoundException
-     * @throws \myConf\Exceptions\URLRequestException
+     * @throws \myConf\Exceptions\HttpStatusException
+     * @throws \myConf\Exceptions\TemplateNotFoundException
+     * @throws \myConf\Exceptions\TemplateParseException
      */
     public function run() : void {
         if (!class_exists($this->_controller_class_name)) {
-            //尝试加载控制器，并将控制权交给控制器
             throw new \myConf\Exceptions\ClassNotFoundException('CLASS_NOT_FOUND', 'Requested controller class not found.');
         }
-        try {
-            $class = $this->_controller_class_name;
-            $this->_controller = new $class();
-            $vars = [];
-            $this->_controller->run($vars);
-            $this->_response->add_variables($this->_parse_variables($vars));
-            $this->_ajax === true ? $this->_response->json() : $this->_response->html($this->_controller->template_name());
-        } catch (\myConf\Exceptions\SendRedirectInstructionException $e) {
-            //跳转指令
-            header('location:' . $e->getRedirectURL());
-        } catch (\myConf\Exceptions\SendExitInstructionException $e) {
-            //直接退出指令
-            if ($e->getAction() === \myConf\Exceptions\SendExitInstructionException::DO_OUTPUT_JSON) {
-                $this->_response->add_variables($e->getData());
-                $this->_response->json();
-            }
-        }
+        $class = $this->_controller_class_name;
+        /**
+         * @var \myConf\BaseController $controller
+         */
+        $controller = new $class();
+        $vars = [];
+        $controller->run($vars);
+        $this->_vars = $vars;
+        $this->_template = $controller->template_name();
+        return;
     }
 
     /**
@@ -110,5 +95,19 @@ class Request
      */
     public function show_error(string $message, int $code) : void {
         $this->_response->handled_error($message, $code);
+    }
+
+    /**
+     * @return string
+     */
+    public function template_name() : string {
+        return $this->_template;
+    }
+
+    /**
+     * @return array
+     */
+    public function result_variables() : array {
+        return $this->_vars;
     }
 }

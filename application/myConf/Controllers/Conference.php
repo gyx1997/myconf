@@ -390,6 +390,10 @@ class Conference extends \myConf\BaseController
             case 'new':
                 {
                     if ($this->_do == 'submit') {
+                        //首先判断是否已经过期了
+                        if (time() >= $this->_conference_data['conference_paper_submit_end'] + 24 * 3600) {
+                            $this->exit_promptly(['status' => 'OUT_OF_DATE']);
+                        }
                         //处理作者
                         $authors = json_decode($this->input->post('authors'), true);
                         if (!isset($authors) || empty($authors)) {

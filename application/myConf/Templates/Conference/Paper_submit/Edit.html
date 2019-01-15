@@ -201,16 +201,9 @@
 </script>
 <script src="/static/js/conf-paper-submit-authorList.js"></script>
 <script type="text/javascript">
-    {
-        {@for
-            $author in $paper['authors']
-        }
-    }
+    <?php foreach($paper['authors'] as $author): ?>
     addToList("{{$author['author_email']}}", "{{$author['author_first_name']}}", "{{$author['author_last_name']}}", "{{$author['author_institution']}}", "{{$author['author_department']}}", "{{$author['author_address']}}", "{{$author['author_prefix']}}", "{{$author['author_chn_full_name']}}");
-    {
-        {@end
-        }
-    }
+    <?php endforeach; ?>
     refreshAuthorListView();
 </script>
 {{@include /Conference/Paper_submit/Edit_author_dialog}}

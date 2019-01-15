@@ -85,32 +85,64 @@
      */
     $ret = 0;
 
+    /**
+     * @var \CI_Controller 当前的CI超级对象
+     */
+    $CI = &get_instance();
+    $ajax = $CI->input->get('ajax') === 'true';
+    $controller_name = ucfirst(strtolower($CI->uri->segment(1, '')));
+    $controller_name === '' && $controller_str = 'Home';
+    /**
+     * @var \myConf\BaseController $controller 实例化的请求
+     */
+    $request = new \myConf\Request($controller_name);
+    /**
+     * @var \myConf\Response $response 实例化的响应
+     */
+    $response = new \myConf\Response();
     //加载请求，开始应用逻辑响应
+    //这里把所有指令和异常均外置，在最外层捕获各种指令、错误、异常
+    //不放在内部，因为ClassNotFoundException是由request抛出的。
     try {
-        /**
-         * @var \myConf\BaseController $controller 实例化的控制器
-         */
-        $request = new \myConf\Request('Home');
         $request->run();
+        $vars = $request->result_variables();
+        $result = [];
+        foreach ($vars as $key => $var) {
+            if ($var['type'] == OUTPUT_VAR_ALL || ($var['type'] === OUTPUT_VAR_HTML_ONLY && $ajax === false) || ($var['type'] === OUTPUT_VAR_JSON_ONLY && $ajax === true)) {
+                $result[$key] = $var['value'];
+            }
+        }
+        $response->add_variables($result);
+        $response->add_variables(['StaticUrl' => '']);
+        $ajax ? $response->json() : $response->html($request->template_name());
+    } catch (\myConf\Exceptions\SendRedirectInstructionException $e) {
+        //跳转指令
+        header('location:' . $e->getRedirectURL());
+    } catch (\myConf\Exceptions\SendExitInstructionException $e) {
+        //直接退出指令
+        if ($e->getAction() === \myConf\Exceptions\SendExitInstructionException::DO_OUTPUT_JSON) {
+            $response->add_variables($e->getData());
+            $response->json();
+        }
     } catch (\myConf\Exceptions\ClassNotFoundException $e) {
-        $request->show_error('The path you requested was not found.', 404);
+        //控制器没有找到，理论上是返回404的
+        $response->handled_error('The path you requested was not found.', 404);
     } catch (\myConf\Exceptions\HttpStatusException $e) {
-        //HTTP错误指令
-        $request->show_error($e->getMessage(), $e->getHttpStatus());
+        //HTTP错误
+        $response->handled_error($e->getMessage(), $e->getHttpStatus());
     } catch (\Throwable $e) {
         //控制器模块加载失败，或者控制器本身无法处理的异常，的错误处理。这里都是按照 HTTP 500 来处理。
         log_message('ERROR', $e->getMessage() . PHP_EOL . $e->getTraceAsString());
         $str = 'A fatal error occurred that your request could not be processed properly. We are so sorry for the inconvenience we have caused. <br/> Critical Information has been written down to our logging system to help us analyze and solve this problem. <br/> If you have further questions, please contact us with the email : xxxx@xxx.com. ';
         if (ENVIRONMENT === 'production') {
-            $request->show_error($str, 500);
+            $response->handled_error($str, 500);
         } else {
             $trace_str = '';
             foreach ($e->getTrace() as $trace) {
                 $trace_str .= '<div><span style="font-family:Consolas;">' . (isset($trace['class']) ? $trace['class'] : '') . '::' . $trace['function'] . '</span><p>Line ' . $trace['line'] . ' in File ' . $trace['file'] . '</p></div>';
             }
-            $request->show_error($str . '<div style="border: 1px #333333 solid; padding: 10px;"><h3>Debug Information</h3><p>' . $e->getMessage() . '</p><p> At Line : <strong>' . $e->getLine() . '</strong> , in File : ' . $e->getFile() . '</p><p> <strong>BackTrace</strong> : </p>' . $trace_str . '</p></div>', 500);
+            $response->handled_error($str . '<div style="border: 1px #333333 solid; padding: 10px;"><h3>Debug Information</h3><p>' . $e->getMessage() . '</p><p> At Line : <strong>' . $e->getLine() . '</strong> , in File : ' . $e->getFile() . '</p><p> <strong>BackTrace</strong> : </p>' . $trace_str . '</p></div>', 500);
         }
         $ret = -1;
     }
-
     exit($ret);
