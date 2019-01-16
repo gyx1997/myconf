@@ -38,7 +38,8 @@
          * @return int
          */
         public function create($username, $password, $email, $salt) {
-            return $this->insert([
+            return $this->insert(
+                [
                     'user_name' => $username,
                     'user_email' => $email,
                     'user_password' => $password,
@@ -46,15 +47,17 @@
                     'is_frozen' => 1,
                     'user_role' => 'user',
                     'user_avatar' => '',
-                ]);
+                ]
+            );
         }
 
         /**
-         * 激活用户
-         * @param $user_id
+         * 激活ID
+         * @param int $user_id
+         * @throws \myConf\Exceptions\CacheDriverException
          */
-        public function activate($user_id) {
-            DbHelper::update($this->table(), ['is_frozen' => 0], ['user_id' => $user_id]);
+        public function activate(int $user_id) {
+            $this->set(strval($user_id), ['is_frozen' => 0]);
         }
 
         /**

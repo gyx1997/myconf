@@ -31,7 +31,7 @@ class Conference extends \myConf\BaseController
         ),
         'user' => [
             [
-                'method' => 'paper_submit',
+                'method' => 'paper-submit',
                 'action' => '',
             ],
             [
@@ -51,21 +51,21 @@ class Conference extends \myConf\BaseController
         ),
         'reviewer' => array(
             array(
-                'method' => 'paper_review',
+                'method' => 'paper-review',
                 'action' => 'review',
             ),
             array(
-                'method' => 'paper_review',
+                'method' => 'paper-review',
                 'action' => '',
             ),
         ),
         'editor' => array(
             array(
-                'method' => 'paper_review',
+                'method' => 'paper-review',
                 'action' => 'arrange',
             ),
             array(
-                'method' => 'paper_review',
+                'method' => 'paper-review',
                 'action' => '',
             ),
         ),

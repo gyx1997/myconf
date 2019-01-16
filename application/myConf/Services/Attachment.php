@@ -22,7 +22,7 @@
          */
         public function ueditor_upload(string $file_field, int $document_id) : array {
             $attach_info = \myConf\Libraries\Attach::parse_attach($file_field);
-            $attachment_id = $this->Models->Attachment->add_as_document_attached($document_id, $attach_info['full_name'], $attach_info['original_name'], $attach_info['size'], $attach_info['is_image'], 0);
+            $attachment_id = $this->Models->Attachment->add_as_document_attached($document_id, $attach_info['full_name'], $attach_info['original_name'], $attach_info['size'], $attach_info['is_image']);
             return [
                 'attachment_id' => $attachment_id,
                 'original_name' => $attach_info['original_name'],

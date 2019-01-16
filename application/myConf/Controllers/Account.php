@@ -93,17 +93,10 @@
             switch ($this->_do) {
                 case 'verifyKey':
                     {
+                        //发送验证邮件
                         $status = 'SUCCESS';
                         $target_email = base64_decode($this->input->get('email'));
-                        //生成验证Key
-                        $hash_key = md5(uniqid());
-                        $this->session->set_tempdata('pwd-reset-hash', $hash_key, 1800);
-                        try {
-                            $this->Services->Account->send_verify_email($target_email, $hash_key);
-                        } catch (\myConf\Exceptions\UserNotExistsException $e) {
-                            $status = 'EMAIL_NOT_EXISTS';
-                            $this->Session->unset_tempdata('pwd-reset-hash');
-                        }
+                        $this->Services->Account->send_verify_email($target_email, 'reset-pwd', 'myConf Reset Password');
                         $this->add_output_variables(array('status' => $status, 'email' => $target_email));
                         break;
                     }
@@ -113,12 +106,12 @@
                         $this->_check_captcha($this->input->post('reset_pwd_captcha')) OR $this->exit_promptly(array('status' => 'CAPTCHA_ERR'));
                         //读取输入
                         $status = 'SUCCESS';
-                        $hash_key = $this->session->tempdata('pwd-reset-hash');
                         $hash_key_got = trim($this->input->post('verification_key'));
                         $new_password = $this->input->post('user_password');
                         $email = $this->input->post('user_email');
                         try {
-                            $this->Services->Account->reset_password($email, $hash_key, $hash_key_got, $new_password);
+                            $this->Services->Account->check_verify_email('reset-pwd', $hash_key_got);
+                            $this->Services->Account->reset_password($email, $new_password);
                         } catch (\myConf\Exceptions\EmailVerifyFailedException $e) {
                             $status = 'EMAIL_VERIFY_FAILED';
                         } catch (\myConf\Exceptions\UserNotExistsException $e) {
@@ -136,32 +129,48 @@
 
         /**
          * 注册
-         * @throws \Exception mysqli_insert_id()出错，认为可以忽略。如果偶然出现会被最外层的_exception_handler抓住。
          */
         public function register() {
             switch ($this->_do) {
+                case 'checkEmail':
+                    {
+                        $status = 'SUCCESS';
+                        $target_email = base64_decode($this->input->get('email'));
+                        if ($this->Services->Account->email_exists($target_email)){
+                            $status = 'EMAIL_EXISTS';
+                        }else {
+                            $this->Services->Account->send_verify_email($target_email, 'reg-verify', 'Email Verification');
+                        }
+                        $this->add_output_variables(['status' => $status]);
+                        break;
+                    }
                 case 'submit':
                     {
                         //检查验证码和登录状态
-                        $this->_check_captcha($this->input->post('register_captcha')) || $this->exit_promptly(array('status' => 'CAPTCHA_ERR'));
-                        $this->_has_login() && $this->exit_promptly(array('status' => 'ALREADY_LOGIN'));
-                        //使用注册逻辑
+                        $this->_check_captcha($this->input->post('register_captcha')) || $this->exit_promptly(['status' => 'CAPTCHA_ERR']);
+                        $this->_has_login() && $this->exit_promptly(['status' => 'ALREADY_LOGIN']);
+                        //得到的验证码
+                        $hash_key_got = trim($this->input->post('register_verification_key'));
+
                         $status = 'SUCCESS';
+                        $redirect = $this->_url_redirect;
                         try {
-                            //定义上会出Exception，实际上应该不会。
+                            $this->Services->Account->check_verify_email('reg-verify', $hash_key_got);
                             $user = $this->Services->Account->new_account($this->input->post('register_email'), $this->input->post('register_username'), $this->input->post('register_password'));
                             $this->_set_login($user);
                         } catch (\myConf\Exceptions\EmailExistsException $e) {
                             $status = 'EMAIL_EXISTS';
                         } catch (\myConf\Exceptions\UsernameExistsException $e) {
                             $status = 'USERNAME_EXISTS';
+                        } catch (\myConf\Exceptions\EmailVerifyFailedException $e) {
+                            $status = 'VERIFY_FAILED';
                         }
-                        $this->add_output_variables(array('status' => $status));
-                        break;
-                    }
-                case 'activate':
-                    {
-                        //TODO 增加注册邮箱激活
+                        $this->add_output_variables(
+                            [
+                                'status' => $status,
+                                'redirect' => $redirect
+                            ]
+                        );
                         break;
                     }
                 default:
@@ -170,6 +179,7 @@
                             $this->_redirect_to('/account/');
                             return;
                         }
+                        $this->add_output_variables(array('redirect' => base64_encode($this->_url_redirect)));
                         break;
                     }
             }
@@ -186,7 +196,6 @@
          * @throws \myConf\Exceptions\DirectoryException
          * @throws \myConf\Exceptions\FileUploadException
          * @throws \myConf\Exceptions\SendRedirectInstructionException
-         * @throws \sAccount\ScholarNotExistsException
          */
         public function my_settings() {
             $this->_login_redirect();

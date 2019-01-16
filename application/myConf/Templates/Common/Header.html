@@ -3,21 +3,21 @@
 <head>
     <meta charset="utf-8">
     <title>{{$title}}</title>
-    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.0/css/bootstrap-grid.min.css" rel="stylesheet">
-    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.0/css/bootstrap-reboot.min.css" rel="stylesheet">
-    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/myconf.css" rel="stylesheet">
-    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-    <link href="/static/font-awesome/css/awesome-bootstrap-checkbox.css" rel="stylesheet">
-    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
-    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <link href="{{$StaticDomain}}/static/css/bootstrap-grid.min.css" rel="stylesheet">
+    <link href="{{$StaticDomain}}/static/css/bootstrap-reboot.min.css" rel="stylesheet">
+    <link href="{{$StaticDomain}}/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{$StaticDomain}}/static/css/myconf.css" rel="stylesheet">
+    <link href="{{$StaticDomain}}/static/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{{$StaticDomain}}/static/font-awesome/css/awesome-bootstrap-checkbox.css" rel="stylesheet">
+    <script src="{{$StaticDomain}}/static/js/common-jquery.min.js"></script>
+    <script src="{{$StaticDomain}}/static/js/common-popper.js"></script>
+    <script src="{{$StaticDomain}}/static/js/common-bootstrap.min.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-    <script type="text/javascript" src="/static/md5.js"></script>
-    <script type="text/javascript" src="/static/jquery.base64.js"></script>
-    <script type="text/javascript" src="/static/bs-table/bootstrap-table.js"></script>
-    <script type="text/javascript" src="/static/bs-table/locale/bootstrap-table-en-US.js"></script>
-    <script type="text/javascript" src="/static/myconf.js"></script>
+    <script type="text/javascript" src="{{$StaticDomain}}/static/js/common-md5.js"></script>
+    <script type="text/javascript" src="{{$StaticDomain}}/static/jquery.base64.js"></script>
+    <script type="text/javascript" src="{{$StaticDomain}}/static/bs-table/bootstrap-table.js"></script>
+    <script type="text/javascript" src="{{$StaticDomain}}/static/bs-table/locale/bootstrap-table-en-US.js"></script>
+    <script type="text/javascript" src="{{$StaticDomain}}/static/js/common-myconf.js"></script>
 </head>
 <body>
 
@@ -47,7 +47,7 @@
                 <?php } else { ?>
                 <li class="nav-item"><a class="nav-link" href="/account/login/?redirect=<?php echo $url; ?>"><span
                         class="fa fa-sign-in"></span> Login</a></li>
-                <li class="nav-item"><a class="nav-link" href="/account/register/"><span
+                <li class="nav-item"><a class="nav-link" href="/account/register/?redirect=<?php echo $url; ?>"><span
                         class="fa fa-user"></span> Register</a></li>
                 <?php } ?>
             </div>

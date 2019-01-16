@@ -65,14 +65,22 @@
                             {{@end}}
                         </td>
                         <td>
-                            <a href="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_id']}}" class="btn btn-light">Edit</a>
+                            {{@if $paper['paper_status'] === '0' || $paper['paper_status'] === '4'}}
+                                <a href="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_id']}}" class="btn btn-primary">Edit</a>
+                            {{@else}}
+                                <span class="btn btn-primary disabled" >Edit</span>
+                            {{@end}}
+                            {{@if $paper['paper_status'] === '0'}}
+                            <a href="{{$conf_url}}/paper-submit/delete/?id={{$paper['paper_id']}}" class="btn btn-primary">Delete</a>
+                            {{@else}}
+                            <span class="btn btn-primary disabled" >Delete</span>
+                            {{@end}}
                         </td>
                     </tr>
                     {{@end}}
                     </tbody>
                 </table>
                 {{@end}}
-
             </div>
         </div>
     </div>

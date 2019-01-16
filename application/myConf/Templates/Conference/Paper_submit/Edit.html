@@ -10,7 +10,7 @@
         </div>
         <div class="modal-body">
             <form id="paper_data" name="paper_data"
-                  action="{{$conf_url}}/paper_submit/edit/?id={{$paper['paper_id']}}&do=submit&ajax=true"
+                  action="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_id']}}&do=submit&ajax=true"
                   method="post" enctype="multipart/form-data">
                 <input type="hidden" name="<?php echo $csrf_name; ?>" value="<?php echo $csrf_hash; ?>" />
                 <input type="hidden" name="user_id" value="<?php echo $login_user['user_id']; ?>" />
@@ -141,9 +141,6 @@
                 <button id="submit_button" class="btn btn-primary" type="button" onclick="submitPaper();">
                     Submit
                 </button>
-                <button id="save_button" class="btn btn-secondary" type="button" onclick="saveToServer();">
-                    Save To Server
-                </button>
             </form>
         </div>
     </div>
@@ -169,37 +166,12 @@
     </li>
 </div>
 <script type="text/javascript">
-    var saveToServer = function () {
-        doSubmit('save');
-    };
     var submitPaper = function () {
         doSubmit('submit');
     };
-
-    var doSubmit = function (action) {
-        $('#authors').val(JSON.stringify(authorList));
-        console.log(JSON.stringify(authorList));
-        $.ajax({
-            async: true,
-            type: "POST",
-            url: "{{$conf_url}}/paper_submit/edit/?id={{$paper['paper_id']}}&do=" + action + "&ajax=true",
-            contentType: false,
-            data: new FormData($('#paper_data')[0]),
-            processData: false,
-            cache: false,
-            dataType: "json",
-            success: function (d) {
-                if (d.status === 'SUCCESS') {
-                    messageBox('Paper ' + (action === 'save' ? 'saved' : 'submitted') + ' successfully.', 'Message', null);
-                }
-            },
-            error: function () {
-                messageBox('An internal server error occurred during submitting your paper.', 'Message');
-            }
-        });
-    }
 </script>
-<script src="/static/js/conf-paper-submit-authorList.js"></script>
+<script src="{{$StaticDomain}}/static/js/conf-paper-submit-editPost.js"></script>
+<script src="{{$StaticDomain}}/static/js/conf-paper-submit-authorList.js"></script>
 <script type="text/javascript">
     <?php foreach($paper['authors'] as $author): ?>
     addToList("{{$author['author_email']}}", "{{$author['author_first_name']}}", "{{$author['author_last_name']}}", "{{$author['author_institution']}}", "{{$author['author_department']}}", "{{$author['author_address']}}", "{{$author['author_prefix']}}", "{{$author['author_chn_full_name']}}");

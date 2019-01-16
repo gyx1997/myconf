@@ -37,7 +37,7 @@ class Request
 
     /**
      * Request constructor.
-     * @param string $default_controller 默认的控制器
+     * @param string $controller 默认的控制器
      */
     public function __construct(string $controller)
     {
@@ -70,8 +70,6 @@ class Request
     /**
      * @throws \myConf\Exceptions\ClassNotFoundException
      * @throws \myConf\Exceptions\HttpStatusException
-     * @throws \myConf\Exceptions\TemplateNotFoundException
-     * @throws \myConf\Exceptions\TemplateParseException
      */
     public function run() : void {
         if (!class_exists($this->_controller_class_name)) {

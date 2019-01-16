@@ -9,14 +9,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.0/css/bootstrap-grid.min.css" rel="stylesheet">
     <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.0/css/bootstrap-reboot.min.css" rel="stylesheet">
     <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/myconf.css" rel="stylesheet">
+    <link href="/static/css/myconf.css" rel="stylesheet">
 
     <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
 
     <script type="text/javascript" src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-    <script type="text/javascript" src="/static/md5.js"></script>
+    <script type="text/javascript" src="/static/js/md5.js"></script>
     <script type="text/javascript" src="/static/jquery.base64.js"></script>
     <script type="text/javascript" src="/static/bs-table/bootstrap-table.js"></script>
     <script type="text/javascript" src="/static/bs-table/locale/bootstrap-table-en-US.js"></script>

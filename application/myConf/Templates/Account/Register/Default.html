@@ -6,23 +6,39 @@
                   onsubmit="return false;">
                 <div class="modal-header">
                     <h4 class="modal-title">Register</h4>
+                    <button type="button" class="close" data-dismiss="modal" id="closeButton">&times;</button>
                 </div>
                 <div class="modal-body">
+
+                    <p>
+                        <h5>Notes:</h5>
+                        Please check the email first after finishing the email field. <br/>
+                        Please use <strong>Mozilla Firefox</strong> or <strong>Google Chrome</strong> to register the site.
+                    </p>
+
                     <input type="hidden" name="{{$csrf_name}}" value="{{$csrf_hash}}"/>
+                    <input type="hidden" name="redirect" value="<?php echo $redirect; ?>"/>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="register_email">Email</label>
+                        </div>
+                        <input type="text" class="form-control" id="register_email" name="register_email"
+                               placeholder="Your email."/>
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-secondary" id="checkEmailButton">Check Email</button>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label for="register_username">Username(No longer than 32 characters)</label>
-                        <input type="text" class="form-control" id="register_username" name="register_username"
-                               placeholder="Your username."/>
-                        <div id="err_username" style="padding:5px 0px 0px 0px;display: none;">
+                        <div id="err_email2" style="padding:5px 0px 0px 0px;display: none;">
                             <div class="alert alert-info">
-                                <span>Username already exists.</span>
+                                <span>Verification Email has been sent successfully. Please check your mailbox and copy the key to the textbox below.</span>
                             </div>
                         </div>
                     </div>
+
                     <div class="form-group">
-                        <label for="register_email">Email</label>
-                        <input type="text" class="form-control" id="register_email" name="register_email"
-                               placeholder="Your email."/>
                         <div id="err_email" style="padding:5px 0px 0px 0px;display: none;">
                             <div class="alert alert-info">
                                 <span>Email already exists.</span>
@@ -31,17 +47,88 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="register_password">Password</label>
-                        <input type="password" class="form-control" id="register_password" name="register_password"
-                               placeholder="Your password."/>
+                        <div id="err_email_format_error" style="padding:5px 0px 0px 0px;display: none;">
+                            <div class="alert alert-info">
+                                <span>Invalid Email.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="verification_key">Verification Key</label>
+                        </div>
+                        <input type="text" class="form-control" id="register_verification_key" name="register_verification_key"
+                               placeholder="Enter the verification key."/>
                     </div>
 
                     <div class="form-group">
-                        <label for="register_captcha">Captcha(Only include UPPERCASE letters)
-                            <img id="captcha_image" src="/misc/captcha/" style="width: 100px; height:30px;"/>
-                        </label>
+                        <div id="err_verify" style="padding:5px 0px 0px 0px;display: none;">
+                            <div class="alert alert-info">
+                                <span>Email Verification failed.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="register_username">Username</span></label>
+                        </div>
+                        <input type="text" class="form-control" id="register_username" name="register_username"
+                               placeholder="Enter your username. It should be less than 32 characters."/>
+                    </div>
+
+                    <div class="form-group">
+                        <div id="err_username" style="padding:5px 0px 0px 0px;display: none;">
+                            <div class="alert alert-info">
+                                <span>Username already exists.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="register_password">Password</label>
+                        </div>
+                        <input type="password" class="form-control" id="register_password" name="register_password"
+                               placeholder="Enter your password."/>
+                    </div>
+
+                    <div class="form-group">
+                        <div id="err_password" style="padding:5px 0px 0px 0px;display: none;">
+                            <div class="alert alert-info">
+                                <span>Password must not be null.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="register_password_repeat">Repeat Password</label>
+                        </div>
+                        <input type="password" class="form-control" id="register_password_repeat" name="register_password_repeat"
+                               placeholder="Repeat your password here."/>
+                    </div>
+
+                    <div class="form-group">
+                        <div id="err_password2" style="padding:5px 0px 0px 0px;display: none;">
+                            <div class="alert alert-info">
+                                <span>Repeat password must be the same.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="register_captcha">Captcha&nbsp;
+                                <img id="captcha_image" src="/misc/captcha/" style="width: 100px; height:30px;"/>
+                            </label>
+                        </div>
                         <input type="text" class="form-control" id="register_captcha" name="register_captcha"
-                               placeholder="Enter the text in the captcha above."/>
+                               placeholder="Captcha only uppercase letters."/>
+                    </div>
+
+                    <div class="form-group">
                         <div id="err_captcha" style="padding:5px 0px 0px 0px;display: none;">
                             <div class="alert alert-info">
                                 <span>Wrong captcha.</span>
@@ -56,49 +143,11 @@
         </div>
     </div>
 </div>
-
+<script type="text/javascript" src="{{$StaticDomain}}/static/js/account-register.js"></script>
 <script>
-    $('#registerDialog').modal({backdrop: 'static', keyboard: false});
-    var has_md5 = false;
-    register_password.onchange = function () {
-        has_md5 = false;
-    };
-    submit_button.onclick = function () {
-        $('#err_captcha').hide();
-        $('#err_username').hide();
-        $('#err_email').hide();
-        if (has_md5 === false) {
-            var password_input = document.getElementById("register_password");
-            password_input.value = $.md5(password_input.value);
-        }
-        $.ajax({
-            async: true,
-            type: "POST",
-            url: '/account/register/?do=submit&ajax=true',
-            contentType: "application/x-www-form-urlencoded; charset=utf-8",
-            data: $("#register_form").serialize(),
-            dataType: "json",
-            success: function (d) {
-                if (d.status === 'SUCCESS') {
-                    window.location.href = "/account/my-settings/";
-                }
-                if (d.status === 'CAPTCHA_ERR') {
-                    $('#err_captcha').show();
-                } else if (d.status === 'USERNAME_EXISTS') {
-                    $('#err_username').show();
-                } else if (d.status === 'EMAIL_EXISTS') {
-                    $('#err_email').show();
-                }
-            },
-            error: function () {
-
-            }
-        });
-        return false;
-    };
-    captcha_image.onclick = function () {
-        this.src = "/misc/captcha/?refresh=" + Math.random();
-    };
+    $('#closeButton').click(function(){
+        window.location.href=window.atob('{{$redirect}}');
+    });
 </script>
 {{@include /Common/Footer}}
 

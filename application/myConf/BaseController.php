@@ -123,7 +123,8 @@ class BaseController
         //获得参数
         $this->_do = $this->input->get('do');
         $this->_url_encoded = base64_encode(Env::get_current_url());
-        $this->_url_redirect = base64_decode(Env::get_redirect());
+        $url_redirect = base64_decode(Env::get_redirect());
+        $this->_url_redirect = $url_redirect === '' ? '/' : $url_redirect;
         //检查登录情况
         $this->_check_login();
     }

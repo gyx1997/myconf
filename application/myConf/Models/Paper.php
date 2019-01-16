@@ -22,7 +22,7 @@
         public const paper_status_under_review = 1;
         public const paper_status_passed = 2;
         public const paper_status_rejected = 3;
-        public const paper_need_modify = 4;
+        public const paper_status_revision = 4;
         public const paper_saved = -1;
 
         /**

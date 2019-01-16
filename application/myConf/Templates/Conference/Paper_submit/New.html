@@ -9,7 +9,7 @@
             <h4 class="modal-title">Submit new paper</h4>
         </div>
         <div class="modal-body">
-            <form id="paper_data" name="paper_data" action="{{$conf_url}}/paper_submit/new/?do=submit&ajax=true"
+            <form id="paper_data" name="paper_data" action="{{$conf_url}}/paper-submit/new/?do=submit&ajax=true"
                   method="post" enctype="multipart/form-data">
                 <input type="hidden" name="<?php echo $csrf_name; ?>" value="<?php echo $csrf_hash; ?>"/>
                 <input type="hidden" name="user_id" value="<?php echo $login_user['user_id']; ?>"/>
@@ -125,42 +125,12 @@
     </li>
 </div>
 <script type="text/javascript">
-    var saveToServer = function () {
-        doSubmit('save');
-    };
     var submitPaper = function () {
         doSubmit('submit');
     };
-
-    var doSubmit = function (action) {
-        $('#authors').val(JSON.stringify(authorList));
-        console.log(JSON.stringify(authorList));
-        $.ajax({
-            async: true,
-            type: "POST",
-            url: "{{$conf_url}}/paper-submit/new/?do=" + action + "&ajax=true",
-            contentType: false,
-            data: new FormData($('#paper_data')[0]),
-            processData: false,
-            cache: false,
-            dataType: "json",
-            success: function (d) {
-                if (d.status === 'SUCCESS') {
-                    messageBox('Paper ' + (action === 'save' ? 'saved' : 'submitted') + ' successfully.', 'Message', null);
-                    setTimeout(function () {
-                        window.location.href = '<?php echo $conf_url; ?>/paper-submit/'
-                    }, 2000);
-                } else if (d.status === 'FILE_ERROR') {
-                    messageBox('File upload error. Do you forget to choose Paper content file or Copyright file?', 'Message');
-                }
-            },
-            error: function () {
-                messageBox('An internal server error occurred during submitting your paper.', 'Message');
-            }
-        });
-    }
 </script>
-<script src="/static/js/conf-paper-submit-authorList.js"></script>
+<script src="{{$StaticDomain}}/static/js/conf-paper-submit-newPost.js"></script>
+<script src="{{$StaticDomain}}/static/js/conf-paper-submit-authorList.js"></script>
 <script>
     refreshAuthorListView();
 </script>

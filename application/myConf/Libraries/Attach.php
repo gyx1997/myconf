@@ -21,7 +21,7 @@ class Attach
      */
     public static function parse_attach(string $file_field_name): array
     {
-        $result = array('error' => '', 'status' => '');
+        $result = ['error' => '', 'status' => ''];
         $stored_data = self::_get_stored_file_data(Upload::get_original_name($file_field_name));
         $file_data = Upload::parse_upload_file($file_field_name, $stored_data['short_name'], ATTACHMENT_DIR . $stored_data['directory'], true);
         $is_image = ($stored_data['extension'] == '.jpg' || $stored_data['extension'] == '.jpeg'

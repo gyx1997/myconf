@@ -8,6 +8,7 @@
 
 namespace myConf\Services;
 
+use myConf\Exceptions\EmailVerifyFailedException;
 use \myConf\Libraries\Logger;
 
 class Account extends \myConf\BaseService
@@ -66,17 +67,16 @@ class Account extends \myConf\BaseService
     /**
      * 发送验证邮件业务逻辑
      * @param string $email
-     * @param string $hash_key
-     * @throws \myConf\Exceptions\UserNotExistsException
+     * @param string $type
+     * @param string $title
      */
-    public function send_verify_email(string $email, string $hash_key): void {
-        if (!$this->Models->User->exist_by_email($email)) {
-            throw new \myConf\Exceptions\UserNotExistsException();
-        }
+    public function send_verify_email(string $email, string $type, string $title): void {
+        $hash_key = md5(uniqid());
+        \myConf\Libraries\Session::set_temp_data($type . '-hash-key', $hash_key, 1800);
         $CI = &get_instance();
-        $CI->email->from('csqrwc@126.com', 'myConf Password Reset');
+        $CI->email->from('csqrwc@126.com', 'myConf');
         $CI->email->to($email);
-        $CI->email->subject('Password Reset');
+        $CI->email->subject($title);
         $CI->email->message('
             <h1>Email Verification From myConf.cn</h1>
             <p>Copy the text below to enter in the form popped from myConf.cn .</p>
@@ -88,19 +88,26 @@ class Account extends \myConf\BaseService
     }
 
     /**
+     * 检查验证邮件的key是否正确
+     * @param string $type
+     * @param string $hash_key
+     * @throws EmailVerifyFailedException
+     */
+    public function check_verify_email(string $type, string $hash_key) : void {
+        $hash_key_stored = \myConf\Libraries\Session::get_temp_data($type . '-hash-key');
+        if ($hash_key_stored !== $hash_key) {
+            throw new EmailVerifyFailedException('EMAIL_VERIFY_FAILED', 'Email key verification failed.');
+        }
+    }
+
+    /**
      * 更改密码用户逻辑
      * @param string $email
-     * @param string $hash_original
-     * @param string $hash_to_verify
      * @param string $new_password
      * @throws \myConf\Exceptions\CacheDriverException
-     * @throws \myConf\Exceptions\EmailVerifyFailedException
      * @throws \myConf\Exceptions\UserNotExistsException
      */
-    public function reset_password(string $email, string $hash_original, string $hash_to_verify, string $new_password): void {
-        if ($hash_original !== $hash_to_verify) {
-            throw new \myConf\Exceptions\EmailVerifyFailedException();
-        }
+    public function reset_password(string $email, string $new_password): void {
         if (!$this->Models->User->exist_by_email($email)) {
             throw new \myConf\Exceptions\UserNotExistsException();
         }
@@ -114,6 +121,7 @@ class Account extends \myConf\BaseService
      * @param int $user_id
      * @param string $avatar_field
      * @throws \myConf\Exceptions\AvatarNotSelectedException
+     * @throws \myConf\Exceptions\CacheDriverException
      * @throws \myConf\Exceptions\DirectoryException
      * @throws \myConf\Exceptions\FileUploadException
      */
@@ -184,10 +192,10 @@ class Account extends \myConf\BaseService
     }
 
     /**
-     * 生成密码用的盐
-     * @return string
+     * @param string $email
+     * @return bool
      */
-    private function _generate_password_salt(): string {
-        return md5(uniqid() . strval(time()));
+    public function email_exists(string $email) : bool {
+        return $this->Models->User->exist_by_email($email);
     }
 }

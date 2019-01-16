@@ -91,7 +91,7 @@
     $CI = &get_instance();
     $ajax = $CI->input->get('ajax') === 'true';
     $controller_name = ucfirst(strtolower($CI->uri->segment(1, '')));
-    $controller_name === '' && $controller_str = 'Home';
+    $controller_name === '' && $controller_name = 'Home';
     /**
      * @var \myConf\BaseController $controller 实例化的请求
      */
@@ -113,8 +113,15 @@
             }
         }
         $response->add_variables($result);
-        $response->add_variables(['StaticUrl' => '']);
-        $ajax ? $response->json() : $response->html($request->template_name());
+        //对应HTML模板输出时，增加静态变量等
+        $ajax === false && $response->add_variables(
+            [
+                'StaticDomain' => '',
+                'AttachmentDomain' => '',
+            ]
+        );
+        //输出ajax json 或者 HTML 模板
+        $ajax === true ? $response->json() : $response->html($request->template_name());
     } catch (\myConf\Exceptions\SendRedirectInstructionException $e) {
         //跳转指令
         header('location:' . $e->getRedirectURL());

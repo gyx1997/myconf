@@ -42,6 +42,6 @@
         public static function get_redirect() : string {
             $CI = &get_instance();
             $redirect = $CI->input->get('redirect');
-            return isset($redirect) ? $redirect : '';
+            return isset($redirect) ? $redirect : '/';
         }
     }
