@@ -187,4 +187,19 @@ class Conference extends \myConf\BaseModel
             'user_role' => 'scholar',
         ]);
     }
+
+    /**
+     * @param int $conference_id
+     * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
+     */
+    public function get_sessions(int $conference_id) : array {
+        $data = [];
+        $ids = $this->Tables->PaperSessions->get_conference_sessions($conference_id);
+        foreach($ids as $id) {
+            $data []= $this->Tables->PaperSessions->get($id);
+        }
+        return $data;
+    }
+
 }

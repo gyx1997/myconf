@@ -32,7 +32,7 @@
          * 禁止克隆
          */
         private function __clone() {
-
+            //do nothing
         }
 
         /**

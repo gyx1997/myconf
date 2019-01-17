@@ -20,6 +20,7 @@ namespace myConf;
  * @property-read \myConf\Models\ConfMember $ConfMember
  * @property-read \myConf\Models\Attachment $Attachment
  * @property-read \myConf\Models\Paper $Paper
+ * @property-read \myConf\Models\PaperSession $PaperSession
  */
 class Models
 {

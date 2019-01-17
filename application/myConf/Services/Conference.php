@@ -10,6 +10,7 @@ namespace myConf\Services;
 
 
 use myConf\Exceptions\ConferenceNotFoundException;
+use myConf\Exceptions\PaperSessionNotExistsException;
 
 class Conference extends \myConf\BaseService
 {
@@ -275,6 +276,54 @@ class Conference extends \myConf\BaseService
     }
 
     /**
+     * @param int $session_id
+     * @throws PaperSessionNotExistsException
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbTransactionException
+     */
+    public function move_down_session(int $session_id) : void {
+        if ($this->Models->PaperSession->exist($session_id) === false){
+            throw new PaperSessionNotExistsException('CONF_SESS_NOT_EXISTS', 'The requested session of does not exists, or it does not belong to this conference.');
+        }
+        $this->Models->PaperSession->move_down($session_id);
+    }
+
+    /**
+     * @param int $session_id
+     * @throws PaperSessionNotExistsException
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbTransactionException
+     */
+    public function move_up_session(int $session_id) : void {
+        if ($this->Models->PaperSession->exist($session_id) === false){
+            throw new PaperSessionNotExistsException('CONF_SESS_NOT_EXISTS', 'The requested session of does not exists, or it does not belong to this conference.');
+        }
+        $this->Models->PaperSession->move_up($session_id);
+    }
+
+    /**
+     * @param int $session_id
+     * @param int $session_type
+     * @param string $session_text
+     * @throws \myConf\Exceptions\CacheDriverException
+     */
+    public function edit_session(int $session_id, int $session_type, string $session_text) : void {
+        //最后一个参数-1，不更新它的display_order
+        $this->Models->PaperSession->update_session($session_id, $session_type, $session_text, -1);
+    }
+
+    /**
+     * @param int $session_id
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\PaperSessionAlreadyUsedException
+     */
+    public function delete_session(int $session_id) : void {
+        $this->Models->PaperSession->delete_session($session_id);
+    }
+
+
+
+    /**
      * @param int $conference_id
      * @param array $roles_restrict
      * @param string $name_restrict
@@ -376,6 +425,30 @@ class Conference extends \myConf\BaseService
      */
     public function add_member(int $conference_id, int $user_id) : void {
         $this->Models->Conference->add_member($conference_id, $user_id);
+    }
+
+    /**
+     * @param int $conference_id
+     * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
+     */
+    public function get_sessions(int $conference_id) : array {
+        return $this->Models->Conference->get_sessions($conference_id);
+    }
+
+    /**
+     * @param int $conference_id
+     * @param string $session_text
+     * @param int $session_type
+     * @return int
+     * @throws ConferenceNotFoundException
+     * @throws \myConf\Exceptions\CacheDriverException
+     */
+    public function add_new_session(int $conference_id, string $session_text, int $session_type) : int {
+        if (!$this->Models->Conference->exist(strval($conference_id))) {
+            throw self::_exception_conf_not_found();
+        }
+        return $this->Models->PaperSession->add_session($conference_id, $session_text, $session_type);
     }
 
     /**

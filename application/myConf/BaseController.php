@@ -70,7 +70,6 @@ class BaseController
     protected $_url_redirect = '';
 
     private $_service_manager;
-    private $_session_manager;
 
     private $_output_variables = array();
 
@@ -94,13 +93,13 @@ class BaseController
         $this->uri = $CI->uri;
         $this->zip = $CI->zip;
         //处理URL的路由映射信息
-        $special_controller_router_mapping = array(
-            'conference' => array(
+        $special_controller_router_mapping = [
+            'conference' => [
                 'class' => 1,
                 'method' => 3,
                 'action' => 4
-            )
-        );
+            ]
+        ];
         $this->_class = $this->uri->segment(1, '');
         if (array_key_exists($this->_class, $special_controller_router_mapping)) {
             $mapping_rule = $special_controller_router_mapping[$this->_class];
@@ -118,8 +117,6 @@ class BaseController
         }
         //加载微服务管理器
         $this->_service_manager = new \myConf\Services;
-        //加载会话管理器
-        $this->_session_manager = new \myConf\Session;
         //获得参数
         $this->_do = $this->input->get('do');
         $this->_url_encoded = base64_encode(Env::get_current_url());
@@ -127,6 +124,10 @@ class BaseController
         $this->_url_redirect = $url_redirect === '' ? '/' : $url_redirect;
         //检查登录情况
         $this->_check_login();
+    }
+
+    public function check_authority() : void {
+
     }
 
     /**

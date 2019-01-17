@@ -71,7 +71,7 @@
                                 <span class="btn btn-primary disabled" >Edit</span>
                             {{@end}}
                             {{@if $paper['paper_status'] === '0'}}
-                            <a href="{{$conf_url}}/paper-submit/delete/?id={{$paper['paper_id']}}" class="btn btn-primary">Delete</a>
+                            <a href="javascript: deletePaper(<?php echo $paper['paper_id']; ?>);" class="btn btn-primary">Delete</a>
                             {{@else}}
                             <span class="btn btn-primary disabled" >Delete</span>
                             {{@end}}
@@ -86,5 +86,35 @@
     </div>
     <?php } ?>
 </div>
+<script type="text/javascript">
+    var deletePaper = function(paperId) {
+        messageBox(
+            'Do you really want to delete this paper? This action can not be cancelled after you click the "OK" button!',
+            'message',
+            function(){
+                    $.ajax({
+                        async: true,
+                        type: "GET",
+                        url: "{{$conf_url}}/paper-submit/delete/?id={{$paper['paper_id']}}&ajax=true",
+                        contentType: false,
+                        processData: false,
+                        cache: false,
+                        dataType: "json",
+                        success: function (d) {
+                            if (d.status === 'SUCCESS') {
+                                messageBoxSecondary('Paper has been deleted successfully.', 'Message', null);
+                                window.location.href = '{{$conf_url}}/paper-submit/'
+                            }
+                        },
+                        error: function () {
+                            console.log(111);
+                            messageBoxSecondary('An internal server error occurred during deleting your paper.', 'Message');
+                        }
+                    });
+            },
+            true
+        );
+    }
+</script>
 {{@include /Conference/Footer}}
 {{@include /Common/Footer}}

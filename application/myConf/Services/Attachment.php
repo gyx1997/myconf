@@ -44,7 +44,7 @@
             if ($type === 'file') {
                 $this->Models->Attachment->increase_download_times($attachment_id);
             }
-            \myConf\Libraries\Attach::download_attach($attach_info['attachment_file_name'], $attach_info['attachment_original_name'], $attach_info['attachment_file_size'], \myConf\Libraries\Attach::get_mode_download);
+            \myConf\Libraries\Attach::download_attach($attach_info['attachment_file_name'], $attach_info['attachment_original_name'], $attach_info['attachment_file_size']);
             throw new \myConf\Exceptions\SendExitInstructionException('DOWNLOAD_OK', 'Download success.');
         }
 

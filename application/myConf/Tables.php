@@ -24,6 +24,7 @@
      * @property-read \myConf\Tables\Users $Users
      * @property-read \myConf\Tables\Papers $Papers
      * @property-read \myConf\Tables\PaperAuthors $PaperAuthors
+     * @property-read \myConf\Tables\PaperSessions $PaperSessions
      */
     class Tables {
         /**

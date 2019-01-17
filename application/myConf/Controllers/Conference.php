@@ -143,7 +143,7 @@ class Conference extends \myConf\BaseController
                 $roles = ['user'];
             }
         } else {
-            $roles = array('guest');
+            $roles = ['guest'];
         }
         //view的显示权限变量
         $this->_auth_conf_review_paper = in_array('reviewer', $roles);
@@ -151,8 +151,8 @@ class Conference extends \myConf\BaseController
         $this->_auth_conf_creator = in_array('creator', $roles);
         $this->_auth_conf_manage = $this->_auth_conf_creator || in_array('admin', $roles);
         //检查是否符合权限
-        //创始人拥有所有权限
-        if ($this->_auth_conf_creator) {
+        //创始人和管理员拥有所有权限
+        if ($this->_auth_conf_creator || $this->_auth_conf_manage) {
             return;
         }
         //否则逐个检查权限
@@ -382,10 +382,82 @@ class Conference extends \myConf\BaseController
                     }
                     break;
                 }
+            case 'suggested-session':
+                {
+                    switch($this->_do){
+                        case 'add':
+                            {
+                                try {
+                                    $this->Services->Conference->add_new_session($this->_conference_id, $this->input->post('session_text'), intval($this->input->post('session_type')));
+                                    $this->add_output_variables(array('status' => 'SUCCESS'), OUTPUT_VAR_JSON_ONLY);
+                                } catch (\myConf\Exceptions\ConferenceNotFoundException $e) {
+                                    throw new HttpStatusException(404, 'CONF_NOT_FOUND', 'The requested conference was not found.');
+                                }
+                                break;
+                            }
+                        case 'down':
+                            {
+                                $this->Services->Conference->move_down_session($this->input->get('id'));
+                                $this->_redirect_to('/conference/' . $this->_conference_url . '/management/suggested-session/');
+                                break;
+                            }
+                        case 'up':
+                            {
+                                $this->Services->Conference->move_up_session($this->input->get('id'));
+                                $this->_redirect_to('/conference/' . $this->_conference_url . '/management/suggested-session/');
+                                break;
+                            }
+                        case 'edit':
+                            {
+                                $sess_id = $this->input->post('session_id');
+                                $sess_type = intval($this->input->post('session_type'));
+                                $sess_text = $this->input->post('session_text');
+                                $this->Services->Conference->edit_session($sess_id, $sess_type, $sess_text);
+                                $this->_redirect_to('/conference/' . $this->_conference_url . '/management/suggested-session/');
+                                break;
+                            }
+                        case 'delete':
+                            {
+                                try {
+                                    $sess_id = intval($this->input->get('id'));
+                                    $this->Services->Conference->delete_session($sess_id);
+                                    $this->add_output_variables(['status' => 'SUCCESS']);
+                                } catch (\myConf\Exceptions\PaperSessionAlreadyUsedException $e) {
+                                    $this->add_output_variables(['status' => 'SESS_ALREADY_USED']);
+                                }
+                                break;
+                            }
+                        default:
+                            {
+                                $sessions = $this->Services->Conference->get_sessions($this->_conference_id);
+                                $this->add_output_variables(['sessions' => $sessions]);
+                            }
+                    }
+                    break;
+                }
+            default:
+                {
+                    throw new HttpStatusException(404, 'NOT_FOUND', 'The requested URL is not found on this server.');
+                }
         }
     }
 
     public function paper_submit() {
+
+        /**
+         * 将session源数据转换为分类的数据供模板显示
+         * @param array $sessions
+         * @return array
+         */
+        function dispatch_sessions(array $sessions) : array {
+            //获取所有的session
+            $sessions_dispatched = [];
+            foreach ($sessions as $session){
+                $sessions_dispatched[intval($session['session_type'])] []= $session;
+            }
+            return $sessions_dispatched;
+        }
+
         switch ($this->_action) {
             case 'new':
                 {
@@ -408,42 +480,65 @@ class Conference extends \myConf\BaseController
                         }
                         //提交文章
                         try {
-                            $this->Services->Paper->submit_new($this->_user_id, $this->_conference_id, $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $authors, 'paper_pdf', 'paper_copyright_pdf', $this->input->post('paper_type_text'), $this->input->post('paper_suggested_session'));
+                            $this->Services->Paper->submit_new($this->_user_id, $this->_conference_id, $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $authors, 'paper_pdf', 'paper_copyright_pdf', $this->input->post('paper_type_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
                             $this->add_output_variables(array('status' => 'SUCCESS'));
                         } catch (\myConf\Exceptions\FileUploadException $e) {
                             $this->add_output_variables(['status' => 'FILE_ERROR']);
                         }
-
-                    } else if ($this->_do === 'save') {
-
+                    } else {
+                        //新建文章界面
+                        $this->add_output_variables([
+                            'sessions' => dispatch_sessions($this->Services->Conference->get_sessions($this->_conference_id))
+                        ]);
                     }
                     break;
                 }
             case 'edit':
+            case 'delete':
                 {
+                    //编辑或者删除需要先验证是否是该文章的发表者
                     $id = intval($this->input->get('id'));
-                    if ($this->_do === 'submit') {
-
-                        //处理作者
-                        $authors = json_decode($this->input->post('authors'), true);
-                        if (!isset($authors) || empty($authors)) {
-                            $this->exit_promptly(['status' => 'AUTHOR_EMPTY']);
-                        }
-                        //如果作者在scholar表中不存在，则添加进去
-                        foreach ($authors as &$author) {
-                            !isset($author['chn_full_name']) && $author['chn_full_name'] = '';  //临时fix，暂时不用中文名这个字段
-                            if ($this->Services->Scholar->exist_by_email($author['email']) === false) {
-                                $this->Services->Scholar->add_new($author['email'], $author['first_name'], $author['last_name'], $author['chn_full_name'], $author['address'], $author['prefix'], $author['institution'], $author['department']);
+                    $paper = $this->Services->Paper->get_paper($id);
+                    if (empty($paper)) {
+                        throw new HttpStatusException(404, 'PAPER_NOT_FOUND', 'The paper you want to edit or delete does not exist. It may have been deleted before.');
+                    }
+                    if(intval($paper['user_id']) !== $this->_user_id) {
+                        throw new HttpStatusException(403, 'ACCESS_DENIED', 'You cannot edit or delete paper of other people.');
+                    }
+                    //下面开始编辑或者删除的业务逻辑
+                    if ($this->_action === 'edit') {
+                        if ($this->_do === 'submit') {
+                            //编辑文章
+                            //先处理作者
+                            $authors = json_decode($this->input->post('authors'), true);
+                            if (!isset($authors) || empty($authors)) {
+                                $this->exit_promptly(['status' => 'AUTHOR_EMPTY']);
                             }
-                        }
-                        try {
-                            $this->Services->Paper->update_paper($id, 'paper_pdf', 'paper_copyright_pdf', $authors, $this->input->post('paper_type_text'), $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $this->input->post('paper_suggested_session'));
-                        } catch (\myConf\Exceptions\FileUploadException $e) {
-                            $this->add_output_variables(['status' => 'FILE_ERROR']);
+                            //如果作者在scholar表中不存在，则添加进去
+                            foreach ($authors as &$author) {
+                                !isset($author['chn_full_name']) && $author['chn_full_name'] = '';  //临时fix，暂时不用中文名这个字段
+                                if ($this->Services->Scholar->exist_by_email($author['email']) === false) {
+                                    $this->Services->Scholar->add_new($author['email'], $author['first_name'], $author['last_name'], $author['chn_full_name'], $author['address'], $author['prefix'], $author['institution'], $author['department']);
+                                }
+                            }
+                            //更新文章
+                            try {
+                                $this->Services->Paper->update_paper($id, 'paper_pdf', 'paper_copyright_pdf', $authors, $this->input->post('paper_type_text'), $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
+                                $this->add_output_variables(['status' => 'SUCCESS']);
+                            } catch (\myConf\Exceptions\FileUploadException $e) {
+                                $this->add_output_variables(['status' => 'FILE_ERROR']);
+                            }
+                        } else {
+                            $paper = $this->Services->Paper->get_paper($id);
+                            $this->add_output_variables([
+                                'paper' => $paper,
+                                'sessions' => dispatch_sessions($this->Services->Conference->get_sessions($this->_conference_id)),
+                            ]);
                         }
                     } else {
-                        $paper = $this->Services->Paper->get_paper($id);
-                        $this->add_output_variables(['paper' => $paper]);
+                        //删除文章
+                        $this->Services->Paper->delete_paper(intval($this->input->get('id')));
+                        $this->add_output_variables(['status' => 'SUCCESS']);
                     }
                     break;
                 }

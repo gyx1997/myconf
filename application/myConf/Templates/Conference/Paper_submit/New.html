@@ -32,7 +32,7 @@
                                 <div class="input-group mb-3" style="width:100%;">
                                     <div class="input-group-prepend">
                                         <label class="input-group-text" for="addAuthorEmailToSearch"><span
-                                                class="fa fa-envelope-o"></span>&nbsp;&nbsp;Author Email</label>
+                                                    class="fa fa-envelope-o"></span>&nbsp;&nbsp;Author Email</label>
                                     </div>
                                     <input class="form-control" type="text" name="addAuthorEmailToSearch"
                                            id="addAuthorEmailToSearch"/>
@@ -80,25 +80,61 @@
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <input type="file" class="" id="paper_copyright_pdf" name="paper_copyright_pdf">
                 </div>
-                <div class="form-inline">
+                <div class="row mt-3"></div>
+                <div class="form-group">
                     <label for="paper_type_text">Type&nbsp;&nbsp;&nbsp;
-                        <select id="paper_type_text" name="paper_type_text" class="form form-control">
-                            <option value="paper" selected="selected">Paper</option>
-                            <option value="abstract">Abstract</option>
-                        </select>
                     </label>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <label for="paper_suggested_session">Suggested Session&nbsp;&nbsp;&nbsp; <span
-                            class="badge badge-secondary">Not available now</span>&nbsp;&nbsp;&nbsp;
-                        <input id="paper_suggested_session" name="paper_suggested_session" class="form form-control"
-                               value="" placeholder="Enter your paper's suggested session."/>
-                    </label>
+                    <select id="paper_type_text" name="paper_type_text" class="form form-control">
+                        <option value="paper" selected="selected">Paper</option>
+                        <option value="abstract">Abstract</option>
+                    </select>
                 </div>
                 <div class="row mt-3"></div>
-                <button id="submit_button" class="btn btn-primary" type="button" onclick="submitPaper();">Submit
-                </button>
-                <button id="save_button" class="btn btn-secondary" type="button" onclick="saveToServer();">Save To
-                    Server
+                <div class="form-group">
+                    <label for="paper_suggested_session">Suggested Session</label>
+                    <select class="form form-control" id="paper_suggested_session" name="paper_suggested_session" onchange="suggestedSessionOnChange();">
+                        <option value="-2" selected="selected" disabled="disabled">Select a suggested session.</option>
+                        <?php if(isset($sessions[0])): ?>
+                            <optgroup label="Sessions provided by the host">
+                                <?php
+                                foreach($sessions[0] as $session) {
+                                    echo "<option value='{$session['session_id']}'>{$session['session_text']}</option>";
+                                }
+                                ?>
+                            </optgroup>
+                        <?php endif; ?>
+                        <?php if(isset($sessions[1])): ?>
+                            <optgroup label="Sessions add by conference members">
+                                <?php
+                                foreach($sessions[1] as $session) {
+                                    echo "<option value='{$session['session_id']}'>{$session['session_text']}</option>";
+                                }
+                                ?>
+                            </optgroup>
+                        <?php endif; ?>
+                        <?php if(isset($sessions[2])): ?>
+                            <optgroup label="Student Paper">
+                                <?php
+                                foreach($sessions[2] as $session) {
+                                    echo "<option value='{$session['session_id']}'>{$session['session_text']}</option>";
+                                }
+                                ?>
+                            </optgroup>
+                        <?php endif; ?>
+                        <optgroup label="Others">
+                            <option value="-1">New session</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="row mt-3"></div>
+                <div class="form-group" id="customSession" style="display:none;">
+                    <label for="paper_suggested_session_custom">Custom Suggested Session</label>
+                    <input id="paper_suggested_session_custom" name="paper_suggested_session_custom" class="form form-control"
+                           value="" placeholder="Enter your paper's suggested session."/>
+                </div>
+                <div class="row mt-3"></div>
+                <button id="submit_button" class="btn btn-primary" type="button" onclick="submitPaper();">
+                    Submit
                 </button>
             </form>
         </div>
@@ -124,15 +160,25 @@
         <p>{11}</p>
     </li>
 </div>
-<script type="text/javascript">
-    var submitPaper = function () {
-        doSubmit('submit');
-    };
-</script>
-<script src="{{$StaticDomain}}/static/js/conf-paper-submit-newPost.js"></script>
 <script src="{{$StaticDomain}}/static/js/conf-paper-submit-authorList.js"></script>
-<script>
+<script src="{{$StaticDomain}}/static/js/conf-paper-submit-formValidation.js"></script>
+<script src="{{$StaticDomain}}/static/js/conf-paper-submit-newPost.js"></script>
+<script type="text/javascript">
+    var suggestedSessionId = '-2';
+    var submitPaper = function () {
+        doSubmit('submit', '{{$conf_url}}');
+    };
     refreshAuthorListView();
+
+    var suggestedSessionOnChange = function(){
+        var suggestedSessionSelect = $('#paper_suggested_session');
+        suggestedSessionId = suggestedSessionSelect.val();
+        if(suggestedSessionId === '-1') {
+            $('#customSession').show(500);
+        }else{
+            $('#customSession').hide(500);
+        }
+    };
 </script>
 {{@include /Conference/Paper_submit/Edit_author_dialog}}
 {{@include /Conference/Footer}}
