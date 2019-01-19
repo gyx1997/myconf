@@ -152,14 +152,13 @@ class Paper extends \myConf\BaseModel
     public function get_paper(int $paper_logic_id, int $paper_version): array
     {
         $paper_base_data = $this->Tables->Papers->get(['paper_logic_id' => $paper_logic_id, 'paper_version' => $paper_version]);
-
         if (empty($paper_base_data)) {
             return [];
         }
         $paper_authors = $this->Tables->PaperAuthors->fetch_all(['paper_id' => $paper_base_data['paper_id']]);
         $paper_base_data['authors'] = $paper_authors;
-        $paper_base_data['content_attach_info'] = $this->Tables->Attachments->get(strval($paper_base_data['pdf_attachment_id']));
-        $paper_base_data['copyright_attach_info'] = $this->Tables->Attachments->get(strval($paper_base_data['copyright_attachment_id']));
+        $paper_base_data['content_attach_info'] = (intval($paper_base_data['pdf_attachment_id']) === 0 ? null : $this->Tables->Attachments->get(strval($paper_base_data['pdf_attachment_id'])));
+        $paper_base_data['copyright_attach_info'] = (intval($paper_base_data['copyright_attachment_id']) === 0 ? null : $this->Tables->Attachments->get(strval($paper_base_data['copyright_attachment_id'])));
         return $paper_base_data;
     }
 
@@ -202,7 +201,6 @@ class Paper extends \myConf\BaseModel
                 'attachment_tag_id' => 'paper',
                 'attachment_tag_type' => $this->Tables->Attachments::tag_type_paper,
                 'attachment_used' => 1,
-                //'attachment_filename_hash' => crc32($pdf_file_info['full_name']),
             ]);
             $this->Tables->Attachments->set_used_status($old_data['pdf_attachment_id'], false);
             $base_data_to_update['pdf_attachment_id'] = $pdf_aid;
@@ -271,10 +269,11 @@ class Paper extends \myConf\BaseModel
     {
         $paper = $this->Tables->Papers->get(['paper_logic_id' => $paper_logic_id, 'paper_version' => $paper_version]);
         $authors = $this->Tables->PaperAuthors->fetch_all(['paper_id' => $paper_logic_id]);
-        $paper_session = $this->Tables->PaperSessions->get($paper['paper_suggested_session']);
+        intval($paper['paper_suggested_session']) !== -2 && $paper_session = $this->Tables->PaperSessions->get($paper['paper_suggested_session']);
         DbHelper::begin_trans();
-        //如果session是自己添加的，那么需要删除之
+        //如果session是自己添加的，且没有人用了，那么需要删除之
         if ($paper_session['session_type'] === self::paper_session_type_custom) {
+            //TODO 没有进行检测是否有人使用!
             $this->Tables->PaperSessions->delete($paper_session['session_id']);
         }
         //删除所有作者信息

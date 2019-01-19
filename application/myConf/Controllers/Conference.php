@@ -484,7 +484,6 @@ class Conference extends \myConf\BaseController
                         }
                         //提交文章
                         try {
-                            var_dump($this->input->post('paper_suggested_session'));
                             $this->Services->Paper->new_draft($this->_user_id, $this->_conference_id, $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $authors, 'paper_pdf', 'paper_copyright_pdf', $this->input->post('paper_type_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
                             $this->add_output_variables(array('status' => 'SUCCESS'));
                         } catch (\myConf\Exceptions\FileUploadException $e) {

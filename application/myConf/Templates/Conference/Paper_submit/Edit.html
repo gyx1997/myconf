@@ -71,7 +71,7 @@
                         <span class="badge badge-info">LESS THAN 5MB</span>
                     </label>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <?php if ($paper['pdf_attachment_id'] !== 0) { ?>
+                    <?php if (intval($paper['pdf_attachment_id']) !== 0) { ?>
                         <span>
                         <a href="/attachment/preview/pdf/?aid={{$paper['pdf_attachment_id']}}" target="_blank">
                             {{$paper['content_attach_info']['attachment_original_name']}}
@@ -88,7 +88,7 @@
                     <?php } else { ?>
                         <input type="file" class="" id="paper_pdf" name="paper_pdf">
                         <div class="row mt-3"></div>
-                        <div class="alert alert-warning">You have not upload the paper content yet.</div>
+                        <div class="alert alert-danger">You have not upload the paper content yet.</div>
                     <?php } ?>
                 </div>
                 <div class="row mt-3"></div>
@@ -98,7 +98,7 @@
                         <span class="badge badge-info">LESS THAN 5MB</span>
                     </label>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <?php if ($paper['copyright_attachment_id'] !== 0) { ?>
+                    <?php if (intval($paper['copyright_attachment_id']) !== 0) { ?>
                         <span>
                         <a href="/attachment/preview/pdf/?aid={{$paper['copyright_attachment_id']}}" target="_blank">
                             {{$paper['copyright_attach_info']['attachment_original_name']}}
@@ -115,7 +115,7 @@
                     <?php } else { ?>
                         <input type="file" class="" id="paper_copyright_pdf" name="paper_copyright_pdf">
                         <div class="row mt-3"></div>
-                        <div class="alert alert-warning">You have not upload the copyright yet.</div>
+                        <div class="alert alert-danger">You have not upload the copyright yet.</div>
                     <?php } ?>
                 </div>
                 <div class="row mt-3"></div>
