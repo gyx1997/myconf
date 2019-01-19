@@ -16,7 +16,7 @@
      * @author _g63<522975334@qq.com>
      * @version 2019.1
      */
-    class Configs extends \myConf\BaseEntityTable {
+    class Configs extends \myConf\BaseSingleKeyTable {
         /**
          * Configs constructor.
          */

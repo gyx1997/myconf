@@ -10,7 +10,7 @@
 
     use \myConf\Libraries\DbHelper;
 
-    class Scholars extends \myConf\BaseEntityTable {
+    class Scholars extends \myConf\BaseSingleKeyTable {
 
         public function __construct() {
             parent::__construct();

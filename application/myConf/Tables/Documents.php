@@ -10,7 +10,7 @@
 
     use \myConf\Libraries\DbHelper;
 
-    class Documents extends \myConf\BaseEntityTable {
+    class Documents extends \myConf\BaseSingleKeyTable {
 
         private static $fields = array('document_id', 'document_category_id', 'document_display_order', 'document_title', 'document_html',);
 

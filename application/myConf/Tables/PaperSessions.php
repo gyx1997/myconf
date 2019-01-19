@@ -11,7 +11,7 @@ namespace myConf\Tables;
 
 use myConf\Libraries\DbHelper;
 
-class PaperSessions extends \myConf\BaseEntityTable
+class PaperSessions extends \myConf\BaseSingleKeyTable
 {
     /**
      * PaperSessions constructor.

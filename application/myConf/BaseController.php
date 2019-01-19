@@ -287,6 +287,7 @@ class BaseController
      */
     protected function _self_redirect(): void
     {
+        //exit($this->_url_redirect);
         throw new \myConf\Exceptions\SendRedirectInstructionException($this->_url_redirect === '' ? '/' : $this->_url_redirect);
     }
 

@@ -8,16 +8,17 @@
 
     namespace myConf;
 
+    use myConf\Exceptions\DbCompositeKeysException;
     use \myConf\Libraries\DbHelper;
 
     /**
-     * Class BaseEntityTable 所有实体表的基类
+     * Class BaseSingleKeyTable 所有单主键表的基类
      * @package myConf
      * @author _g63 <522975334@qq.com>
      * @version 2019.1
      * @property-read \myConf\Cache Cache
      */
-    abstract class BaseEntityTable extends BaseTable {
+    abstract class BaseSingleKeyTable extends BaseTable {
 
         /**
          * BaseTable constructor.
@@ -97,11 +98,23 @@
         /**
          * 插入一条数据
          * @param array $data
-         * @return int 返回当前自增键的最新一条记录的PK id（实体表应该对应有id）
+         * @return int 返回当前自增键的最新一条记录的PK id
+         * @throws Exceptions\CacheDriverException
+         * @throws Exceptions\DbException
          */
         public function insert(array $data = array()) : int {
+            //主键唯一性约束检查
+            //只要逻辑主键和物理主键不一致的，需要进行检查
+            if ($this->_actual_pk() !== $this->primary_key()){
+                //逻辑主键和物理主键不一致，但又不存在的，不满足完整性约束条件。
+                if(!isset($data[$this->primary_key()]) || $this->exist($data[$this->primary_key()])) {
+                    throw new \myConf\Exceptions\DbException('DUPLICATE_PRIMARY_KEY', 'Duplicate Primary key detected.');
+                }
+            }
             DbHelper::insert($this->table(), $data);
-            return DbHelper::last_insert_id();
+            //删除掉旧数据，不能保证业务确定的逻辑主键前后完全不会重复
+            $this->Cache->delete($this->pk_cache_name($data[$this->primary_key()]));
+            return DbHelper::last_insert_id();  //单主键表都应当是实体表，返回物理主键ID
         }
 
         /**

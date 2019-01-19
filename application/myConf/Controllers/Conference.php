@@ -18,64 +18,7 @@ class Conference extends \myConf\BaseController
      */
 
     // TODO 使用数据库构造完整的 Role-Based Access Control 权限系统
-    private $_privilege_table = array(
-        'guest' => array(
-            array(
-                'method' => 'index',
-                'action' => '',
-            ),
-            array(
-                'method' => 'download',
-                'action' => '',
-            ),
-        ),
-        'user' => [
-            [
-                'method' => 'paper-submit',
-                'action' => '',
-            ],
-            [
-                'method' => 'member',
-                'action' => '',
-            ],
-        ],
-        'scholar' => array(
-            array(
-                'method' => 'index',
-                'action' => '',
-            ),
-            array(
-                'method' => 'download',
-                'action' => '',
-            ),
-        ),
-        'reviewer' => array(
-            array(
-                'method' => 'paper-review',
-                'action' => 'review',
-            ),
-            array(
-                'method' => 'paper-review',
-                'action' => '',
-            ),
-        ),
-        'editor' => array(
-            array(
-                'method' => 'paper-review',
-                'action' => 'arrange',
-            ),
-            array(
-                'method' => 'paper-review',
-                'action' => '',
-            ),
-        ),
-        'admin' => array(
-            array(
-                'method' => 'management',
-                'action' => ''
-            )
-        ),
-    );
+    private $_privilege_table;
 
     /**
      * @var array 当前会议信息
@@ -133,6 +76,45 @@ class Conference extends \myConf\BaseController
      */
     private function _check_privilege(): void
     {
+        //权限表
+        $this->_privilege_table = [
+            //游客的权限
+            'guest' => [
+                ['method' => 'index', 'actions' => ['default']],
+            ],
+            //普通注册用户的权限
+            'user' => [
+                ['method' => 'paper-submit', 'actions' => ['default']],
+                ['method' => 'member', 'actions' => ['']],
+            ],
+            //注册进入会议的用户的权限
+            'scholar' => array(
+                ['method' => 'paper-submit', 'actions' => ['new', 'author']],
+                //编辑和删除文章，需要满足是作者本人进行操作。
+                ['method' => 'paper-submit', 'actions' => ['edit', 'delete'], 'special_check' => function() : bool {
+                    $paper = $this->Services->Paper->get(intval($this->input->get('id')), intval($this->input->get('ver')));
+
+                    if (empty($paper)) {
+                        throw new HttpStatusException(404, 'PAPER_NOT_FOUND', 'The paper you requested was not found.');
+                    }
+                    return intval($paper['user_id']) === $this->_user_id;
+                }],
+            ),
+            //paper审核人的权限
+            'reviewer' => [
+                ['method' => 'paper-review', 'actions' => ['review']],
+                ['method' => 'paper-review', 'actions' => [''],],
+            ],
+            //编辑的权限
+            'editor' => [
+                ['method' => 'paper-review', 'actions' => ['arrange']],
+                ['method' => 'paper-review', 'actions' => ['']],
+            ],
+            //管理员的权限
+            'admin' => [
+                ['method' => 'management', 'actions' => ['']]
+            ],
+        ];
         //将游客、未加入会议的注册用户的角色权限合并进基础权限
         $this->_privilege_table['user'] = array_merge($this->_privilege_table['user'], $this->_privilege_table['guest']);
         $this->_privilege_table['scholar'] = array_merge($this->_privilege_table['scholar'], $this->_privilege_table['user']);
@@ -151,16 +133,21 @@ class Conference extends \myConf\BaseController
         $this->_auth_conf_creator = in_array('creator', $roles);
         $this->_auth_conf_manage = $this->_auth_conf_creator || in_array('admin', $roles);
         //检查是否符合权限
-        //创始人和管理员拥有所有权限
-        if ($this->_auth_conf_creator || $this->_auth_conf_manage) {
+        //创始人拥有所有权限
+        if ($this->_auth_conf_creator) {
             return;
         }
         //否则逐个检查权限
         foreach ($roles as $role) {
             foreach ($this->_privilege_table[$role] as $privilege) {
-                if (isset($privilege['method']) && isset($privilege['action'])) {
-                    if ($privilege['method'] == $this->_method && ($privilege['action'] == '' || $privilege['action'] == $this->_action)) {
-                        return;
+                if (isset($privilege['method']) && isset($privilege['actions'])) {
+                    $check_func = isset($privilege['special_check']) ? $privilege['special_check'] : function() : bool {return true;};
+                    if ($privilege['method'] === $this->_method) {
+                        foreach($privilege['actions'] as $action) {
+                            if ($action === '' || $action === $this->_action && $check_func()) {
+                                return;
+                            }
+                        }
                     }
                 }
             }
@@ -480,7 +467,25 @@ class Conference extends \myConf\BaseController
                         }
                         //提交文章
                         try {
-                            $this->Services->Paper->submit_new($this->_user_id, $this->_conference_id, $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $authors, 'paper_pdf', 'paper_copyright_pdf', $this->input->post('paper_type_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
+                            $this->Services->Paper->new_submit($this->_user_id, $this->_conference_id, $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $authors, 'paper_pdf', 'paper_copyright_pdf', $this->input->post('paper_type_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
+                            $this->add_output_variables(array('status' => 'SUCCESS'));
+                        } catch (\myConf\Exceptions\FileUploadException $e) {
+                            $this->add_output_variables(['status' => 'FILE_ERROR']);
+                        }
+                    } else if ($this->_do == 'save') {
+                        $authors = json_decode($this->input->post('authors'), true);
+                        if (isset($authors) && !empty($authors)) {
+                            foreach ($authors as &$author) {
+                                !isset($author['chn_full_name']) && $author['chn_full_name'] = '';  //临时fix，暂时不用中文名这个字段
+                                if ($this->Services->Scholar->exist_by_email($author['email']) === false) {
+                                    $this->Services->Scholar->add_new($author['email'], $author['first_name'], $author['last_name'], $author['chn_full_name'], $author['address'], $author['prefix'], $author['institution'], $author['department']);
+                                }
+                            }
+                        }
+                        //提交文章
+                        try {
+                            var_dump($this->input->post('paper_suggested_session'));
+                            $this->Services->Paper->new_draft($this->_user_id, $this->_conference_id, $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $authors, 'paper_pdf', 'paper_copyright_pdf', $this->input->post('paper_type_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
                             $this->add_output_variables(array('status' => 'SUCCESS'));
                         } catch (\myConf\Exceptions\FileUploadException $e) {
                             $this->add_output_variables(['status' => 'FILE_ERROR']);
@@ -494,52 +499,54 @@ class Conference extends \myConf\BaseController
                     break;
                 }
             case 'edit':
-            case 'delete':
                 {
-                    //编辑或者删除需要先验证是否是该文章的发表者
                     $id = intval($this->input->get('id'));
-                    $paper = $this->Services->Paper->get_paper($id);
+                    $version = intval($this->input->get('ver'));
+                    $paper = $this->Services->Paper->get($id, $version);
                     if (empty($paper)) {
                         throw new HttpStatusException(404, 'PAPER_NOT_FOUND', 'The paper you want to edit or delete does not exist. It may have been deleted before.');
                     }
-                    if(intval($paper['user_id']) !== $this->_user_id) {
-                        throw new HttpStatusException(403, 'ACCESS_DENIED', 'You cannot edit or delete paper of other people.');
-                    }
-                    //下面开始编辑或者删除的业务逻辑
-                    if ($this->_action === 'edit') {
-                        if ($this->_do === 'submit') {
-                            //编辑文章
-                            //先处理作者
-                            $authors = json_decode($this->input->post('authors'), true);
-                            if (!isset($authors) || empty($authors)) {
-                                $this->exit_promptly(['status' => 'AUTHOR_EMPTY']);
+                    if ($this->_do === 'submit') {
+                        //编辑文章
+                        //先处理作者
+                        $authors = json_decode($this->input->post('authors'), true);
+                        if (!isset($authors) || empty($authors)) {
+                            $this->exit_promptly(['status' => 'AUTHOR_EMPTY']);
+                        }
+                        //如果作者在scholar表中不存在，则添加进去
+                        foreach ($authors as &$author) {
+                            !isset($author['chn_full_name']) && $author['chn_full_name'] = '';  //临时fix，暂时不用中文名这个字段
+                            if ($this->Services->Scholar->exist_by_email($author['email']) === false) {
+                                $this->Services->Scholar->add_new($author['email'], $author['first_name'], $author['last_name'], $author['chn_full_name'], $author['address'], $author['prefix'], $author['institution'], $author['department']);
                             }
-                            //如果作者在scholar表中不存在，则添加进去
-                            foreach ($authors as &$author) {
-                                !isset($author['chn_full_name']) && $author['chn_full_name'] = '';  //临时fix，暂时不用中文名这个字段
-                                if ($this->Services->Scholar->exist_by_email($author['email']) === false) {
-                                    $this->Services->Scholar->add_new($author['email'], $author['first_name'], $author['last_name'], $author['chn_full_name'], $author['address'], $author['prefix'], $author['institution'], $author['department']);
-                                }
-                            }
-                            //更新文章
-                            try {
-                                $this->Services->Paper->update_paper($id, 'paper_pdf', 'paper_copyright_pdf', $authors, $this->input->post('paper_type_text'), $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
-                                $this->add_output_variables(['status' => 'SUCCESS']);
-                            } catch (\myConf\Exceptions\FileUploadException $e) {
-                                $this->add_output_variables(['status' => 'FILE_ERROR']);
-                            }
-                        } else {
-                            $paper = $this->Services->Paper->get_paper($id);
-                            $this->add_output_variables([
-                                'paper' => $paper,
-                                'sessions' => dispatch_sessions($this->Services->Conference->get_sessions($this->_conference_id)),
-                            ]);
+                        }
+                        //更新文章
+                        try {
+                            $this->Services->Paper->update_paper($id, 'paper_pdf', 'paper_copyright_pdf', $authors, $this->input->post('paper_type_text'), $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
+                            $this->add_output_variables(['status' => 'SUCCESS']);
+                        } catch (\myConf\Exceptions\FileUploadException $e) {
+                            $this->add_output_variables(['status' => 'FILE_ERROR']);
                         }
                     } else {
-                        //删除文章
-                        $this->Services->Paper->delete_paper(intval($this->input->get('id')));
-                        $this->add_output_variables(['status' => 'SUCCESS']);
+                        $this->add_output_variables([
+                            'paper' => $paper,
+                            'sessions' => dispatch_sessions($this->Services->Conference->get_sessions($this->_conference_id)),
+                        ]);
                     }
+                    break;
+                }
+            case 'delete':
+                {
+                    $id = intval($this->input->get('id'));
+                    $version = intval($this->input->get('ver'));
+                    $paper = $this->Services->Paper->get($id, $version);
+                    if (empty($paper)) {
+                        throw new HttpStatusException(404, 'PAPER_NOT_FOUND', 'The paper you want to edit or delete does not exist. It may have been deleted before.');
+                    }
+                    if (intval($paper['paper_status']) === \myConf\Models\Paper::paper_saved) {
+                        $this->Services->Paper->delete_paper($id, $version);
+                    }
+                    $this->add_output_variables(['status' => 'SUCCESS']);
                     break;
                 }
             case 'author':

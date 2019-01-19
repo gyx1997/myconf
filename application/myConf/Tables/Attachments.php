@@ -10,7 +10,7 @@
      * @author _g63<522975334@qq.com>
      * @version 2019.1
      */
-    class Attachments extends \myConf\BaseEntityTable {
+    class Attachments extends \myConf\BaseSingleKeyTable {
 
         public $tag_types = array('document' => 'document', 'paper' => 'paper', 'conf' => 'conf', '' => '');
 

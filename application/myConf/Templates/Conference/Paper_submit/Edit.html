@@ -207,7 +207,7 @@
 <script src="{{$StaticDomain}}/static/js/conf-paper-submit-editPost.js"></script>
 <script src="{{$StaticDomain}}/static/js/conf-paper-submit-authorList.js"></script>
 <script type="text/javascript">
-    var suggestedSessionId = '-2';
+    var suggestedSessionId = "{{$paper['paper_suggested_session']}}";
     var submitPaper = function () {
         doSubmit('submit', <?php echo $paper['paper_id']; ?> , '{{$conf_url}}');
     };

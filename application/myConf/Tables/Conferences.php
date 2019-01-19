@@ -10,7 +10,7 @@
 
     use \myConf\Libraries\DbHelper;
 
-    class Conferences extends \myConf\BaseEntityTable {
+    class Conferences extends \myConf\BaseSingleKeyTable {
         /**
          * @var array 会议状态
          */

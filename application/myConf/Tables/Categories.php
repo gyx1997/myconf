@@ -4,7 +4,7 @@
 
     use \myConf\Libraries\DbHelper;
 
-    class Categories extends \myConf\BaseEntityTable {
+    class Categories extends \myConf\BaseSingleKeyTable {
 
         /**
          * Categories constructor.

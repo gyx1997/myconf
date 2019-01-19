@@ -10,7 +10,7 @@
 
     use \myConf\Libraries\DbHelper;
 
-    class Users extends \myConf\BaseEntityTable {
+    class Users extends \myConf\BaseSingleKeyTable {
         private static $fields_extra = array('avatar', 'organization');
 
         public function __construct() {

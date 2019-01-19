@@ -27,10 +27,10 @@
                     <thead>
                     <tr>
                         <th>
-                            Paper Title
+                            Paper Id
                         </th>
                         <th>
-                            Authors
+                            Title
                         </th>
                         <th>
                             Submit Time
@@ -47,33 +47,42 @@
                     {{@for $paper in $papers}}
                     <tr>
                         <td>
-                            {{$paper['paper_title']}}
+                            {{$paper['paper_logic_id']}}
                         </td>
                         <td>
-                            {{@for $author in $paper['authors']}}
-                            {{$author['author_first_name']}} , {{$author['author_last_name']}} <br>
-                            {{@end}}
+                            {{$paper['paper_title']}}
                         </td>
                         <td>
                             <?php echo(date('Y-m-d', $paper['paper_submit_time'])); ?>
                         </td>
                         <td>
                             {{@switch $paper['paper_status']}}
-                            {{@case 0}}
-                            Submitted
-                            {{@end}}
+                                {{@case -1}}
+                                    Saved
+                                {{@end}}
+                                {{@case 0}}
+                                    Submitted
+                                {{@end}}
+                                {{@case 1}}
+                                    Under Review
+                                {{@end}}
+                                {{@case 2}}
+                                    Passed
+                                {{@end}}
+                                {{@case 3}}
+                                    Rejected
+                                {{@end}}
+                                {{@case 4}}
+                                    Revision
+                                {{@end}}
                             {{@end}}
                         </td>
                         <td>
-                            {{@if $paper['paper_status'] === '0' || $paper['paper_status'] === '4'}}
-                                <a href="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_id']}}" class="btn btn-primary">Edit</a>
-                            {{@else}}
-                                <span class="btn btn-primary disabled" >Edit</span>
+                            {{@if $paper['paper_status'] === '-1'}}
+                                <a href="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}" class="btn btn-primary">Edit</a>
                             {{@end}}
-                            {{@if $paper['paper_status'] === '0'}}
-                            <a href="javascript: deletePaper(<?php echo $paper['paper_id']; ?>);" class="btn btn-primary">Delete</a>
-                            {{@else}}
-                            <span class="btn btn-primary disabled" >Delete</span>
+                            {{@if $paper['paper_status'] === '-1'}}
+                            <a href="javascript: deletePaper(<?php echo $paper['paper_logic_id']; ?>, <?php echo $paper['paper_version']; ?>);" class="btn btn-primary">Delete</a>
                             {{@end}}
                         </td>
                     </tr>
@@ -87,7 +96,7 @@
     <?php } ?>
 </div>
 <script type="text/javascript">
-    var deletePaper = function(paperId) {
+    var deletePaper = function(paperId, paperVersion) {
         messageBox(
             'Do you really want to delete this paper? This action can not be cancelled after you click the "OK" button!',
             'message',
@@ -95,7 +104,7 @@
                     $.ajax({
                         async: true,
                         type: "GET",
-                        url: "{{$conf_url}}/paper-submit/delete/?id={{$paper['paper_id']}}&ajax=true",
+                        url: "{{$conf_url}}/paper-submit/delete/?id=" + paperId + "&ver=" + paperVersion + "&ajax=true",
                         contentType: false,
                         processData: false,
                         cache: false,

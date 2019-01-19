@@ -180,6 +180,6 @@
          * @return bool
          */
         private function _is_really_table(string $class) : bool {
-            return $class !== 'myConf\BaseTable' && $class !== 'myConf\BaseEntityTable' && $class !== 'myConf\BaseMultiRelationTable';
+            return $class !== 'myConf\BaseTable' && $class !== 'myConf\BaseSingleKeyTable' && $class !== 'myConf\BaseMultiRelationTable';
         }
     }

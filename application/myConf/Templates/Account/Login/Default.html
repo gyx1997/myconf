@@ -81,7 +81,7 @@
             dataType: "json",
             success: function (d) {
                 if (d.status === 'SUCCESS') {
-                    window.location.href = d.redirect;
+                    window.location.href = window.atob('{{$redirect}}');
                 } else {
                     $('#captcha_image').src = "/misc/captcha/?" + Math.random();
                     if (d.status === 'CAPTCHA_ERR') {

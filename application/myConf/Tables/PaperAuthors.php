@@ -16,7 +16,7 @@
      * @author _g63
      * @version 2019.1
      */
-    class PaperAuthors extends \myConf\BaseEntityTable {
+    class PaperAuthors extends \myConf\BaseSingleKeyTable {
 
         public function __construct() {
             parent::__construct();

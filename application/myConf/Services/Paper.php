@@ -36,13 +36,31 @@
          * @param string $custom_suggested_session
          * @return int
          * @throws \myConf\Exceptions\CacheDriverException
+         * @throws \myConf\Exceptions\DbCompositeKeysException
          * @throws \myConf\Exceptions\DbTransactionException
-         * @throws \myConf\Exceptions\FileUploadException
          */
-        public function submit_new(int $user_id, int $conference_id, string $title, string $abstract, array $authors, string $pdf_field, string $copyright_field, string $type, string $suggested_session, string $custom_suggested_session = '') : int {
-            $pdf_result = \myConf\Libraries\Attach::parse_attach($pdf_field);
-            $copyright_result = \myConf\Libraries\Attach::parse_attach($copyright_field);
-            return $this->Models->Paper->add($user_id, $conference_id, $authors, $pdf_result, $copyright_result, $type, $suggested_session, $title, $abstract, $this->Models->Paper::paper_status_submitted, $custom_suggested_session);
+        public function new_draft(int $user_id, int $conference_id, string $title, string $abstract, array $authors, string $pdf_field, string $copyright_field, string $type, string $suggested_session, string $custom_suggested_session = '') : int {
+            //没有上传文件的话，就设置为空数组
+            try {
+                $paper_pdf = \myConf\Libraries\Attach::parse_attach($pdf_field);
+            } catch (\myConf\Exceptions\FileUploadException $e) {
+                $paper_pdf = [];
+            }
+            //没有上传Copyright文件的话，就设置为空数组
+            try {
+                $copyright_pdf = \myConf\Libraries\Attach::parse_attach($copyright_field);
+            } catch (\myConf\Exceptions\FileUploadException $e) {
+                $copyright_pdf = [];
+            }
+            return $this->Models->Paper->add($user_id, $conference_id, $authors, $paper_pdf, $copyright_pdf, $type, $suggested_session, $title, $abstract, $this->Models->Paper::paper_status_submitted, $custom_suggested_session);
+        }
+
+        public function save_draft() : int {
+
+        }
+
+        public function submit_new_version() : int {
+
         }
 
         /**
@@ -56,11 +74,13 @@
 
         /**
          * @param int $paper_id
+         * @param int $paper_version
          * @return array
          * @throws \myConf\Exceptions\CacheDriverException
+         * @throws \myConf\Exceptions\DbCompositeKeysException
          */
-        public function get_paper(int $paper_id) : array {
-            return $this->Models->Paper->get_paper_by_id($paper_id);
+        public function get(int $paper_id, int $paper_version) : array {
+            return $this->Models->Paper->get_paper($paper_id, $paper_version);
         }
 
         /**
@@ -107,15 +127,15 @@
          * @throws \myConf\Exceptions\CacheDriverException
          * @throws \myConf\Exceptions\DbTransactionException
          */
-        public function delete_paper(int $paper_id) : void {
-            $paper = $this->Models->Paper->get_paper_by_id($paper_id);
+        public function delete_paper(int $paper_logic_id, int $paper_version) : void {
+            $paper = $this->Models->Paper->get_paper($paper_logic_id, $paper_version);
             $attachment_pdf = $this->Models->Attachment->get($paper['pdf_attachment_id']);
             $attachment_copyright = $this->Models->Attachment->get($paper['copyright_attachment_id']);
             $pdf_file = ATTACHMENT_DIR . $attachment_pdf['attachment_file_name'];
             $copyright_file = ATTACHMENT_DIR . $attachment_copyright['attachment_file_name'];
             file_exists($pdf_file) && @unlink($pdf_file);
             file_exists($copyright_file) && @unlink($copyright_file);
-            $this->Models->Paper->delete_paper($paper_id);
+            $this->Models->Paper->delete_paper($paper_logic_id, $paper_version);
             return;
         }
 
