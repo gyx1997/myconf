@@ -47,10 +47,14 @@
                     {{@for $paper in $papers}}
                     <tr>
                         <td>
-                            {{$paper['paper_logic_id']}}
+                            <a href="{{$conf_url}}/paper-submit/preview/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}">
+                                {{$paper['paper_logic_id']}}-{{$paper['paper_version']}}
+                            </a>
                         </td>
                         <td>
-                            {{$paper['paper_title']}}
+                            <a href="{{$conf_url}}/paper-submit/preview/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}">
+                                {{$paper['paper_title']}}
+                            </a>
                         </td>
                         <td>
                             <?php echo(date('Y-m-d', $paper['paper_submit_time'])); ?>
@@ -78,6 +82,7 @@
                             {{@end}}
                         </td>
                         <td>
+
                             {{@if $paper['paper_status'] === '-1'}}
                                 <a href="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}" class="btn btn-primary">Edit</a>
                             {{@end}}

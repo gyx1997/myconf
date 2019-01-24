@@ -54,6 +54,7 @@
          * @return int
          */
         public function get_new_paper_logic_id() : int {
-            return intval(DbHelper::fetch_first_raw("SELECT MAX(paper_id) AS maxId FROM {$this->table()}")['maxId']) + 1;
+            //注意MYSQL 8.0 需要 set global information_schema_stats_expiry=0
+            return intval(DbHelper::fetch_first_raw("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{$this->table()}'")['AUTO_INCREMENT']);
         }
     }

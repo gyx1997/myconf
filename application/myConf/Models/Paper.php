@@ -25,7 +25,7 @@ class Paper extends \myConf\BaseModel
     public const paper_status_passed = 2;
     public const paper_status_rejected = 3;
     public const paper_status_revision = 4;
-    public const paper_saved = -1;
+    public const paper_status_saved = -1;
     //下面是paper session的取值列表
     public const paper_session_type_internal = 0;
     public const paper_session_type_custom = 1;
@@ -66,7 +66,7 @@ class Paper extends \myConf\BaseModel
         $paper_version = 1;
         DbHelper::begin_trans();
         //如果不存在的话，写入session信息
-        if (empty($session)) {
+        if (empty($session) && intval($suggested_session) !== -2) {
             $session_id = $this->Tables->PaperSessions->insert([
                 'session_conference_id' => $conference_id,
                 'session_text' => $custom_suggested_session,
@@ -86,7 +86,7 @@ class Paper extends \myConf\BaseModel
             'attachment_tag_id' => 'paper',
             'attachment_tag_type' => $this->Tables->Attachments::tag_type_paper,
             'attachment_used' => 1,
-            'attachment_filename_hash' => crc32($pdf_file_info['full_name']),
+            'attachment_filename_hash' => $pdf_file_info['full_name'],
         ]);
         //如果上传了copyright文件，那么将其写入Attachment表
         $copyright_aid = empty($copyright_file_info) ? 0 : $this->Tables->Attachments->insert([
@@ -99,7 +99,7 @@ class Paper extends \myConf\BaseModel
             'attachment_tag_id' => 'paper',
             'attachment_tag_type' => $this->Tables->Attachments::tag_type_paper,
             'attachment_used' => 1,
-            'attachment_filename_hash' => crc32($copyright_file_info['full_name']),
+            'attachment_filename_hash' => $copyright_file_info['full_name'],
         ]);
         //插入paper信息
         $paper_id = $this->Tables->Papers->insert([
@@ -110,7 +110,7 @@ class Paper extends \myConf\BaseModel
             'pdf_attachment_id' => $pdf_aid,
             'copyright_attachment_id' => $copyright_aid,
             'paper_submit_time' => time(),
-            'paper_status' => self::paper_saved,
+            'paper_status' => $status,
             'paper_type' => $paper_type,
             'paper_suggested_session' => $suggested_session,
             'paper_title' => $title,
@@ -177,14 +177,15 @@ class Paper extends \myConf\BaseModel
      * @throws \myConf\Exceptions\DbCompositeKeysException
      * @throws \myConf\Exceptions\DbTransactionException
      */
-    public function update_paper_by_id(int $paper_logic_id, int $paper_version, array $authors = null, array $pdf_file_info = null, array $copyright_file_info = null, string $paper_type = null, string $suggested_session = null, string $title = null, string $abstract = null, string $custom_suggested_session = null): void
+    public function update_paper(int $paper_logic_id, int $paper_version, int $paper_status,  array $authors = null, array $pdf_file_info = null, array $copyright_file_info = null, string $paper_type = null, string $suggested_session = null, string $title = null, string $abstract = null, string $custom_suggested_session = null): void
     {
         //先获取旧的信息，进行比对，如果有出入则进行修改
         $old_data = $this->get_paper($paper_logic_id, $paper_version);
         $base_data_to_update = [];
         //获取session信息(如果必要的话)
         if (isset($suggested_session)) {
-            $session = $this->Tables->PaperSessions->get(strval(intval($suggested_session)));
+            $suggested_session = intval($suggested_session);
+            $session = $this->Tables->PaperSessions->get(strval($suggested_session));
             $session_display_order_max = $this->Tables->PaperSessions->get_conference_sessions_max_display_order($old_data['conference_id']);
         }
         //下面开始事务修改信息
@@ -223,7 +224,7 @@ class Paper extends \myConf\BaseModel
         }
 
         //如果不存在的话，写入session信息
-        if (empty($session)) {
+        if (empty($session) && intval($suggested_session) !== -2) {
             $session_id = $this->Tables->PaperSessions->insert([
                 'session_conference_id' => $old_data['conference_id'],
                 'session_text' => $custom_suggested_session,
@@ -233,20 +234,22 @@ class Paper extends \myConf\BaseModel
             $suggested_session = $session_id;
         }
 
+
         //下面开始处理作者信息
-        if (isset($authors)) {
+        if (isset($authors) && !empty($authors)) {
             //先清除旧的信息
             foreach ($old_data['authors'] as $current_author) {
                 $this->Tables->PaperAuthors->delete($current_author['author_id']);
             }
             //再插入新的数据
-            $this->Tables->PaperAuthors->insert_array($this->_parse_authors($paper_logic_id, $authors));
+            $this->Tables->PaperAuthors->insert_array($this->_parse_authors($old_data['paper_id'], $authors));
         }
         //其他的一些信息
         isset($paper_type) && $base_data_to_update['paper_type'] = $paper_type;
         isset($suggested_session) && $base_data_to_update['paper_suggested_session'] = $suggested_session;
         isset($title) && $base_data_to_update['paper_title'] = $title;
         isset($abstract) && $base_data_to_update['paper_abstract'] = $abstract;
+        $base_data_to_update['paper_status'] = $paper_status;
         $this->Tables->Papers->set([
                 'paper_logic_id' => $paper_logic_id,
                 'paper_version' => $paper_version
@@ -272,10 +275,12 @@ class Paper extends \myConf\BaseModel
         intval($paper['paper_suggested_session']) !== -2 && $paper_session = $this->Tables->PaperSessions->get($paper['paper_suggested_session']);
         DbHelper::begin_trans();
         //如果session是自己添加的，且没有人用了，那么需要删除之
+        /*/
         if ($paper_session['session_type'] === self::paper_session_type_custom) {
             //TODO 没有进行检测是否有人使用!
             $this->Tables->PaperSessions->delete($paper_session['session_id']);
         }
+        */
         //删除所有作者信息
         foreach($authors as $author) {
             $this->Tables->PaperAuthors->delete($author['author_id']);

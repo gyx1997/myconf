@@ -9,12 +9,12 @@ var validateForm = function() {
         return false;
     }
 
-    if (!$('#paper_pdf').get(0).files[0]) {
+    if (hasPaper === false && !$('#paper_pdf').get(0).files[0]) {
         messageBoxSecondary('Please select paper file.', 'Message');
         return false;
     }
 
-    if (!$('#paper_copyright_pdf').get(0).files[0]) {
+    if (hasCopyright === false && !$('#paper_copyright_pdf').get(0).files[0]) {
         messageBoxSecondary('Please select copyright file.', 'Message');
         return false;
     }

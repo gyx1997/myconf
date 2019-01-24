@@ -134,7 +134,7 @@
                 </div>
                 <div class="row mt-3"></div>
                 <button id="submit_button" class="btn btn-primary" type="button" onclick="savePaper();">
-                    <span class="fa fa-save"> </span>&nbsp;&nbsp;Save To Server
+                    <span class="fa fa-save"> </span>&nbsp;&nbsp;Save
                 </button>
                 <button id="submit_button" class="btn btn-primary" type="button" onclick="submitPaper();">
                     <span class="fa fa-check"> </span>&nbsp;&nbsp;Submit
@@ -168,7 +168,8 @@
 <script src="{{$StaticDomain}}/static/js/conf-paper-submit-newPost.js"></script>
 <script type="text/javascript">
     var suggestedSessionId = '-2';
-
+    var hasPaper = false;
+    var hasCopyright = false;
     var submitPaper = function () {
         doSubmit('submit', '{{$conf_url}}');
     };

@@ -112,8 +112,8 @@ abstract class BaseSingleKeyTable extends BaseTable {
             }
         }
         DbHelper::insert($this->table(), $data);
-        //删除掉旧数据，不能保证业务确定的逻辑主键前后完全不会重复
-        $this->Cache->delete($this->pk_cache_name($data[$this->primary_key()]));
+        //删除掉旧数据，对于物理主键和逻辑主键不一致的情况，不能保证业务确定的逻辑主键前后完全不会重复
+        $this->_actual_pk() !== $this->primary_key() && $this->Cache->delete($this->pk_cache_name($data[$this->primary_key()]));
         return DbHelper::last_insert_id();  //单主键表都应当是实体表，返回物理主键ID
     }
 

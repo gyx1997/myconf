@@ -505,12 +505,18 @@ class Conference extends \myConf\BaseController
                     if (empty($paper)) {
                         throw new HttpStatusException(404, 'PAPER_NOT_FOUND', 'The paper you want to edit or delete does not exist. It may have been deleted before.');
                     }
-                    if ($this->_do === 'submit') {
+                    if ($this->_do === 'submit' || $this->_do === 'save') {
+
                         //编辑文章
                         //先处理作者
                         $authors = json_decode($this->input->post('authors'), true);
+
                         if (!isset($authors) || empty($authors)) {
-                            $this->exit_promptly(['status' => 'AUTHOR_EMPTY']);
+                            if ($this->_do === 'submit') {
+                                $this->exit_promptly(['status' => 'AUTHOR_EMPTY']);
+                            } else {
+                                $authors = [];
+                            }
                         }
                         //如果作者在scholar表中不存在，则添加进去
                         foreach ($authors as &$author) {
@@ -519,12 +525,21 @@ class Conference extends \myConf\BaseController
                                 $this->Services->Scholar->add_new($author['email'], $author['first_name'], $author['last_name'], $author['chn_full_name'], $author['address'], $author['prefix'], $author['institution'], $author['department']);
                             }
                         }
-                        //更新文章
-                        try {
-                            $this->Services->Paper->update_paper($id, 'paper_pdf', 'paper_copyright_pdf', $authors, $this->input->post('paper_type_text'), $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
-                            $this->add_output_variables(['status' => 'SUCCESS']);
-                        } catch (\myConf\Exceptions\FileUploadException $e) {
-                            $this->add_output_variables(['status' => 'FILE_ERROR']);
+                        if ($this->_do === 'submit') {
+                            //更新文章
+                            try {
+                                $this->Services->Paper->submit_paper($id, $version, 'paper_pdf', 'paper_copyright_pdf', $authors, $this->input->post('paper_type_text'), $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
+                                $this->add_output_variables(['status' => 'SUCCESS']);
+                            } catch (\myConf\Exceptions\FileUploadException $e) {
+                                $this->add_output_variables(['status' => 'FILE_ERROR']);
+                            }
+                        } else {
+                            try {
+                                $this->Services->Paper->save_draft($id, $version, 'paper_pdf', 'paper_copyright_pdf', $authors, $this->input->post('paper_type_text'), $this->input->post('paper_title_text'), $this->input->post('paper_abstract_text'), $this->input->post('paper_suggested_session'), $this->input->post('paper_suggested_session_custom'));
+                                $this->add_output_variables(['status' => 'SUCCESS']);
+                            } catch (\myConf\Exceptions\FileUploadException $e) {
+                                $this->add_output_variables(['status' => 'FILE_ERROR']);
+                            }
                         }
                     } else {
                         $this->add_output_variables([
@@ -532,6 +547,19 @@ class Conference extends \myConf\BaseController
                             'sessions' => dispatch_sessions($this->Services->Conference->get_sessions($this->_conference_id)),
                         ]);
                     }
+                    break;
+                }
+            case 'preview':
+                {
+                    $id = intval($this->input->get('id'));
+                    $version = intval($this->input->get('ver'));
+                    $paper = $this->Services->Paper->get($id, $version);
+                    $this->add_output_variables([
+                        'paper' => $paper,
+                        'sessions' => dispatch_sessions(
+                            $this->Services->Conference->get_sessions($this->_conference_id)
+                        ),
+                    ]);
                     break;
                 }
             case 'delete':
@@ -542,7 +570,7 @@ class Conference extends \myConf\BaseController
                     if (empty($paper)) {
                         throw new HttpStatusException(404, 'PAPER_NOT_FOUND', 'The paper you want to edit or delete does not exist. It may have been deleted before.');
                     }
-                    if (intval($paper['paper_status']) === \myConf\Models\Paper::paper_saved) {
+                    if (intval($paper['paper_status']) === \myConf\Models\Paper::paper_status_saved) {
                         $this->Services->Paper->delete_paper($id, $version);
                     }
                     $this->add_output_variables(['status' => 'SUCCESS']);

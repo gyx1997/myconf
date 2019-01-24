@@ -6,58 +6,28 @@
         <div class="row">
         </div>
         <div class="modal-header">
-            <h4 class="modal-title">Edit Paper</h4>
+            <h4 class="modal-title">Preview - {{$paper['paper_title']}}</h4>
         </div>
         <div class="modal-body">
             <form id="paper_data" name="paper_data"
-                  action="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_id']}}&do=submit&ajax=true"
+                  action=""
                   method="post" enctype="multipart/form-data">
-                <input type="hidden" name="<?php echo $csrf_name; ?>" value="<?php echo $csrf_hash; ?>" />
-                <input type="hidden" name="user_id" value="<?php echo $login_user['user_id']; ?>" />
-                <input type="hidden" name="authors" id="authors" value="" />
                 <div class="form-group">
-                    <label for="paper_title_text">Title&nbsp;&nbsp;<span class="badge badge-info">LESS THAN 200 characters</span></label>
-                    <textarea class="form form-control" id="paper_title_text" name="paper_title_text"
+                    <label for="paper_title_text">Title</label>
+                    <textarea class="form form-control" id="paper_title_text" name="paper_title_text" disabled="disabled"
                               rows="2">{{$paper['paper_title']}}</textarea>
                 </div>
                 <div class="form-group">
-                    <label for="paper_abstract_text">Abstract&nbsp;&nbsp;<span class="badge badge-info">LESS THAN 200 words</span></label>
-                    <textarea class="form form-control" id="paper_abstract_text" name="paper_abstract_text"
+                    <label for="paper_abstract_text">Abstract</label>
+                    <textarea class="form form-control" id="paper_abstract_text" name="paper_abstract_text" disabled="disabled"
                               rows="2">{{$paper['paper_abstract']}}</textarea>
                 </div>
                 <div class="form-group">
                     <label>Authors&nbsp;&nbsp;</label>
-                    <div id="authorSearch" class="card">
-                        <div class="card-body">
-                            <div class="form-inline">
-                                <div class="input-group mb-3" style="width:100%;">
-                                    <div class="input-group-prepend">
-                                        <label class="input-group-text" for="addAuthorEmailToSearch"><span
-                                                    class="fa fa-envelope-o"></span>&nbsp;&nbsp;Author Email</label>
-                                    </div>
-                                    <input class="form-control" type="text" name="addAuthorEmailToSearch"
-                                           id="addAuthorEmailToSearch" />
-                                    <div class="input-group-append">
-                                        <button type="button" class="btn btn-secondary" style="width:100px;"
-                                                onclick="searchAuthor('<?php echo $conf_url; ?>', $('#addAuthorEmailToSearch').val());">
-                                            Add
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="searchMessage" style="display:none;">
-                                <div class="mt-3 row" id="searchMessageLineSpace"></div>
-                                <div id="searchMessageMain">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="row mt-3"></div>
                     <div id="authorList" class="card">
                         <div class="card-body">
                             <div class="form-group">
-                                <label>Selected Authors</label>
                                 <ul class="list-group" id="authorListView">
                                 </ul>
                             </div>
@@ -68,61 +38,33 @@
                 <div class="form-group">
                     <label for="paper_copyright_pdf">
                         Paper Content (PDF Upload)&nbsp;&nbsp;
-                        <span class="badge badge-info">LESS THAN 5MB</span>
                     </label>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
                     <?php if (intval($paper['pdf_attachment_id']) !== 0) { ?>
-                        <span>
-                        <a href="/attachment/preview/pdf/?aid={{$paper['pdf_attachment_id']}}" target="_blank">
-                            {{$paper['content_attach_info']['attachment_original_name']}}
-                        </a>
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                        <input type="file" class="" id="paper_pdf" name="paper_pdf">
-                     </span>
-
-                        <div class="row mt-3"></div>
-                        <div class="alert alert-info">
-                            Use the button above to choose a new file to upload when necessary.
-
-                        </div>
+                        <iframe width="100%" height="800" src="/attachment/preview/pdf/?aid={{$paper['pdf_attachment_id']}}">
+                            This browser does not support PDFs. Please download the PDF to view it: <a href="/attachment/preview/pdf/?aid={{$paper['pdf_attachment_id']}}">Download PDF</a>
+                        </iframe>
                     <?php } else { ?>
-                        <input type="file" class="" id="paper_pdf" name="paper_pdf">
-                        <div class="row mt-3"></div>
-                        <div class="alert alert-danger">You have not upload the paper content yet.</div>
+                        <div class="alert alert-danger">No paper content here.</div>
                     <?php } ?>
                 </div>
                 <div class="row mt-3"></div>
                 <div class="form-group">
                     <label for="paper_copyright_pdf">
-                        Paper Copyright (PDF Upload)&nbsp;&nbsp;
-                        <span class="badge badge-info">LESS THAN 5MB</span>
+                        Paper Copyright
                     </label>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
                     <?php if (intval($paper['copyright_attachment_id']) !== 0) { ?>
-                        <span>
-                        <a href="/attachment/preview/pdf/?aid={{$paper['copyright_attachment_id']}}" target="_blank">
-                            {{$paper['copyright_attach_info']['attachment_original_name']}}
-                        </a>
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                        <input type="file" class="" id="paper_copyright_pdf" name="paper_copyright_pdf">
-                     </span>
-
-                        <div class="row mt-3"></div>
-                        <div class="alert alert-info">
-                            Use the button above to choose a new file to upload when necessary.
-
-                        </div>
+                        <iframe width="100%" height="300" src="/attachment/preview/pdf/?aid={{$paper['copyright_attachment_id']}}">
+                            This browser does not support PDFs. Please download the PDF to view it: <a href="/attachment/preview/pdf/?aid={{$paper['copyright_attachment_id']}}">Download PDF</a>
+                        </iframe>
                     <?php } else { ?>
-                        <input type="file" class="" id="paper_copyright_pdf" name="paper_copyright_pdf">
-                        <div class="row mt-3"></div>
-                        <div class="alert alert-danger">You have not upload the copyright yet.</div>
+                        <div class="alert alert-danger">No copyright here.</div>
                     <?php } ?>
                 </div>
                 <div class="row mt-3"></div>
                 <div class="form-group">
                     <label for="paper_type_text">Type&nbsp;&nbsp;&nbsp;
                     </label>
-                    <select id="paper_type_text" name="paper_type_text" class="form form-control">
+                    <select id="paper_type_text" name="paper_type_text" class="form form-control" disabled="disabled">
                         <option value="paper" <?php if ($paper['paper_type'] === 'paper'): ?> selected="selected" <?php endif;?>> Paper</option>
                         <option value="abstract" <?php if ($paper['paper_type'] === 'abstract'): ?> selected="selected" <?php endif;?>>Abstract</option>
                     </select>
@@ -130,39 +72,38 @@
                 <div class="row mt-3"></div>
                 <div class="form-group">
                     <label for="paper_suggested_session">Suggested Session</label>
-                    <select class="form form-control" id="paper_suggested_session" name="paper_suggested_session" onchange="suggestedSessionOnChange();">
-
+                    <select class="form form-control" id="paper_suggested_session" name="paper_suggested_session" disabled="disabled">
                         <option value="-2" <?php if (intval($paper['paper_suggested_session']) === -2) { ?> selected="selected" <?php } ?>>Select a suggested session.</option>
                         <?php if(isset($sessions[0])): ?>
                             <optgroup label="Sessions provided by the host">
                                 <?php
-                                foreach($sessions[0] as $session) {
-                                    $selected = '';
-                                    intval($session['session_id']) === intval($paper['paper_suggested_session']) && $selected = "selected='selected'";
-                                    echo "<option $selected value='{$session['session_id']}'>{$session['session_text']}</option>";
-                                }
+                                    foreach($sessions[0] as $session) {
+                                        $selected = '';
+                                        intval($session['session_id']) === intval($paper['paper_suggested_session']) && $selected = "selected='selected'";
+                                        echo "<option $selected value='{$session['session_id']}'>{$session['session_text']}</option>";
+                                    }
                                 ?>
                             </optgroup>
                         <?php endif; ?>
                         <?php if(isset($sessions[1])): ?>
                             <optgroup label="Sessions add by conference members">
                                 <?php
-                                foreach($sessions[1] as $session) {
-                                    $selected = '';
-                                    intval($session['session_id']) === intval($paper['paper_suggested_session']) && $selected = "selected='selected'";
-                                    echo "<option $selected value='{$session['session_id']}'>{$session['session_text']}</option>";
-                                }
+                                    foreach($sessions[1] as $session) {
+                                        $selected = '';
+                                        intval($session['session_id']) === intval($paper['paper_suggested_session']) && $selected = "selected='selected'";
+                                        echo "<option $selected value='{$session['session_id']}'>{$session['session_text']}</option>";
+                                    }
                                 ?>
                             </optgroup>
                         <?php endif; ?>
                         <?php if(isset($sessions[2])): ?>
                             <optgroup label="Student Paper">
                                 <?php
-                                foreach($sessions[2] as $session) {
-                                    $selected = '';
-                                    intval($session['session_id']) === intval($paper['paper_suggested_session']) && $selected = "selected='selected'";
-                                    echo "<option $selected value='{$session['session_id']}'>{$session['session_text']}</option>";
-                                }
+                                    foreach($sessions[2] as $session) {
+                                        $selected = '';
+                                        intval($session['session_id']) === intval($paper['paper_suggested_session']) && $selected = "selected='selected'";
+                                        echo "<option $selected value='{$session['session_id']}'>{$session['session_text']}</option>";
+                                    }
                                 ?>
                             </optgroup>
                         <?php endif; ?>
@@ -192,7 +133,7 @@
     <li class="list-group-item list-group-item-action" style="font-size:80%;">
         <h5 style="line-height: 50px;">{0}&nbsp;&nbsp;&nbsp;<span class="badge badge-light">{1}</span>
             <span class="float-right">
-                <div class="btn-group">
+                <div class="btn-group" style="display: none;">
                     <button type="button" data-toggle="tooltip" class="btn btn-light fa fa-edit" id="author_edit{2}"
                             data-author-id="{3}" title="Edit author information."></button>
                     <button type="button" data-toggle="tooltip" class="btn btn-light fa fa-angle-up" id="author_up{4}"
