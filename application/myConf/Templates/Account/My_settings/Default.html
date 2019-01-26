@@ -3,11 +3,12 @@
 <div class="col-md-10">
     <div class="col-md-12">
         <div class="row">
+            <?php if(false): ?>
             <div class="container col-md-6">
                 <div class="card">
                     <form id="setting_form_general" name="setting_form_general" enctype="multipart/form-data"
                           action="/account/my-settings/general/?do=submit" method="post">
-                        <div class="card-header">Account Settings</div>
+                        <div class="card-header">Account</div>
                         <div class="card-body">
                             <input type="hidden" name="<?php echo $csrf_name; ?>" value="<?php echo $csrf_hash; ?>"/>
                             <div class="form-group">
@@ -38,8 +39,8 @@
                     </form>
                 </div>
             </div>
-
-            <div class="container col-md-6">
+            <?php endif; ?>
+            <div class="container col-md-3">
                 <div class="card">
                     <form id="setting_form_avatar" name="setting_form_avatar" enctype="multipart/form-data"
                           action="/account/my-settings/avatar/?do=submit" method="post">
@@ -70,10 +71,8 @@
                     </form>
                 </div>
             </div>
-        </div>
-        <div class="row mt-3"></div>
-        <div class="row">
-            <div class="container col-md-12">
+
+            <div class="container col-md-9">
                 <div class="card">
                     <form id="setting_form_scholar" enctype="application/x-www-form-urlencoded"
                           action="/account/my-settings/scholar/?do=submit" method="post">
@@ -118,7 +117,7 @@
                                 <tr>
                                     <td style="width:38%;">
                                         <label for="scholarInstitution">Institution&nbsp;&nbsp;<span
-                                                class="badge badge-info">LESS THAN 160 characters</span></label>
+                                                    class="badge badge-info">LESS THAN 160 characters</span></label>
                                     </td>
                                     <td style="width:62%;">
                                         <input class="form-control" name="scholarInstitution" id="scholarInstitution"
@@ -133,7 +132,7 @@
                                 <tr>
                                     <td style="width:38%;">
                                         <label for="scholarDepartment">Department&nbsp;&nbsp;<span
-                                                class="badge badge-info">LESS THAN 60 characters</span></label>
+                                                    class="badge badge-info">LESS THAN 60 characters</span></label>
                                     </td>
                                     <td style="width:62%;">
                                         <input class="form-control" name="scholarDepartment" id="scholarDepartment"
@@ -156,12 +155,16 @@
                                 </tr>
                             </table>
                             <div class="row mt-3"></div>
-                            <button type="submit" class="form-control " class="float-right">Update author information
+                            <button type="submit" class="btn btn-primary" class="float-right">
+                                <span class="fa fa-check"></span>&nbsp;&nbsp;Submit
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
+        </div>
+        <div class="row mt-3"></div>
+        <div class="row">
         </div>
     </div>
 </div>

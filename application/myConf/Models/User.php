@@ -84,6 +84,8 @@ class User extends \myConf\BaseModel
      * @param string $password
      * @param string $email
      * @return int
+     * @throws \myConf\Exceptions\CacheDriverException
+     * @throws \myConf\Exceptions\DbException
      * @throws \myConf\Exceptions\DbTransactionException
      */
     public function create_new(string $username, string $password, string $email) : int {
@@ -97,6 +99,7 @@ class User extends \myConf\BaseModel
 
     /**
      * @param int $user_id
+     * @throws \myConf\Exceptions\CacheDriverException
      */
     public function activate(int $user_id) : void
     {

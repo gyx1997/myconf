@@ -151,12 +151,15 @@
                         $this->_has_login() && $this->exit_promptly(['status' => 'ALREADY_LOGIN']);
                         //得到的验证码
                         $hash_key_got = trim($this->input->post('register_verification_key'));
-
                         $status = 'SUCCESS';
                         $redirect = $this->_url_redirect;
                         try {
                             $this->Services->Account->check_verify_email('reg-verify', $hash_key_got);
-                            $user = $this->Services->Account->new_account($this->input->post('register_email'), $this->input->post('register_username'), $this->input->post('register_password'));
+                            $email = $this->input->post('register_email');
+                            $password = $this->input->post('register_password');
+                            $email_prefix = substr(explode('@', $email)[0], 0, 17);
+                            $username = $email_prefix . '-' . substr(md5($email . $password . strval(time())), 0, 32 - strlen($email_prefix) - 1);
+                            $user = $this->Services->Account->new_account($email, $username, $password);
                             $this->_set_login($user);
                         } catch (\myConf\Exceptions\EmailExistsException $e) {
                             $status = 'EMAIL_EXISTS';
@@ -193,9 +196,11 @@
         }
 
         /**
+         * @throws \myConf\Exceptions\CacheDriverException
          * @throws \myConf\Exceptions\DirectoryException
          * @throws \myConf\Exceptions\FileUploadException
          * @throws \myConf\Exceptions\SendRedirectInstructionException
+         * @throws \myConf\Exceptions\UserNotExistsException
          */
         public function my_settings() {
             $this->_login_redirect();

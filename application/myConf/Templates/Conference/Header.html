@@ -25,13 +25,15 @@ $conf_url = '/conference/' . $conference['conference_url'];
                     class="fa fa-file-o"></span>&nbsp;Online Paper
                 Submission</a>
         </li>
+        <?php if(false): ?>
         <li class="nav-item">
             <a class="nav-link disabled <?php if ($tab_page == 'downloads') { ?>active disabled<?php } ?>"><span
                     class="fa fa-download"></span>&nbsp;Downloads</a>
         </li>
+        <?php endif; ?>
         {{@end}}
         <!-- TODO 增加权限判断 -->
-        <?php if ($auth_review || $auth_arrange_review) { ?>
+        <?php if (($auth_review || $auth_arrange_review) && false) { ?>
         <li class="nav-item">
             <a class="nav-link <?php if ($tab_page == 'paper_submit-review') { ?>active disabled<?php } ?>"
                href="/conference/<?php echo $conference['conference_url']; ?>/paper-review/">Paper Review</a>

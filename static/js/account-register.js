@@ -71,8 +71,6 @@ submit_button.onclick = function () {
                     }
                     if (d.status === 'CAPTCHA_ERR') {
                         $('#err_captcha').show();
-                    } else if (d.status === 'USERNAME_EXISTS') {
-                        $('#err_username').show();
                     } else if (d.status === 'EMAIL_EXISTS') {
                         $('#err_email').show();
                     } else if (d.status === 'VERIFY_FAILED') {
@@ -80,7 +78,7 @@ submit_button.onclick = function () {
                     }
                 },
                 error: function () {
-
+                    messageBox('An internal server error occurred.', 'Message');
                 }
             });
         }

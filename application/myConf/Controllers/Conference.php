@@ -91,9 +91,8 @@ class Conference extends \myConf\BaseController
             'scholar' => array(
                 ['method' => 'paper-submit', 'actions' => ['new', 'author']],
                 //编辑和删除文章，需要满足是作者本人进行操作。
-                ['method' => 'paper-submit', 'actions' => ['edit', 'delete'], 'special_check' => function() : bool {
+                ['method' => 'paper-submit', 'actions' => ['edit', 'delete', 'preview'], 'special_check' => function() : bool {
                     $paper = $this->Services->Paper->get(intval($this->input->get('id')), intval($this->input->get('ver')));
-
                     if (empty($paper)) {
                         throw new HttpStatusException(404, 'PAPER_NOT_FOUND', 'The paper you requested was not found.');
                     }

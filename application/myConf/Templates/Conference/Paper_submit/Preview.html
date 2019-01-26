@@ -119,12 +119,10 @@
                            value="" placeholder="Enter your paper's suggested session."/>
                 </div>
                 <div class="row mt-3"></div>
-                <button id="submit_button" class="btn btn-primary" type="button" onclick="savePaper();">
-                    <span class="fa fa-save"> </span>&nbsp;&nbsp;Save
-                </button>
-                <button id="submit_button" class="btn btn-primary" type="button" onclick="submitPaper();">
-                    <span class="fa fa-check"> </span>&nbsp;&nbsp;Submit
-                </button>
+                <a id="submit_button" class="btn btn-primary"
+                   href="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}">
+                    <span class="fa fa-edit"> </span>&nbsp;&nbsp;Edit
+                </a>
             </form>
         </div>
     </div>
@@ -154,38 +152,10 @@
 <script src="{{$StaticDomain}}/static/js/conf-paper-submit-authorList.js"></script>
 <script type="text/javascript">
     var suggestedSessionId = "{{$paper['paper_suggested_session']}}";
-
-    <?php if(intval($paper['pdf_attachment_id']) !== 0): ?>
-    var hasPaper = true;
-    <?php else: ?>
-    var hasPaper = false;
-    <?php endif; ?>
-
-    <?php if(intval($paper['copyright_attachment_id']) !== 0): ?>
-    var hasCopyright = true;
-    <?php else: ?>
-    var hasCopyright = false;
-    <?php endif; ?>
-
-    var submitPaper = function () {
-        doSubmit('submit', <?php echo $paper['paper_id']; ?>, <?php echo $paper['paper_version']; ?> , '{{$conf_url}}');
-    };
-    var savePaper = function () {
-        doSubmit('save', <?php echo $paper['paper_id']; ?>, <?php echo $paper['paper_version']; ?> , '{{$conf_url}}');
-    };
     <?php foreach($paper['authors'] as $author): ?>
     addToList("{{$author['author_email']}}", "{{$author['author_first_name']}}", "{{$author['author_last_name']}}", "{{$author['author_institution']}}", "{{$author['author_department']}}", "{{$author['author_address']}}", "{{$author['author_prefix']}}", "{{$author['author_chn_full_name']}}");
     <?php endforeach; ?>
     refreshAuthorListView();
-    var suggestedSessionOnChange = function(){
-        var suggestedSessionSelect = $('#paper_suggested_session');
-        suggestedSessionId = suggestedSessionSelect.val();
-        if(suggestedSessionId === '-1') {
-            $('#customSession').show(500);
-        }else{
-            $('#customSession').hide(500);
-        }
-    };
 </script>
 {{@include /Conference/Paper_submit/Edit_author_dialog}}
 {{@include /Conference/Footer}}
