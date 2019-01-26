@@ -56,9 +56,9 @@ $end_ts = $start_ts;
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
-//define('ENVIRONMENT', 'production');
-define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
-    define('IN_LAB', false);
+define('ENVIRONMENT', 'production');
+//define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
+//   define('IN_LAB', false);
 /*
  *---------------------------------------------------------------
  * ERROR REPORTING

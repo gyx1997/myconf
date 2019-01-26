@@ -12,7 +12,7 @@ namespace myConf;
 use myConf\Exceptions\SendExitInstructionException;
 use myConf\Libraries\File;
 use myConf\Libraries\Session;
-use myCOnf\Libraries\Env;
+use myConf\Libraries\Env;
 
 /**
  * Class BaseController
@@ -155,7 +155,7 @@ class BaseController
     {
         $this->add_output_variables(
             array(
-                'title' => $this->Services->Config->get_title(),
+                'title' => 'myConf',
                 'footer1' => $this->Services->Config->get_footer(),
                 'mitbeian' => $this->Services->Config->get_mitbeian(),
                 'csrf_name' => $this->security->get_csrf_token_name(),
