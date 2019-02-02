@@ -92,5 +92,11 @@ class Misc extends \myConf\BaseController
         imagepng($distortionImage);
         imagedestroy($img);
         imagedestroy($distortionImage);
+        $this->exit_promptly();
     }
+
+    public function upload_success() : void {
+
+    }
+
 }

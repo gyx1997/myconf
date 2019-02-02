@@ -73,4 +73,8 @@
                 throw new \myConf\Exceptions\HttpStatusException(404, 'ATTACH_NOT_FOUND', 'The file you have requested for preview does not exists, it may have been deleted or moved before.');
             }
         }
+
+        public function put_temp_file() : void {
+
+        }
     }

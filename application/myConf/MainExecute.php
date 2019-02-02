@@ -79,6 +79,8 @@
     \myConf\Libraries\DbHelper::init();
     //初始化静态会话类
     \myConf\Libraries\Session::init();
+    //初始化电子邮箱类
+    \myConf\Libraries\Email::init();
 
     /**
      * @var int 进程返回值

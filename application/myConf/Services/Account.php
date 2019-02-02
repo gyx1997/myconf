@@ -73,18 +73,15 @@ class Account extends \myConf\BaseService
     public function send_verify_email(string $email, string $type, string $title): void {
         $hash_key = md5(uniqid());
         \myConf\Libraries\Session::set_temp_data($type . '-hash-key', $hash_key, 1800);
-        $CI = &get_instance();
-        $CI->email->from('csqrwc@126.com', 'myConf');
-        $CI->email->to($email);
-        $CI->email->subject($title);
-        $CI->email->message('
+        $content =
+            '
             <h1>Email Verification From myConf.cn</h1>
             <p>Copy the text below to enter in the form popped from myConf.cn .</p>
             <p style="font-family: Consolas; font-size: 14px; background-color: #D0D0D0">' . $hash_key . '</p>
             <p>You should finish to submit the form in 30 minutes since you have submit this request.</p>
             <p>If you have not registered an account at myConf.cn, Please ignore this email.</p>
-            ');
-        $CI->email->send();
+            ';
+        \myConf\Libraries\Email::send_mail('AccountVerification@mail.myconf.cn', 'myConf账号验证', $email, $title, $content);
     }
 
     /**
