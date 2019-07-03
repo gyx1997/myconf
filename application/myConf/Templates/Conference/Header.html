@@ -33,9 +33,9 @@ $conf_url = '/conference/' . $conference['conference_url'];
         <?php endif; ?>
         {{@end}}
         <!-- TODO 增加权限判断 -->
-        <?php if (($auth_review || $auth_arrange_review) && false) { ?>
+        <?php if (($auth_review || $auth_arrange_review)) { ?>
         <li class="nav-item">
-            <a class="nav-link <?php if ($tab_page == 'paper_submit-review') { ?>active disabled<?php } ?>"
+            <a class="nav-link <?php if ($tab_page == 'paper-review') { ?>active disabled<?php } ?>"
                href="/conference/<?php echo $conference['conference_url']; ?>/paper-review/">Paper Review</a>
         </li>
         <?php } ?>

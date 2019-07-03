@@ -28,7 +28,7 @@
          * 初始化
          */
         public static function init() : void {
-            if (ENVIRONMENT === 'production' || 1) {
+            if (ENVIRONMENT === 'production') {
                 self::$mail_service = 'SendCloud';
                 self::$send_cloud_user_id = 'myconf_app_trigger';
                 self::$send_cloud_api_key = 'E8G9wHzTAmrtBHPn';
@@ -51,7 +51,6 @@
                 require_once self::$send_cloud_path . 'util/HttpClient.php';
                 require_once self::$send_cloud_path . 'util/Mail.php';
                 require_once self::$send_cloud_path . 'util/Mimetypes.php';
-                var_dump(self::$send_cloud_user_id);
                 $sc = new \SendCloud(self::$send_cloud_user_id, self::$send_cloud_api_key, 'v2');
                 $mail = new \Mail();
                 $mail->setFrom($from);
@@ -60,14 +59,12 @@
                 $mail->setSubject($subject);
                 $mail->setContent($content);
                 $result = json_decode($sc->sendCommon($mail));
-                var_dump($result);
             } else if(self::$mail_service === 'CodeIgniterSMTP') {
-                $CI = &get_instance();
-                $CI->email->from($from, $from_name);
-                $CI->email->to($to);
-                $CI->email->subject($subject);
-                $CI->email->message($content);
-                $CI->email->send();
+                //调试模式
+                $file = APPPATH . '/debug/' . str_replace($to, '_' , '@') . '-' .
+                    date('y-m-d',time()) . '.html';
+                $fcontent = "<html><body><h1>From $from_name ($from)</h1><h1>To $to</h1><h1>$subject</h1><p>$content</p></body></html>";
+                file_put_contents($file, $fcontent);
             }
         }
     }

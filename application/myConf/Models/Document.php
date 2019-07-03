@@ -44,9 +44,17 @@ class Document extends \myConf\BaseModel
             $old_attachment_ids [$old_attachment['attachment_id']] = true;
         }
         DbHelper::begin_trans();
-        //将使用了的附件都标记为1
+        //将使用了的附件都标记为1，同时更新其tag（document使用，并更新其tag_id）
         foreach ($aids as $aid) {
             if (!isset($old_attachment_ids[$aid])) {
+                $this->Tables->Attachments->set(
+                    strval($aid),
+                    [
+                        'attachment_tag_type' => \myConf\Models\Attachment::tag_type_document,
+                        'attachment_tag_id' => $id,
+                        'attachment_used' => 1,
+                    ]
+                );
                 $this->Tables->Attachments->set_used_status($aid, true);
             }
             $old_attachment_ids[$aid] = false;

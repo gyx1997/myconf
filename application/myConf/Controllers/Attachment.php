@@ -23,9 +23,13 @@
          */
         public function put() {
             try {
-                $attach_data = $this->Services->Attachment->ueditor_upload('upfile', $this->input->post('document_id'));
+                $file_field = $this->input->get('ff');
+                $attach_data = $this->Services->Attachment->upload($file_field);
                 $this->exit_promptly([
+                    //给UEditor专用
                     'state' => 'SUCCESS',
+                    //通用的状态标记
+                    'status' => 'SUCCESS',
                     //对于图片直接进行下载，不需要中转进行文件重命名。
                     //也可以充分利用后期的CDN
                     'url' => $this->_action === 'file' ? '/attachment/get/' . $this->_action . '/?aid=' . $attach_data['attachment_id'] : $attach_data['file_name'],

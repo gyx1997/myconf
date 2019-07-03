@@ -90,9 +90,13 @@ class User extends \myConf\BaseModel
      */
     public function create_new(string $username, string $password, string $email) : int {
         $salt = $this->_generate_password_salt();
+        //需要判断，当前注册的用户是否已经进入了Scholar表
+        $scholar_exists = $this->Tables->Scholars->exist($email);
         \myConf\Libraries\DbHelper::begin_trans();
         $user_id = $this->Tables->Users->create($username, md5($password . $salt), $email, $salt);
-        $this->Tables->Scholars->insert(array('scholar_email' => $email));
+        if(!$scholar_exists) {
+            $this->Tables->Scholars->insert(array('scholar_email' => $email));
+        }
         \myConf\Libraries\DbHelper::end_trans();
         return $user_id;
     }

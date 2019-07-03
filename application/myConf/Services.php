@@ -19,6 +19,7 @@ namespace myConf;
  * @property-read \myConf\Services\Attachment $Attachment
  * @property-read \myConf\Services\Scholar $Scholar
  * @property-read \myConf\Services\Paper $Paper
+ * @property-read \myConf\Services\PaperReview $PaperReview
  */
 class Services
 {

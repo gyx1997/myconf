@@ -48,6 +48,16 @@ class PaperSession extends \myConf\BaseModel
     }
 
     /**
+     * 得到一个session
+     * @param int $session_id
+     * @return array
+     * @throws \myConf\Exceptions\CacheDriverException
+     */
+    public function get_session(int $session_id) : array {
+        return $this->Tables->PaperSessions->get(strval($session_id));
+    }
+
+    /**
      * @param int $session_id
      * @throws PaperSessionAlreadyUsedException
      * @throws \myConf\Exceptions\CacheDriverException

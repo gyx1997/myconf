@@ -18,6 +18,7 @@ class Admin extends \myConf\BaseController
     public function __construct()
     {
         parent::__construct();
+        //throw new \myConf\Exceptions\HttpStatusException(404, 'NOT_FOUND', 'The page you are requesting is not found on this server.');
     }
 
     public function index(): void

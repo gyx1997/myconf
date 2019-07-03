@@ -24893,7 +24893,7 @@
                                 result = body.innerText || body.textContent || '';
                             json = (new Function("return " + result))();
                             link = me.options.imageUrlPrefix + json.url;
-                            if (json.state == 'SUCCESS' && json.url) {
+                            if (json.state === 'SUCCESS' && json.url) {
                                 loader = me.document.getElementById(loadingId);
                                 loader.setAttribute('src', link);
                                 loader.setAttribute('_src', link);

@@ -174,3 +174,11 @@
     });
 </script>
 {{@include /Common/Footer}}
+<script type="text/javascript">
+    <?php
+    $CI = &get_instance();
+    ?>
+    <?php if($CI->input->get('ret') === 'ok'): ?>
+    messageBoxSecondary('Settings changed successfully.', 'Message');
+    <?php endif; ?>
+</script>

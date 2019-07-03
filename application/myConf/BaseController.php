@@ -20,6 +20,7 @@ use myConf\Libraries\Env;
  * @author _g63<522975334@qq.com>
  * @version 2019.1
  * @property-read \myConf\Services $Services
+ * @property-read \myConf\Callbacks $Callbacks
  * @property-read \CI_Session $Session
  */
 class BaseController

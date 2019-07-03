@@ -119,10 +119,12 @@
                            value="" placeholder="Enter your paper's suggested session."/>
                 </div>
                 <div class="row mt-3"></div>
-                <a id="submit_button" class="btn btn-primary"
+            <?php if(intval($paper['paper_status']) === \myConf\Models\Paper::paper_status_saved): ?>
+                <a id="submit_button" class="btn btn-primary" <?php if(intval($paper['paper_status']) !== \myConf\Models\Paper::paper_status_saved) echo 'disabled="disabled"' ; ?>
                    href="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}">
                     <span class="fa fa-edit"> </span>&nbsp;&nbsp;Edit
                 </a>
+            <?php endif; ?>
             </form>
         </div>
     </div>

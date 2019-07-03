@@ -1,5 +1,4 @@
 var doSubmit = function (action, confUrl) {
-    console.log(action);
     if (action === 'submit') {
         var ehandler = function() {
             if(validateForm() === true) {
@@ -15,20 +14,21 @@ var doSubmit = function (action, confUrl) {
                     dataType: "json",
                     success: function (d) {
                         if (d.status === 'SUCCESS') {
-                            messageBox('Paper ' + (action === 'save' ? 'saved' : 'submitted') + ' successfully.', 'Message', null);
+                            messageBoxSecondary('Paper ' + (action === 'save' ? 'saved' : 'submitted') + ' successfully.', 'Message', null);
                             setTimeout(function () {
                                 window.location.href = confUrl + '/paper-submit/';
                             }, 2000);
                         } else if (d.status === 'FILE_ERROR') {
-                            messageBox('File upload error.', 'Message');
+                            messageBoxSecondary('File upload error.', 'Message');
                         } else if (d.status === 'AUTHOR_EMPTY') {
-                            messageBox('Please select authors.', 'Message');
+                            messageBoxSecondary('Please select authors.', 'Message');
                         } else if (d.status === 'OUT_OF_DATE') {
-                            messageBox('The submission has been closed after deadline.', 'Message');
+                            console.log('out of date');
+                            messageBoxSecondary('The submission has been closed after deadline.', 'Message');
                         }
                     },
                     error: function () {
-                        messageBox('An internal server error occurred during submitting your paper.', 'Message');
+                        messageBoxSecondary('An internal server error occurred during submitting your paper.', 'Message');
                     }
                 });
             }
@@ -48,10 +48,17 @@ var doSubmit = function (action, confUrl) {
             dataType: "json",
             success: function (d) {
                 if (d.status === 'SUCCESS') {
-                    messageBox('Paper ' + (action === 'save' ? 'saved' : 'submitted') + ' successfully.', 'Message', null);
+                    messageBoxSecondary('Paper ' + (action === 'save' ? 'saved' : 'submitted') + ' successfully.', 'Message', null);
                     setTimeout(function () {
                         window.location.href = confUrl + '/paper-submit/';
                     }, 2000);
+                } else if (d.status === 'FILE_ERROR') {
+                    messageBoxSecondary('File upload error.', 'Message');
+                } else if (d.status === 'AUTHOR_EMPTY') {
+                    messageBoxSecondary('Please select authors.', 'Message');
+                } else if (d.status === 'OUT_OF_DATE') {
+                    console.log('out of date');
+                    messageBoxSecondary('The submission has been closed after deadline.', 'Message');
                 }
             },
             error: function () {

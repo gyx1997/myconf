@@ -46,9 +46,9 @@
     UE.Editor.prototype._bkGetActionUrl = UE.Editor.prototype.getActionUrl;
     UE.Editor.prototype.getActionUrl = function (action) {
         if (action == 'uploadimage') {
-            return '/attachment/put/image/';
+            return '/attachment/put/image/?ff=upfile';
         } else if (action == 'uploadfile') {
-            return '/attachment/put/file/';
+            return '/attachment/put/file/?ff=upfile';
         } else if (action == 'listimage') {
             return '/attachment/get-list/image/';
         } else if (action == 'listfile') {

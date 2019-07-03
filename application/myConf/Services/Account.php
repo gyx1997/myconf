@@ -61,6 +61,17 @@ class Account extends \myConf\BaseService
             throw new \myConf\Exceptions\UsernameExistsException();
         }
         $user_id = $this->Models->User->create_new($username, $password, $email);
+        //检查当前用户是不是被添加进了reviewer
+        $tasks = $this->Models->PaperReview->get_reviewer_conference_tasks
+        ($email, 0);
+        if (!empty($tasks)) {
+            foreach($tasks as $task) {
+                $this->Models->Conference->add_member($task['conference_id'],
+                    $user_id);
+                $this->Models->Conference->set_user_roles($task['conference_id'], $user_id, ['scholar', 'reviewer']);
+                //TODO 使用一个函数重写上面两个语句，提高效率
+            }
+        }
         return $this->Models->User->get_by_id($user_id);
     }
 
@@ -81,7 +92,7 @@ class Account extends \myConf\BaseService
             <p>You should finish to submit the form in 30 minutes since you have submit this request.</p>
             <p>If you have not registered an account at myConf.cn, Please ignore this email.</p>
             ';
-        \myConf\Libraries\Email::send_mail('AccountVerification@mail.myconf.cn', 'myConf账号验证', $email, $title, $content);
+        \myConf\Libraries\Email::send_mail('AccountVerification@mail.myconf.cn', 'myConf Account Verification', $email, $title, $content);
     }
 
     /**

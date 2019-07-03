@@ -21,6 +21,7 @@ namespace myConf;
  * @property-read \myConf\Models\Attachment $Attachment
  * @property-read \myConf\Models\Paper $Paper
  * @property-read \myConf\Models\PaperSession $PaperSession
+ * @property-read \myConf\Models\PaperReview $PaperReview
  */
 class Models
 {

@@ -55,6 +55,11 @@
          */
         public function get_new_paper_logic_id() : int {
             //注意MYSQL 8.0 需要 set global information_schema_stats_expiry=0
-            return intval(DbHelper::fetch_first_raw("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{$this->table()}'")['AUTO_INCREMENT']);
+            ENVIRONMENT === 'development' && DbHelper::query('SET information_schema_stats_expiry=0');
+            $table_raw = $this->table();
+            $table = $this->table();
+            //$table = substr($table_raw, 1, strlen($table_raw) - 2);
+            return intval(DbHelper::fetch_first_raw("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
+'$table'")['AUTO_INCREMENT']);
         }
     }

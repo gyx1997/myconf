@@ -41,29 +41,44 @@ class Paper extends \myConf\BaseModel
     }
 
     /**
+     * 添加一片原始文章
      * @param int $user_id
      * @param int $conference_id
      * @param array $authors
-     * @param array $pdf_file_info
-     * @param array $copyright_file_info
+     * @param int $pdf_aid
+     * @param int $copyright_aid
      * @param string $paper_type
      * @param string $suggested_session
      * @param string $title
      * @param string $abstract
      * @param int $status
      * @param string $custom_suggested_session
+     * @param int $old_paper_id
+     * @param int $old_paper_version
      * @return int
      * @throws \myConf\Exceptions\CacheDriverException
      * @throws \myConf\Exceptions\DbCompositeKeysException
      * @throws \myConf\Exceptions\DbTransactionException
      */
-    public function add(int $user_id, int $conference_id, array $authors, array $pdf_file_info, array $copyright_file_info, string $paper_type, string $suggested_session, string $title, string $abstract, int $status, string $custom_suggested_session = ''): int
+    public function add(int $user_id, int $conference_id, array $authors, int
+    $pdf_aid, int $copyright_aid, string $paper_type, string
+    $suggested_session, string $title, string $abstract, int $status, string
+    $custom_suggested_session = '', int $specified_paper_id = 0, int
+    $specified_paper_version =
+    0): int
     {
         //放在事务外面，读取不加写锁
         $session = $this->Tables->PaperSessions->get(strval(intval($suggested_session)));
         $session_display_order_max = $this->Tables->PaperSessions->get_conference_sessions_max_display_order($conference_id);
-        $paper_logic_id = $this->Tables->Papers->get_new_paper_logic_id();
-        $paper_version = 1;
+
+        if ($specified_paper_id === 0) {
+            $paper_logic_id = $this->Tables->Papers->get_new_paper_logic_id();
+            $paper_version = 1;
+        } else {
+            $paper_logic_id = $specified_paper_id;
+            $paper_version = $specified_paper_version;
+        }
+
         DbHelper::begin_trans();
         //如果不存在的话，写入session信息
         if (empty($session) && intval($suggested_session) !== -2) {
@@ -75,32 +90,6 @@ class Paper extends \myConf\BaseModel
             ]);
             $suggested_session = $session_id;
         }
-        //如果上传了paper的pdf文件，那么将其写入Attachment表，反之，attachment_id记为0
-        $pdf_aid = empty($pdf_file_info) ? 0 : $this->Tables->Attachments->insert([
-            'attachment_file_name' => $pdf_file_info['full_name'],
-            'attachment_is_image' => 0,
-            'attachment_file_size' => $pdf_file_info['size'],
-            'attachment_original_name' => $pdf_file_info['original_name'],
-            'attachment_image_height' => 0,
-            'attachment_image_width' => 0,
-            'attachment_tag_id' => 'paper',
-            'attachment_tag_type' => $this->Tables->Attachments::tag_type_paper,
-            'attachment_used' => 1,
-            'attachment_filename_hash' => $pdf_file_info['full_name'],
-        ]);
-        //如果上传了copyright文件，那么将其写入Attachment表
-        $copyright_aid = empty($copyright_file_info) ? 0 : $this->Tables->Attachments->insert([
-            'attachment_file_name' => $copyright_file_info['full_name'],
-            'attachment_is_image' => 0,
-            'attachment_file_size' => $copyright_file_info['size'],
-            'attachment_original_name' => $copyright_file_info['original_name'],
-            'attachment_image_height' => 0,
-            'attachment_image_width' => 0,
-            'attachment_tag_id' => 'paper',
-            'attachment_tag_type' => $this->Tables->Attachments::tag_type_paper,
-            'attachment_used' => 1,
-            'attachment_filename_hash' => $copyright_file_info['full_name'],
-        ]);
         //插入paper信息
         $paper_id = $this->Tables->Papers->insert([
             'paper_logic_id' => $paper_logic_id,
@@ -118,10 +107,22 @@ class Paper extends \myConf\BaseModel
         ]);
         //插入作者信息（如果填写了的话）
         !empty($authors) && $this->Tables->PaperAuthors->insert_array($this->_parse_authors($paper_id, $authors));
-        DbHelper::end_trans();
         //原子性操作，修改attachment_tag_id，即attachment的关联的表的id
-        $this->Tables->Attachments->set($pdf_aid, ['attachment_tag_id' => $paper_id]);
-        $this->Tables->Attachments->set($copyright_aid, ['attachment_tag_id' => $paper_id]);
+        if ($pdf_aid !== 0) {
+            $this->Tables->Attachments->set($pdf_aid, [
+                'attachment_tag_id' => $paper_id,
+                'attachment_tag_type' => \myConf\Tables\Attachments::tag_type_paper,
+                'attachment_used' => 1,
+            ]);
+        }
+        if ($copyright_aid !== 0) {
+            $this->Tables->Attachments->set($copyright_aid, [
+                'attachment_tag_id' => $paper_id,
+                'attachment_tag_type' => \myConf\Tables\Attachments::tag_type_paper,
+                'attachment_used' => 1
+            ]);
+        }
+        DbHelper::end_trans();
         return $paper_id;
     }
 
@@ -177,7 +178,7 @@ class Paper extends \myConf\BaseModel
      * @throws \myConf\Exceptions\DbCompositeKeysException
      * @throws \myConf\Exceptions\DbTransactionException
      */
-    public function update_paper(int $paper_logic_id, int $paper_version, int $paper_status,  array $authors = null, array $pdf_file_info = null, array $copyright_file_info = null, string $paper_type = null, string $suggested_session = null, string $title = null, string $abstract = null, string $custom_suggested_session = null): void
+    public function update_paper(int $paper_logic_id, int $paper_version, int $paper_status,  array $authors = null, int $paper_aid = 0, int $copyright_aid = 0, string $paper_type = null, string $suggested_session = null, string $title = null, string $abstract = null, string $custom_suggested_session = null): void
     {
         //先获取旧的信息，进行比对，如果有出入则进行修改
         $old_data = $this->get_paper($paper_logic_id, $paper_version);
@@ -190,39 +191,24 @@ class Paper extends \myConf\BaseModel
         }
         //下面开始事务修改信息
         DbHelper::begin_trans();
-        //paper本身的pdf文件是不是上传新的了
-        if (isset($pdf_file_info)) {
-            $pdf_aid = $this->Tables->Attachments->insert([
-                'attachment_file_name' => $pdf_file_info['full_name'],
-                'attachment_is_image' => 0,
-                'attachment_file_size' => $pdf_file_info['size'],
-                'attachment_original_name' => $pdf_file_info['original_name'],
-                'attachment_image_height' => 0,
-                'attachment_image_width' => 0,
-                'attachment_tag_id' => 'paper',
-                'attachment_tag_type' => $this->Tables->Attachments::tag_type_paper,
+        //如果上传了新的paper，那么修改相关信息
+        if ($paper_aid !== 0 && $paper_aid !== intval($old_data['pdf_attachment_id'])) {
+            $this->Tables->Attachments->set($paper_aid, [
+                'attachment_tag_id' => $old_data['paper_id'],
+                'attachment_tag_type' => \myConf\Tables\Attachments::tag_type_paper,
                 'attachment_used' => 1,
             ]);
-            $this->Tables->Attachments->set_used_status($old_data['pdf_attachment_id'], false);
-            $base_data_to_update['pdf_attachment_id'] = $pdf_aid;
+            $base_data_to_update['pdf_attachment_id'] = $paper_aid;
         }
-        //copyright是不是更新了
-        if (isset($copyright_file_info)) {
-            $copyright_aid = $this->Tables->Attachments->insert([
-                'attachment_file_name' => $copyright_file_info['full_name'],
-                'attachment_is_image' => 0,
-                'attachment_file_size' => $copyright_file_info['size'],
-                'attachment_original_name' => $copyright_file_info['original_name'],
-                'attachment_image_height' => 0,
-                'attachment_image_width' => 0,
-                'attachment_tag_id' => 'paper',
-                'attachment_tag_type' => $this->Tables->Attachments::tag_type_paper,
-                'attachment_used' => 1,
+        //如果上传了新的copyright，修改相关信息
+        if ($copyright_aid !== 0 && $copyright_aid !== intval($old_data['copyright_attachment_id'])) {
+            $this->Tables->Attachments->set($copyright_aid, [
+                'attachment_tag_id' => $old_data['paper_id'],
+                'attachment_tag_type' => \myConf\Tables\Attachments::tag_type_paper,
+                'attachment_used' => 1
             ]);
-            $this->Tables->Attachments->set_used_status($old_data['copyright_attachment_id'], false);
             $base_data_to_update['copyright_attachment_id'] = $copyright_aid;
         }
-
         //如果不存在的话，写入session信息
         if (empty($session) && intval($suggested_session) !== -2) {
             $session_id = $this->Tables->PaperSessions->insert([
@@ -233,8 +219,6 @@ class Paper extends \myConf\BaseModel
             ]);
             $suggested_session = $session_id;
         }
-
-
         //下面开始处理作者信息
         if (isset($authors) && !empty($authors)) {
             //先清除旧的信息
@@ -288,9 +272,27 @@ class Paper extends \myConf\BaseModel
         //删除paper信息
         $this->Tables->Papers->delete(['paper_logic_id' => $paper_logic_id, 'paper_version' => $paper_version]);
         //删除对应的附件信息
-        $this->Tables->Attachments->delete($paper['pdf_attachment_id']);
+        intval($paper['pdf_attachment_id']) !== 0 &&
+    $this->Tables->Attachments->delete
+    ($paper['pdf_attachment_id']);
+        intval($paper['copyright_attachment_id']) !== 0 &&
         $this->Tables->Attachments->delete($paper['copyright_attachment_id']);
         DbHelper::end_trans();
+    }
+
+    /**
+     * 得到会议的所有文章
+     * @param int $conference_id
+     * @param int $start
+     * @param int $limit
+     * @return array
+     */
+    public function get_conference_papers(int $conference_id, int $start = 0, int $limit = 0) : array {
+        if ($start == 0 && $limit == 0) {
+            return $this->Tables->Papers->fetch_all(['conference_id' => $conference_id]);
+        } else {
+            return $this->Tables->Papers->fetch_all(['conference_id' => $conference_id], '', '', $start, $limit);
+        }
     }
 
     /**

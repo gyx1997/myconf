@@ -17,6 +17,7 @@ class Attachment extends \myConf\BaseModel
     public const tag_type_document = 'document';
     public const tag_type_paper = 'paper';
     public const tag_type_non_restrict = '';
+    public const tag_type_none = 'none';
 
     public function __construct()
     {
@@ -35,6 +36,18 @@ class Attachment extends \myConf\BaseModel
     public function add_as_document_attached(int $document_id, string $full_name, string $original_name, int $file_size, bool $is_image = false) : int
     {
         return $this->add($full_name, $file_size, $original_name, 'document', $document_id, $is_image, 0, 0, 0);
+    }
+
+    /**
+     * 添加一个未知分类的附件
+     * @param string $full_name
+     * @param string $original_name
+     * @param int $file_size
+     * @param bool $is_image
+     * @return int
+     */
+    public function add_as_unknown_attached(string $full_name, string $original_name, int $file_size, bool $is_image = false) : int {
+        return $this->add($full_name, $file_size, $original_name, self::tag_type_none, 0, $is_image, 0, 0, 0);
     }
 
     /**

@@ -11,4 +11,4 @@ $config['smtp_host'] = 'smtp.126.com';
 $config['smtp_user'] = 'csqrwc@126.com';
 $config['smtp_pass'] = 'csqrwc123456smtp';
 $config['mailtype'] = 'html';
-$config['smtp_port'] = '465';
+$config['smtp_port'] = '25';

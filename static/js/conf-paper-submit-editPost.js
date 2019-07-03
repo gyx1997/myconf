@@ -14,20 +14,20 @@ var doSubmit = function (action, paperId, paperVer, confUrl) {
                     dataType: "json",
                     success: function (d) {
                         if (d.status === 'SUCCESS') {
-                            messageBox('Paper ' + (action === 'save' ? 'saved' : 'submitted') + ' successfully.', 'Message', null);
+                            messageBoxSecondary('Paper ' + (action === 'save' ? 'saved' : 'submitted') + ' successfully.', 'Message');
                             setTimeout(function () {
                                 window.location.href = confUrl + '/paper-submit/';
                             }, 2000);
                         } else if (d.status === 'FILE_ERROR') {
-                            messageBox('File upload error. Do you forget to choose Paper content file or Copyright file?', 'Message');
+                            messageBoxSecondary('File upload error. Do you forget to choose Paper content file or Copyright file?', 'Message');
                         } else if (d.status === 'AUTHOR_EMPTY') {
-                            messageBox('Please select authors.', 'Message');
+                            messageBoxSecondary('Please select authors.', 'Message');
                         } else if (d.status === 'OUT_OF_DATE') {
-                            messageBox('The submission has been closed after deadline.', 'Message');
+                            messageBoxSecondary('The submission has been closed after deadline.', 'Message');
                         }
                     },
                     error: function () {
-                        messageBox('An internal server error occurred during submitting your paper.', 'Message');
+                        messageBoxSecondary('An internal server error occurred during submitting your paper.', 'Message');
                     }
                 });
             }};

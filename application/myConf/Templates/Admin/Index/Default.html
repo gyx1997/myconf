@@ -3,7 +3,7 @@
 <div class="container">
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">System Information</h5>
+            <h5 class="card-title">系统信息</h5>
             <ul class="list-group">
                 <li class="list-group-item">
                     <strong>System Information</strong> <br>
@@ -14,12 +14,13 @@
                 <li class="list-group-item">
                     <p><strong>PHP</strong></p>
                     <p>PHP Version: <?php echo phpversion(); ?></p>
+                    <p>Server Software: <?php echo $_SERVER['SERVER_SOFTWARE']; ?></p>
                 </li>
                 <li class="list-group-item">
                     <p><strong>MySQL</strong></p>
                     <p>
                         Version: <?php echo \myConf\Libraries\DbHelper::fetch_first_raw('select version();')['version()']; ?></p>
-                    <p>Connect: <?php echo \myConf\Libraries\DbHelper::connector_info(); ?></p>
+                    <p>Connector: <?php echo \myConf\Libraries\DbHelper::connector_info(); ?></p>
                     <p>Database Size:
                         <?php
                             \myConf\Libraries\DbHelper::query('use information_schema;');
@@ -44,4 +45,4 @@
         </div>
     </div>
 </div>
-{{@include /Admin/Footer}}
+{{@include /Common/Footer}}

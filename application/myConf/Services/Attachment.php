@@ -20,9 +20,14 @@
          * @return array
          * @throws \myConf\Exceptions\FileUploadException
          */
-        public function ueditor_upload(string $file_field, int $document_id) : array {
+        public function upload(string $file_field) : array {
             $attach_info = \myConf\Libraries\Attach::parse_attach($file_field);
-            $attachment_id = $this->Models->Attachment->add_as_document_attached($document_id, $attach_info['full_name'], $attach_info['original_name'], $attach_info['size'], $attach_info['is_image']);
+            $attachment_id = $this->Models->Attachment->add_as_unknown_attached(
+                $attach_info['full_name'],
+                $attach_info['original_name'],
+                $attach_info['size'],
+                $attach_info['is_image']
+            );
             return [
                 'attachment_id' => $attachment_id,
                 'original_name' => $attach_info['original_name'],
@@ -41,11 +46,14 @@
          */
         public function download_attachment(int $attachment_id, string $type = 'file') : void {
             $attach_info = $this->Models->Attachment->get($attachment_id);
+            if (empty($attach_info)) {
+                throw new \myConf\Exceptions\HttpStatusException(404, 'ATTACH_NOT_FOUND', 'Attachment not found.');
+            }
             if ($type === 'file') {
                 $this->Models->Attachment->increase_download_times($attachment_id);
             }
             \myConf\Libraries\Attach::download_attach($attach_info['attachment_file_name'], $attach_info['attachment_original_name'], $attach_info['attachment_file_size']);
-            throw new \myConf\Exceptions\SendExitInstructionException('DOWNLOAD_OK', 'Download success.');
+            throw new \myConf\Exceptions\SendExitInstructionException(\myConf\Exceptions\SendExitInstructionException::DO_NOTHING, [], 'DOWNLOAD_OK', 'Download success.');
         }
 
         /**

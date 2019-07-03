@@ -140,8 +140,17 @@
         //HTTP错误
         $response->handled_error($e->getMessage(), $e->getHttpStatus());
     } catch (\Throwable $e) {
-        //控制器模块加载失败，或者控制器本身无法处理的异常，的错误处理。这里都是按照 HTTP 500 来处理。
-        log_message('ERROR', $e->getMessage() . PHP_EOL . $e->getTraceAsString());
+        //控制器模块加载失败，或者控制器本身无法处理的异常，的错误处理。这里都是按照 HTTP 500 来处理。;
+        $error_log_str =
+            'Error => { ' . PHP_EOL .
+            '\tRequestURL => ' . \myConf\Libraries\Env::get_current_url() . PHP_EOL .
+            '\tMessage => ' . $e->getMessage() . PHP_EOL .
+            '\tFile => ' . $e->getFile() . PHP_EOL .
+            '\tLine => ' . $e->getLine() . PHP_EOL .
+            '\tTrace => { ' . $e->getTraceAsString() . PHP_EOL .
+            '\t}'. PHP_EOL . '}' . PHP_EOL
+        ;
+        log_message('ERROR', $error_log_str);
         $str = 'A fatal error occurred that your request could not be processed properly. We are so sorry for the inconvenience we have caused. <br/> Critical Information has been written down to our logging system to help us analyze and solve this problem. <br/> If you have further questions, please contact us with the email : xxxx@xxx.com. ';
         if (ENVIRONMENT === 'production') {
             $response->handled_error($str, 500);

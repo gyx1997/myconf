@@ -33,7 +33,12 @@
     var messageBox = function (message, title, ok_event_handler = null, showCancel = false) {
         $('#msgBox-title').html(title);
         $('#msgBox-message').html(message);
-        $('#OKButton').click(function(){ok_event_handler(); $('#msgBox-main').modal('hide');});
+        if(ok_event_handler !== null) {
+            $('#OKButton').click(function () {
+                ok_event_handler();
+                $('#msgBox-main').modal('hide');
+            });
+        }
         if (showCancel === false) {
             $('#CancelButton').hide();
         } else {

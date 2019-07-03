@@ -69,16 +69,30 @@
                         Paper Content (PDF Upload)&nbsp;&nbsp;
                         <span class="badge badge-info">LESS THAN 8MB.</span>
                     </label>
+                    <input type="hidden" id="paper_pdf_aid" value="0" name="paper_pdf_aid"/>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="file" class="" id="paper_pdf" name="paper_pdf">
+                    <input type="file" class="" id="paper_pdf" name="paper_pdf" onchange="putPDF('paper_pdf', 'paper_pdf_message', '{{$csrf_name}}', '{{$csrf_hash}}', 'paper_pdf_aid');" accept="application/pdf"/>
+                    <div class="row mt-3"></div>
+                    <div id="paper_pdf_message">
+                        <div class="alert alert-info">
+                            Use the button above to choose a new file to upload.
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="paper_copyright_pdf">
                         Paper Copyright (PDF Upload)&nbsp;&nbsp;
                         <span class="badge badge-info">LESS THAN 8MB</span>
                     </label>
+                    <input type="hidden" id="paper_copyright_aid" value="0" name="paper_copyright_aid"/>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="file" class="" id="paper_copyright_pdf" name="paper_copyright_pdf">
+                    <input type="file" class="" id="paper_copyright_pdf" name="paper_copyright_pdf" onchange="putPDF('paper_copyright_pdf', 'paper_copyright_pdf_message', '{{$csrf_name}}', '{{$csrf_hash}}', 'paper_copyright_aid');" accept="application/pdf"/>
+                    <div class="row mt-3"></div>
+                    <div id="paper_copyright_pdf_message">
+                        <div class="alert alert-info">
+                            Use the button above to choose a new file to upload.
+                        </div>
+                    </div>
                 </div>
                 <div class="row mt-3"></div>
                 <div class="form-group">
@@ -166,6 +180,7 @@
 <script src="{{$StaticDomain}}/static/js/conf-paper-submit-authorList.js"></script>
 <script src="{{$StaticDomain}}/static/js/conf-paper-submit-formValidation.js"></script>
 <script src="{{$StaticDomain}}/static/js/conf-paper-submit-newPost.js"></script>
+<script src="{{$StaticDomain}}/static/js/conf-paper-submit-putPdf.js"></script>
 <script type="text/javascript">
     var suggestedSessionId = '-2';
     var hasPaper = false;

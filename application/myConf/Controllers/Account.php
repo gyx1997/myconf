@@ -128,7 +128,10 @@
         }
 
         /**
-         * 注册
+         * @throws \myConf\Exceptions\CacheDriverException
+         * @throws \myConf\Exceptions\DbTransactionException
+         * @throws \myConf\Exceptions\SendExitInstructionException
+         * @throws \myConf\Exceptions\SendRedirectInstructionException
          */
         public function register() {
             switch ($this->_do) {
@@ -232,7 +235,7 @@
                             $this->Services->Account->update_scholar_info($email, $first_name, $last_name, $institution, $department, $address);
                         }
                 }
-                $this->_redirect_to('/account/my-settings/');
+                $this->_redirect_to('/account/my-settings/?ret=ok');
                 return;
             } else {
                 $user_data = $this->Services->Account->user_full_info($this->_user_id);

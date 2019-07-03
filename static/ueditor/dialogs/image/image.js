@@ -710,7 +710,7 @@
             uploader.on('uploadBeforeSend', function (file, data, header) {
                 //这里可以通过data对象添加POST参数
                 data.csrf_test_name = editor.options.csrf_token;
-                data.document_id = editor.options.document_id;
+                //data.document_id = editor.options.document_id;
                 header['X_Requested_With'] = 'XMLHttpRequest';
             });
 

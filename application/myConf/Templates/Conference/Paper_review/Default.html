@@ -1,0 +1,134 @@
+{{@include /Common/Header}}
+{{@include /Conference/Header}}
+{{@include /Conference/Paper_review/Left_bar}}
+<div class="col-md-10 content-rf content-rf-doc">
+    <?php if ($has_joint === FALSE) { ?>
+        <div class="alert alert-warning">
+            You have not entered in this conference.
+            <br/>
+            To submit your paper, you should
+            <a class="alert_link"
+               href="/conference/<?php echo $conference['conference_url']; ?>/member/?do=register&redirect=<?php echo $url; ?>">register
+                                                                                                                                in <?php echo $conference['conference_name']; ?>
+            </a>
+            .
+        </div>
+    <?php } else { ?>
+        <div>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Submitted Papers</h4>
+                    {{@if empty($papers)}}
+                    <div class="alert alert-info">
+                        You have not submitted a paper yet.
+                    </div>
+                    {{@else}}
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                        <tr>
+                            <th>
+                                Paper Id
+                            </th>
+                            <th>
+                                Title
+                            </th>
+                            <th>
+                                Submit Time
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                            <th>
+                                Operations
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{@for $paper in $papers}}
+                        <tr>
+                            <td>
+                                <a href="{{$conf_url}}/paper-submit/preview/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}">
+                                    {{$paper['paper_logic_id']}}-{{$paper['paper_version']}}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{$conf_url}}/paper-submit/preview/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}">
+                                    {{$paper['paper_title']}}
+                                </a>
+                            </td>
+                            <td>
+                                <?php echo(date('Y-m-d', $paper['paper_submit_time'])); ?>
+                            </td>
+                            <td>
+                                {{@switch $paper['paper_status']}}
+                                {{@case -1}}
+                                Saved
+                                {{@end}}
+                                {{@case 0}}
+                                Submitted
+                                {{@end}}
+                                {{@case 1}}
+                                Under Review
+                                {{@end}}
+                                {{@case 2}}
+                                Passed
+                                {{@end}}
+                                {{@case 3}}
+                                Rejected
+                                {{@end}}
+                                {{@case 4}}
+                                Revision
+                                {{@end}}
+                                {{@end}}
+                            </td>
+                            <td>
+
+                                {{@if $paper['paper_status'] === '-1'}}
+                                <a href="{{$conf_url}}/paper-submit/edit/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}" class="btn btn-primary">Edit</a>
+                                {{@end}}
+                                {{@if $paper['paper_status'] === '-1'}}
+                                <a href="javascript: deletePaper(<?php echo $paper['paper_logic_id']; ?>, <?php echo $paper['paper_version']; ?>);" class="btn btn-primary">Delete</a>
+                                {{@end}}
+                            </td>
+                        </tr>
+                        {{@end}}
+                        </tbody>
+                    </table>
+                    {{@end}}
+                </div>
+            </div>
+        </div>
+    <?php } ?>
+</div>
+<script type="text/javascript">
+    var deletePaper = function(paperId, paperVersion) {
+        messageBox(
+            'Do you really want to delete this paper? This action can not be cancelled after you click the "OK" button!',
+            'message',
+            function(){
+                $.ajax({
+                    async: true,
+                    type: "GET",
+                    url: "{{$conf_url}}/paper-submit/delete/?id=" + paperId + "&ver=" + paperVersion + "&ajax=true",
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    dataType: "json",
+                    success: function (d) {
+                        if (d.status === 'SUCCESS') {
+                            messageBoxSecondary('Paper has been deleted successfully.', 'Message', null);
+                            window.location.href = '{{$conf_url}}/paper-submit/'
+                        }
+                    },
+                    error: function () {
+                        console.log(111);
+                        messageBoxSecondary('An internal server error occurred during deleting your paper.', 'Message');
+                    }
+                });
+            },
+            true
+        );
+    }
+</script>
+{{@include /Conference/Footer}}
+{{@include /Common/Footer}}

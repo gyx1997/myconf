@@ -65,7 +65,7 @@
                                     Saved
                                 {{@end}}
                                 {{@case 0}}
-                                    Submitted
+                                    Submitted / Reviewing
                                 {{@end}}
                                 {{@case 1}}
                                     Under Review
@@ -89,6 +89,10 @@
                             {{@if $paper['paper_status'] === '-1'}}
                             <a href="javascript: deletePaper(<?php echo $paper['paper_logic_id']; ?>, <?php echo $paper['paper_version']; ?>);" class="btn btn-primary">Delete</a>
                             {{@end}}
+                            <?php if ($paper['paper_status'] === '4') : ?>
+                                <a
+                                        href="{{$conf_url}}/paper-submit/revision/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}" class="btn btn-primary">Submit Revision</a>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     {{@end}}

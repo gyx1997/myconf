@@ -1,0 +1,150 @@
+{{@include /Common/Header}}
+{{@include /Conference/Header}}
+{{@include /Conference/Paper_review/Left_bar}}
+<div class="col-md-10 content-rf content-rf-doc">
+    <div>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Review Tasks</h4>
+                <table class="table table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th style="max-width:12%;">
+                            Id
+                        </th>
+                        <th style="width: 200px;">
+                            Title
+                        </th>
+                        <th style="max-width:10%;">
+                            Session
+                        </th>
+                        <th style="max-width:10%;">
+                            Submit-Date
+                        </th>
+                        <th style="max-width:15%;min-width: 150px;">
+                            Status
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{@for $paper in $papers}}
+                    {{@if (intval($paper['paper_status']) !== -1)}}
+                    <tr>
+                        <td>
+                            <a href="{{$conf_url}}/paper-submit/preview/?id={{$paper['paper_logic_id']}}&ver={{$paper['paper_version']}}">
+                                {{$paper['paper_logic_id']}}-{{$paper['paper_version']}}
+                            </a>
+                        </td>
+                        <td>
+                            {{$paper['paper_title']}}
+                        </td>
+                        <td>
+                            {{$paper['paper_suggested_session']}}
+                        </td>
+                        <td>
+                            <?php echo date('Y-m-d', $paper['paper_submit_time']);?>
+                        </td>
+                        <td>
+                            <?php if (intval($paper['review_status']) === 0) :?>
+                                <span style="text-align:center" class="alert alert-warning">
+                                    Waiting for Review...
+                                </span>
+                                <div class="mt-3 row"></div>
+                                <a href="<?php echo $conf_url; ?>/paper-review/reviewer-tasks/?do=enterReview&id=<?php echo $paper['paper_logic_id']?>&ver=<?php echo $paper['paper_version']?>" class="btn btn-light"><span class="fa fa-arrow-right"></span>&nbsp;&nbsp;Enter Review
+                                </a>
+                            <?php elseif (intval($paper['review_status']) === 1): ?>
+                                <span style="text-align:center" class="alert alert-primary">
+                                    Under Review
+                                </span>
+                                <div class="mt-3 row"></div>
+                                <a href="<?php echo $conf_url; ?>/paper-review/show-review/?id=<?php echo $paper['paper_logic_id']?>&ver=<?php echo $paper['paper_version']?>" class="btn btn-light"><span class="fa fa-check"></span>&nbsp;&nbsp;Go to review page
+                                </a>
+                            <?php else: ?>
+                                <span style="text-align:center" class="alert alert-success">
+                                    Review Finished
+                                </span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    {{@end}}
+                    {{@end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--添加reviewer模态框-->
+<div class="modal fade" id="modalAddReviewer">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add reviewer</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-head">
+
+                    </div>
+                    <div class="card-body">
+                        <input type="hidden" id="modalAddReviewerPaperId" value="0"/>
+                        <input type="hidden" id="modalAddReviewerPaperVersion" value="0"/>
+                        <table style="width:100%;">
+                            <tr>
+                                <td style="width:38%;">
+                                    <label for="modalAddReviewerEmail">Email</label>
+                                </td>
+                                <td style="width:62%;">
+                                    <input class="form-control" name="modalAddReviewerEmail" id="modalAddReviewerEmail" type="text"
+                                           style="width:100%;" />
+                                </td>
+                            </tr>
+                        </table>
+                        <div id="tips">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="modalAddReviewerOKButton">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var addReviewer = function (id, version) {
+        $('#modalAddReviewerPaperId').val(id);
+        $('#modalAddReviewerPaperVersion').val(version);
+        $('#modalAddReviewerOKButton').click(function(){
+            em = window.btoa($('#modalAddReviewerEmail').val());
+            console.log(em);
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: '<?php echo $conf_url ?>/paper-review/editor-list/?do=addReviewer&ajax=true&id='+id+'&ver='+version+'&email='+em,
+                contentType: false,
+                processData: false,
+                cache: false,
+                dataType: "json",
+                success: function (d) {
+                    console.log(d);
+                    if (d.found === 'true') {
+                        messageBoxSecondary('Adding a reviewer succeed.');
+                    } else {
+                        messageBoxSecondary('An invitation email has just sent due to this email had not registered. Please notice him/her to check his/her mailbox, or tell him/her to register an account directly and then start to review. ');
+                    }
+                },
+                error: function () {
+                    messageBoxSecondary('An internal server error occurred while adding the reviewer.');
+                }
+            });
+        });
+        $('#modalAddReviewer').modal();
+    }
+</script>
+{{@include /Conference/Footer}}
+{{@include /Common/Footer}}
